@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Night Quiz</title>
+    <link rel="stylesheet" href="styles/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Game Night Quiz</h1>
+            <p>Metti alla prova la tua cultura generale!</p>
+        </header>
+        
+        <!-- Schermata di login -->
+        <div id="loginScreen" class="login-screen">
+            <h2>Unisciti al Quiz</h2>
+            <p>Inserisci il tuo nome per iniziare a giocare</p>
+            <form id="loginForm" class="login-form">
+                <div class="form-group">
+                    <label for="playerName">Nome Giocatore</label>
+                    <input type="text" id="playerName" required placeholder="Inserisci il tuo nome">
+                </div>
+                <button type="submit" class="btn">Inizia a Giocare</button>
+            </form>
+        </div>
+        
+        <!-- Area di gioco principale -->
+        <div id="gameScreen" class="hidden">
+            <div class="game-area">
+                <div class="quiz-container">
+                    <div class="question-container">
+                        <div class="question-counter" id="questionCounter">Domanda 1 di 10</div>
+                        <div class="question-text" id="questionText">Caricamento domanda...</div>
+                        <div class="media-container" id="mediaContainer"></div>
+                    </div>
+                    
+                    <div class="answers-container" id="answersContainer">
+                        <!-- Le risposte verranno inserite qui dinamicamente -->
+                    </div>
+                    
+                    <div class="controls">
+                        <div class="timer" id="timer">30s</div>
+                        <button class="btn" id="nextBtn" disabled>Prossima Domanda</button>
+                    </div>
+                </div>
+                
+                <div class="leaderboard">
+                    <h2>Classifica</h2>
+                    <ul class="player-list" id="playerList">
+                        <!-- La classifica verrà popolata dinamicamente -->
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Schermata dei risultati -->
+        <div id="resultsScreen" class="results-screen hidden">
+            <h2>Quiz Completato!</h2>
+            <div id="finalScore" class="final-score">Il tuo punteggio: <span id="scoreValue">0</span></div>
+            <div id="rankingPosition" class="ranking-position">Posizione in classifica: <span id="positionValue">-</span></div>
+            <button class="btn" id="playAgainBtn">Gioca Ancora</button>
+        </div>
+    </div>
+
+    <script src="scripts/script.js"></script>
+</body>
+</html>
