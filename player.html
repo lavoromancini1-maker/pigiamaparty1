@@ -7,7 +7,16 @@
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&display=swap" rel="stylesheet">
     <script src="https://js.pusher.com/7.2/pusher.min.js"></script>
     <style>
-        :root { --pink:#ff00c8; --cyan:#00eaff; --glass:rgba(255,255,255,0.06); --blur:blur(18px); }
+        :root { 
+            --pink:#ff00c8; 
+            --cyan:#00eaff; 
+            --primary: #ff00c8;
+            --accent: #00eaff;
+            --secondary: #7b2cff;
+            --light: #ffffff;
+            --glass:rgba(255,255,255,0.06); 
+            --blur:blur(18px); 
+        }
         
 
         * {
@@ -291,21 +300,8 @@
             font-weight: bold;
         }
 
-        /* Media Container */
-        .media-container {
-            margin: 15px 0;
-            display: flex;
-            justify-content: center;
-        }
-
-        .media-container img, .media-container video, .media-container audio {
-            max-width: 100%;
-            border-radius: 10px;
-            border: 1px solid var(--accent);
-        }
-
         /* Connection Status */
-                .connection-status {
+        .connection-status {
             position: fixed;
             top: 10px;
             right: 10px;
@@ -345,7 +341,7 @@
 </head>
 <body>
     <!-- Connection Status -->
-    <div class="connection-status">🟢 CONNECTED</div>
+    <div class="connection-status" id="connectionStatus">🔴 DISCONNESSO</div>
 
     <!-- Login Screen -->
     <div id="loginScreen" class="screen">
@@ -369,7 +365,7 @@
     <div id="gameScreen" class="screen hidden">
         <div class="header">
             <div style="font-size: 1.2rem; color: var(--accent);">PLAYER</div>
-            <div style="font-size: 0.9rem; opacity: 0.7;">Question <span id="currentQuestion">1</span>/60</div>
+            <div style="font-size: 0.9rem; opacity: 0.7;">Question <span id="currentQuestion">1</span>/3</div>
         </div>
 
         <div class="player-info">
@@ -399,253 +395,242 @@
     <!-- Waiting Screen -->
     <div id="waitingScreen" class="screen hidden">
         <div class="waiting-animation">🎮</div>
-        <div style="font-size: 1.5rem; color: var(--accent); margin-bottom: 10px;">NEXT QUESTION</div>
-        <div style="opacity: 0.8; margin-bottom: 30px;">Get ready to answer!</div>
+        <div style="font-size: 1.5rem; color: var(--accent); margin-bottom: 10px;">IN ATTESA</div>
+        <div style="opacity: 0.8; margin-bottom: 30px;">L'host sta per iniziare il gioco...</div>
         
         <div class="player-info">
             <div class="player-name" id="waitingPlayerName">PLAYER</div>
             <div class="player-score" id="waitingPlayerScore">0</div>
         </div>
 
-        <div class="leaderboard-mini" id="miniLeaderboard">
-            <!-- Mini leaderboard will appear here -->
-        </div>
-
         <div style="margin-top: 20px; font-size: 0.9rem; opacity: 0.6;">
-            Question <span id="nextQuestionNumber">2</span> starting soon...
+            Preparati per la prima domanda!
         </div>
     </div>
 
     <script>
         // ==================== PLAYER STATE ====================
-let playerState = {
-    name: '',
-    score: 0,
-    currentQuestion: null,
-    answered: false,
-    answerTime: 0,
-    connected: false
-};
+        let playerState = {
+            name: '',
+            score: 0,
+            currentQuestion: null,
+            answered: false,
+            answerTime: 0,
+            connected: false
+        };
 
-// ==================== DOM ELEMENTS ====================
-const screens = {
-    login: document.getElementById('loginScreen'),
-    game: document.getElementById('gameScreen'),
-    waiting: document.getElementById('waitingScreen')
-};
+        // ==================== DOM ELEMENTS ====================
+        const screens = {
+            login: document.getElementById('loginScreen'),
+            game: document.getElementById('gameScreen'),
+            waiting: document.getElementById('waitingScreen')
+        };
 
-const elements = {
-    playerName: document.getElementById('playerName'),
-    joinBtn: document.getElementById('joinBtn'),
-    displayPlayerName: document.getElementById('displayPlayerName'),
-    displayPlayerScore: document.getElementById('displayPlayerScore'),
-    displayQuestion: document.getElementById('displayQuestion'),
-    currentQuestion: document.getElementById('currentQuestion'),
-    nextQuestionNumber: document.getElementById('nextQuestionNumber'),
-    timer: document.getElementById('timer'),
-    answersContainer: document.getElementById('answersContainer'),
-    resultFeedback: document.getElementById('resultFeedback'),
-    mediaContainer: document.getElementById('mediaContainer'),
-    waitingPlayerName: document.getElementById('waitingPlayerName'),
-    waitingPlayerScore: document.getElementById('waitingPlayerScore'),
-    miniLeaderboard: document.getElementById('miniLeaderboard')
-};
+        const elements = {
+            playerName: document.getElementById('playerName'),
+            joinBtn: document.getElementById('joinBtn'),
+            displayPlayerName: document.getElementById('displayPlayerName'),
+            displayPlayerScore: document.getElementById('displayPlayerScore'),
+            displayQuestion: document.getElementById('displayQuestion'),
+            currentQuestion: document.getElementById('currentQuestion'),
+            timer: document.getElementById('timer'),
+            answersContainer: document.getElementById('answersContainer'),
+            resultFeedback: document.getElementById('resultFeedback'),
+            mediaContainer: document.getElementById('mediaContainer'),
+            waitingPlayerName: document.getElementById('waitingPlayerName'),
+            waitingPlayerScore: document.getElementById('waitingPlayerScore'),
+            connectionStatus: document.getElementById('connectionStatus')
+        };
 
-// ==================== PUSHER SETUP ====================
-let pusher;
-let channel;
-let gameCode = '';
+        // ==================== PUSHER SETUP ====================
+        let pusher;
+        let channel;
+        let gameCode = '';
 
-// ==================== INITIALIZATION ====================
-document.addEventListener('DOMContentLoaded', () => {
-    elements.joinBtn.addEventListener('click', joinGame);
-});
-
-// ==================== GAME FUNCTIONS ====================
-function joinGame() {
-    const name = elements.playerName.value.trim();
-    if (name) {
-        playerState.name = name;
-        
-        elements.displayPlayerName.textContent = name;
-        elements.waitingPlayerName.textContent = name;
-        
-        // Chiedi il codice gioco
-        gameCode = prompt("Inserisci il codice gioco (es: GAME123):");
-        
-        if (!gameCode) {
-            alert("Devi inserire un codice gioco!");
-            return;
-        }
-        
-        gameCode = gameCode.trim().toUpperCase();
-        console.log("🎮 Joining game:", gameCode);
-        
-        // Configura Pusher
-        pusher = new Pusher('26fcb8b4979ceb555e15', {
-            cluster: 'eu'
+        // ==================== INITIALIZATION ====================
+        document.addEventListener('DOMContentLoaded', () => {
+            elements.joinBtn.addEventListener('click', joinGame);
         });
-        
-        // Connetti al canale dell'host
-        channel = pusher.subscribe('game-channel-' + gameCode);
-        
-        // Quando connesso, notifica l'host
-        channel.bind('pusher:subscription_succeeded', function() {
-            console.log("✅ Connected to game:", gameCode);
+
+        // ==================== GAME FUNCTIONS ====================
+        function joinGame() {
+            const name = elements.playerName.value.trim();
+            if (name) {
+                playerState.name = name;
+                
+                elements.displayPlayerName.textContent = name;
+                elements.waitingPlayerName.textContent = name;
+                
+                // Chiedi il codice gioco
+                gameCode = prompt("Inserisci il codice gioco (es: GAME123):");
+                
+                if (!gameCode) {
+                    alert("Devi inserire un codice gioco!");
+                    return;
+                }
+                
+                gameCode = gameCode.trim().toUpperCase();
+                console.log("🎮 Joining game:", gameCode);
+                
+                // Configura Pusher
+                pusher = new Pusher('26fcb8b4979ceb555e15', {
+                    cluster: 'eu'
+                });
+                
+                // Connetti al canale dell'host
+                channel = pusher.subscribe('game-channel-' + gameCode);
+                
+                // Quando connesso
+                channel.bind('pusher:subscription_succeeded', function() {
+                    console.log("✅ Connected to game:", gameCode);
+                    elements.connectionStatus.textContent = "🟢 CONNESSO";
+                    elements.connectionStatus.style.background = "rgba(0, 255, 100, 0.2)";
+                    elements.connectionStatus.style.borderColor = "#00ff88";
+                    
+                    // Notifica l'host
+                    channel.trigger('client-player-join', {
+                        playerName: name,
+                        playerId: pusher.connection.socket_id,
+                        gameCode: gameCode,
+                        timestamp: Date.now()
+                    });
+                    
+                    // Mostra schermata di attesa
+                    screens.login.classList.add('hidden');
+                    screens.waiting.classList.remove('hidden');
+                    elements.waitingPlayerScore.textContent = "0";
+                });
+                
+                // Quando l'host avvia il gioco
+                channel.bind('client-game-start', function(data) {
+                    console.log("🎯 Game starting!", data);
+                    screens.waiting.classList.add('hidden');
+                    screens.game.classList.remove('hidden');
+                    elements.displayQuestion.textContent = "Preparati... la prima domanda arriva tra poco!";
+                });
+                
+                // Quando l'host invia una domanda
+                channel.bind('client-new-question', function(data) {
+                    console.log("📝 New question received:", data);
+                    loadQuestion(data.question);
+                });
+                
+                // Gestisci errori
+                channel.bind('pusher:subscription_error', function(status) {
+                    console.error("❌ Connection failed:", status);
+                    alert("Errore di connessione. Controlla il codice gioco!");
+                    elements.connectionStatus.textContent = "🔴 ERRORE";
+                });
+                
+            } else {
+                alert("Inserisci un nome!");
+            }
+        }
+
+        function loadQuestion(questionData) {
+            playerState.answered = false;
+            playerState.currentQuestion = questionData;
             
-            // Notifica l'host
-            channel.trigger('client-player-join', {
-                playerName: name,
+            // Aggiorna UI
+            elements.displayQuestion.textContent = questionData.question;
+            elements.currentQuestion.textContent = questionData.index + 1;
+            elements.resultFeedback.innerHTML = '';
+            elements.mediaContainer.innerHTML = '';
+            
+            // Carica risposte
+            loadAnswers(questionData);
+            
+            // Avvia timer
+            startTimer();
+            
+            // Mostra schermata gioco
+            screens.waiting.classList.add('hidden');
+            screens.game.classList.remove('hidden');
+        }
+
+        function loadAnswers(question) {
+            elements.answersContainer.innerHTML = '';
+            const letters = ['A', 'B', 'C', 'D'];
+            
+            question.answers.forEach((answer, index) => {
+                const button = document.createElement('button');
+                button.className = 'answer-btn';
+                button.textContent = answer;
+                button.setAttribute('data-letter', letters[index]);
+                button.addEventListener('click', () => selectAnswer(index));
+                elements.answersContainer.appendChild(button);
+            });
+        }
+
+        function startTimer() {
+            let timeLeft = 20;
+            elements.timer.textContent = timeLeft;
+            playerState.answerTime = 0;
+            
+            const timerInterval = setInterval(() => {
+                timeLeft--;
+                playerState.answerTime++;
+                elements.timer.textContent = timeLeft;
+                
+                if (timeLeft <= 0 || playerState.answered) {
+                    clearInterval(timerInterval);
+                    if (!playerState.answered) {
+                        handleTimeUp();
+                    }
+                }
+            }, 1000);
+        }
+
+        function selectAnswer(selectedIndex) {
+            if (playerState.answered) return;
+            
+            playerState.answered = true;
+            
+            // Disabilita tutti i pulsanti
+            const answerButtons = elements.answersContainer.querySelectorAll('.answer-btn');
+            answerButtons.forEach(button => {
+                button.disabled = true;
+            });
+            
+            // Invia risposta all'host
+            channel.trigger('client-player-answer', {
+                playerName: playerState.name,
                 playerId: pusher.connection.socket_id,
-                gameCode: gameCode,
+                answerIndex: selectedIndex,
+                answerTime: playerState.answerTime,
                 timestamp: Date.now()
             });
             
-            // Mostra schermata di attesa
-            screens.login.classList.add('hidden');
-            screens.waiting.classList.remove('hidden');
-            elements.waitingPlayerScore.textContent = "0";
-        });
-        
-        // Quando l'host avvia il gioco
-        channel.bind('client-game-start', function(data) {
-            console.log("🎯 Game starting!", data);
-            screens.waiting.classList.add('hidden');
-            screens.game.classList.remove('hidden');
-            elements.displayQuestion.textContent = "Preparati... la prima domanda arriva tra poco!";
-        });
-        
-        // Quando l'host invia una domanda
-        channel.bind('client-new-question', function(data) {
-            console.log("📝 New question received:", data);
-            loadQuestion(data.question);
-        });
-        
-        // Gestisci errori
-        channel.bind('pusher:subscription_error', function(status) {
-            console.error("❌ Connection failed:", status);
-            alert("Errore di connessione. Controlla il codice gioco!");
-        });
-        
-    } else {
-        alert("Inserisci un nome!");
-    }
-}
-
-function loadQuestion(questionData) {
-    playerState.answered = false;
-    playerState.currentQuestion = questionData;
-    
-    // Aggiorna UI
-    elements.displayQuestion.textContent = questionData.question;
-    elements.currentQuestion.textContent = questionData.index + 1;
-    elements.resultFeedback.innerHTML = '';
-    elements.mediaContainer.innerHTML = '';
-    
-    // Carica risposte
-    loadAnswers(questionData);
-    
-    // Avvia timer
-    startTimer();
-    
-    // Mostra schermata gioco
-    screens.waiting.classList.add('hidden');
-    screens.game.classList.remove('hidden');
-}
-
-function loadAnswers(question) {
-    elements.answersContainer.innerHTML = '';
-    const letters = ['A', 'B', 'C', 'D'];
-    
-    question.answers.forEach((answer, index) => {
-        const button = document.createElement('button');
-        button.className = 'answer-btn';
-        button.textContent = answer;
-        button.setAttribute('data-letter', letters[index]);
-        button.addEventListener('click', () => selectAnswer(index));
-        elements.answersContainer.appendChild(button);
-    });
-}
-
-function startTimer() {
-    let timeLeft = 20;
-    elements.timer.textContent = timeLeft;
-    playerState.answerTime = 0;
-    
-    const timerInterval = setInterval(() => {
-        timeLeft--;
-        playerState.answerTime++;
-        elements.timer.textContent = timeLeft;
-        
-        if (timeLeft <= 0 || playerState.answered) {
-            clearInterval(timerInterval);
-            if (!playerState.answered) {
-                handleTimeUp();
-            }
+            elements.resultFeedback.innerHTML = `
+                <div class="result-feedback" style="background: rgba(255, 255, 0, 0.2); border-color: yellow; color: yellow;">
+                    ⏳ RISPOSTA INVIATA - ATTENDI RISULTATI
+                </div>
+            `;
         }
-    }, 1000);
-}
 
-function selectAnswer(selectedIndex) {
-    if (playerState.answered) return;
-    
-    playerState.answered = true;
-    
-    // Disabilita tutti i pulsanti
-    const answerButtons = elements.answersContainer.querySelectorAll('.answer-btn');
-    answerButtons.forEach(button => {
-        button.disabled = true;
-    });
-    
-    // Invia risposta all'host
-    channel.trigger('client-player-answer', {
-        playerName: playerState.name,
-        playerId: pusher.connection.socket_id,
-        answerIndex: selectedIndex,
-        answerTime: playerState.answerTime,
-        timestamp: Date.now()
-    });
-    
-    elements.resultFeedback.innerHTML = `
-        <div class="result-feedback" style="background: rgba(255, 255, 0, 0.2); border-color: yellow; color: yellow;">
-            ⏳ RISPOSTA INVIATA - ATTENDI RISULTATI
-        </div>
-    `;
-}
+        function handleTimeUp() {
+            if (playerState.answered) return;
+            
+            playerState.answered = true;
+            const answerButtons = elements.answersContainer.querySelectorAll('.answer-btn');
+            
+            answerButtons.forEach(button => {
+                button.disabled = true;
+            });
+            
+            elements.resultFeedback.innerHTML = `
+                <div class="result-feedback incorrect-feedback">
+                    ⏰ TEMPO SCADUTO!
+                </div>
+            `;
+        }
 
-function handleTimeUp() {
-    if (playerState.answered) return;
-    
-    playerState.answered = true;
-    const answerButtons = elements.answersContainer.querySelectorAll('.answer-btn');
-    
-    answerButtons.forEach(button => {
-        button.disabled = true;
-    });
-    
-    elements.resultFeedback.innerHTML = `
-        <div class="result-feedback incorrect-feedback">
-            ⏰ TEMPO SCADUTO!
-        </div>
-    `;
-}
+        function updateScoreDisplay() {
+            elements.displayPlayerScore.textContent = playerState.score;
+            elements.waitingPlayerScore.textContent = playerState.score;
+        }
 
-function updateScoreDisplay() {
-    elements.displayPlayerScore.textContent = playerState.score;
-    elements.waitingPlayerScore.textContent = playerState.score;
-}
-
-
-];
+        console.log("✅ Player initialized");
     </script>
 </body>
-
 </html>
-
-
-
-
-
-
-
-
