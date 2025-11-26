@@ -635,7 +635,7 @@
             currentQuestionIndex: 0,
             score: 0,
             timer: null,
-            timeLeft: 30,
+            timeLeft: 20,
             answered: false
         };
         
@@ -679,7 +679,7 @@
         // Carica una domanda
         function loadQuestion() {
             gameState.answered = false;
-            gameState.timeLeft = 30;
+            gameState.timeLeft = 20;
             timerElement.textContent = `${gameState.timeLeft}s`;
             nextBtn.disabled = true;
             
@@ -837,3 +837,4 @@
     </script>
 </body>
 </html>
+
