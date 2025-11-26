@@ -3,10 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pigiama Party - Host</title>
+    <title>Pigiama Party - Host v2.1</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&display=swap" rel="stylesheet">
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
+    
+    <!-- META TAG ANTI-CACHE -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    
     <style>
         :root {
             --pink: #ff00c8;
@@ -182,9 +188,23 @@
             border-color: yellow !important;
             font-weight: bold;
         }
+        
+        /* VERSION INFO */
+        .version {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 5px 10px;
+            border-radius: 10px;
+            font-size: 0.8rem;
+            opacity: 0.7;
+        }
     </style>
 </head>
 <body>
+    <div class="version">v2.1 - Risposte Nascoste</div>
+    
     <div class="container">
         <h1>🎮 PIGIAMA PARTY - HOST</h1>
         
@@ -244,6 +264,9 @@
     </div>
 
     <script>
+        // === FORZA REFRESH CACHE ===
+        console.log('🔥 HOST v2.1 - Risposte Nascoste - Caricato: ' + new Date().toLocaleString());
+        
         // === CONFIGURA FIREBASE ===
         const firebaseConfig = {
             apiKey: "AIzaSyC-RrLKSwfM-S5r1gD_RWdjWElWhkgp1vI",
@@ -314,13 +337,14 @@
             elements.gameCode.textContent = gameCode;
             elements.shareCode.textContent = gameCode;
             
-            console.log('🎮 Host creato con codice:', gameCode);
+            console.log('🎮 Host v2.1 creato con codice:', gameCode);
             
             // Inizializza il gioco su Firebase
             database.ref('games/' + gameCode).set({
                 status: 'waiting',
                 host: true,
-                createdAt: Date.now()
+                createdAt: Date.now(),
+                version: '2.1'
             });
 
             // Ascolta i player che si connettono
@@ -552,6 +576,12 @@
 
         // === AVVIA IL GIOCO ===
         initGame();
+        
+        // === FORZA REFRESH VISUALE ===
+        setTimeout(() => {
+            console.log('🔄 Controllo versione: HOST v2.1 attivo');
+            document.title = "Pigiama Party - Host v2.1";
+        }, 100);
     </script>
 </body>
 </html>
