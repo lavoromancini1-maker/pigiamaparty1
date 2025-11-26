@@ -314,7 +314,7 @@
         }
 
         /* Connection Status */
-        .connection-status {
+                .connection-status {
             position: fixed;
             top: 10px;
             right: 10px;
@@ -324,6 +324,31 @@
             border-radius: 15px;
             font-size: 0.8rem;
             border: 1px solid #00ff88;
+        }
+
+        /* ==================== MOBILE FIXES ==================== */
+        html, body {
+            overflow: auto;
+            -webkit-overflow-scrolling: touch;
+            height: 100%;
+            position: relative;
+        }
+
+        .screen {
+            overflow-y: auto;
+            max-height: 100vh;
+        }
+
+        * {
+            touch-action: pan-y;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        input, textarea, button {
+            -webkit-user-select: text;
+            user-select: text;
         }
     </style>
 </head>
@@ -987,3 +1012,4 @@
 </body>
 
 </html>
+
