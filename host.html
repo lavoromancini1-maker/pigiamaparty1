@@ -225,6 +225,40 @@
         let timeLeft = 20;
         let timer;
 
+        // Aggiungi questa funzione all'host.html
+function sendQuestionToPlayers(questionIndex) {
+    const question = questions[questionIndex];
+    
+    channel.trigger('client-new-question', {
+        question: {
+            ...question,
+            index: questionIndex
+        },
+        totalQuestions: questions.length,
+        timestamp: Date.now()
+    });
+    
+    console.log("📤 Sent question to players:", questionIndex);
+}
+
+// E modifica loadQuestion nell'host:
+function loadQuestion(index) {
+    if (index >= questions.length) {
+        endGame();
+        return;
+    }
+
+    currentQuestion = index;
+    const question = questions[index];
+    
+    // ... il resto del tuo codice ...
+    
+    // INVIA LA DOMANDA AI PLAYER
+    sendQuestionToPlayers(index);
+    
+    startTimer();
+}
+
         const elements = {
             questionCounter: document.getElementById('questionCounter'),
             questionText: document.getElementById('questionText'),
@@ -510,6 +544,7 @@ updatePlayerList();
     </script>
 </body>
 </html>
+
 
 
 
