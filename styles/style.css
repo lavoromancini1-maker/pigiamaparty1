@@ -13,7 +13,7 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: 'Orbitron', 'Segoe UI', sans-serif;
 }
 
 body {
@@ -264,4 +264,5 @@ input {
     h1 {
         font-size: 2rem;
     }
+
 }
