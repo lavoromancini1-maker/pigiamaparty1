@@ -149,6 +149,30 @@
             text-align: center;
             margin: 15px 0;
         }
+
+        /* ==================== MOBILE FIXES ==================== */
+        html, body {
+            overflow: auto;
+            -webkit-overflow-scrolling: touch;
+            height: 100%;
+        }
+
+        .container {
+            min-height: 100vh;
+            overflow-y: auto;
+        }
+
+        * {
+            touch-action: pan-y;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        input, textarea, button {
+            -webkit-user-select: text;
+            user-select: text;
+        }
     </style>
 </head>
 <body>
@@ -316,5 +340,6 @@
     </script>
 </body>
 </html>
+
 
 
