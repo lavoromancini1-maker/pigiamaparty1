@@ -370,14 +370,73 @@
             cursor: pointer;
             font-size: 0.9rem;
             transition: all 0.3s ease;
+            margin: 2px;
         }
 
         .audio-btn:hover {
             background: rgba(255, 255, 255, 0.2);
         }
+
+        /* ACTIVATION OVERLAY */
+        .audio-activation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            flex-direction: column;
+        }
+
+        .activation-box {
+            background: linear-gradient(135deg, var(--pink), var(--purple));
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            max-width: 400px;
+            margin: 20px;
+        }
+
+        .activation-title {
+            font-size: 2rem;
+            margin-bottom: 20px;
+            color: white;
+        }
+
+        .activation-btn {
+            background: rgba(255, 255, 255, 0.9);
+            color: black;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            margin: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .activation-btn:hover {
+            transform: scale(1.05);
+            background: white;
+        }
     </style>
 </head>
 <body>
+    <!-- OVERLAY ATTIVAZIONE AUDIO -->
+    <div id="audioActivation" class="audio-activation">
+        <div class="activation-box">
+            <div class="activation-title">🎵 ATTIVA L'AUDIO</div>
+            <p style="margin-bottom: 30px; opacity: 0.9;">Clicca il pulsante qui sotto per attivare la musica e i suoni del gioco</p>
+            <button class="activation-btn" id="activateAudio">🎮 ATTIVA AUDIO</button>
+            <p style="margin-top: 20px; font-size: 0.9rem; opacity: 0.7;">(Necessario per l'esperienza completa)</p>
+        </div>
+    </div>
+
     <!-- CONTROLLI AUDIO -->
     <div class="audio-controls">
         <button class="audio-btn" id="musicToggle">🔊 Musica ON</button>
@@ -467,32 +526,32 @@
     </div>
 
     <!-- ELEMENTI AUDIO -->
-    <audio id="menuMusic" loop>
+    <audio id="menuMusic" loop preload="auto">
         <source src="https://assets.mixkit.co/music/preview/mixkit-game-show-suspense-waiting-667.mp3" type="audio/mpeg">
     </audio>
-    <audio id="gameMusic" loop>
+    <audio id="gameMusic" loop preload="auto">
         <source src="https://assets.mixkit.co/music/preview/mixkit-tech-house-vibes-130.mp3" type="audio/mpeg">
     </audio>
-    <audio id="victoryMusic">
+    <audio id="victoryMusic" preload="auto">
         <source src="https://assets.mixkit.co/music/preview/mixkit-winning-chimes-2015.mp3" type="audio/mpeg">
     </audio>
     
-    <audio id="clickSound">
+    <audio id="clickSound" preload="auto">
         <source src="https://assets.mixkit.co/sfx/preview/mixkit-select-click-1109.mp3" type="audio/mpeg">
     </audio>
-    <audio id="correctSound">
+    <audio id="correctSound" preload="auto">
         <source src="https://assets.mixkit.co/sfx/preview/mixkit-correct-answer-tone-2870.mp3" type="audio/mpeg">
     </audio>
-    <audio id="wrongSound">
+    <audio id="wrongSound" preload="auto">
         <source src="https://assets.mixkit.co/sfx/preview/mixkit-wrong-answer-fail-notification-946.mp3" type="audio/mpeg">
     </audio>
-    <audio id="transitionSound">
+    <audio id="transitionSound" preload="auto">
         <source src="https://assets.mixkit.co/sfx/preview/mixkit-sci-fi-transition-2152.mp3" type="audio/mpeg">
     </audio>
-    <audio id="timerSound">
+    <audio id="timerSound" preload="auto">
         <source src="https://assets.mixkit.co/sfx/preview/mixkit-unlock-game-notification-253.mp3" type="audio/mpeg">
     </audio>
-    <audio id="startSound">
+    <audio id="startSound" preload="auto">
         <source src="https://assets.mixkit.co/sfx/preview/mixkit-game-show-intro-331.mp3" type="audio/mpeg">
     </audio>
 
@@ -516,12 +575,45 @@
             startSound: document.getElementById('startSound'),
             
             // Stato
-            musicEnabled: true,
-            sfxEnabled: true,
+            musicEnabled: false, // Inizia disabilitato
+            sfxEnabled: false,   // Inizia disabilitato
+            audioActivated: false,
             
             // Metodi
+            activateAudio() {
+                // Crea un contesto audio vuoto per sbloccare l'audio
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                const audioContext = new AudioContext();
+                
+                // Crea un buffer vuoto e lo suona
+                const buffer = audioContext.createBuffer(1, 1, 22050);
+                const source = audioContext.createBufferSource();
+                source.buffer = buffer;
+                source.connect(audioContext.destination);
+                source.start();
+                
+                // Ripristina il contesto
+                audioContext.resume();
+                
+                this.audioActivated = true;
+                this.musicEnabled = true;
+                this.sfxEnabled = true;
+                
+                // Aggiorna UI
+                document.getElementById('musicToggle').textContent = '🔊 Musica ON';
+                document.getElementById('sfxToggle').textContent = '🔊 Suoni ON';
+                
+                // Nascondi overlay
+                document.getElementById('audioActivation').style.display = 'none';
+                
+                // Avvia musica menu
+                this.playMusic('menuMusic');
+                
+                console.log('🎵 Audio attivato!');
+            },
+            
             playMusic(type) {
-                if (!this.musicEnabled) return;
+                if (!this.musicEnabled || !this.audioActivated) return;
                 
                 // Ferma tutta la musica
                 this.menuMusic.pause();
@@ -531,7 +623,8 @@
                 // Reset e play nuova musica
                 const music = this[type];
                 music.currentTime = 0;
-                music.play().catch(e => console.log('Audio autoplay blocked:', e));
+                music.volume = 0.7;
+                music.play().catch(e => console.log('Audio error:', e));
             },
             
             stopAllMusic() {
@@ -541,13 +634,15 @@
             },
             
             playSFX(type) {
-                if (!this.sfxEnabled) return;
+                if (!this.sfxEnabled || !this.audioActivated) return;
                 const sfx = this[type];
                 sfx.currentTime = 0;
+                sfx.volume = 0.6;
                 sfx.play().catch(e => console.log('SFX error:', e));
             },
             
             toggleMusic() {
+                if (!this.audioActivated) return;
                 this.musicEnabled = !this.musicEnabled;
                 document.getElementById('musicToggle').textContent = 
                     this.musicEnabled ? '🔊 Musica ON' : '🔇 Musica OFF';
@@ -567,6 +662,7 @@
             },
             
             toggleSFX() {
+                if (!this.audioActivated) return;
                 this.sfxEnabled = !this.sfxEnabled;
                 document.getElementById('sfxToggle').textContent = 
                     this.sfxEnabled ? '🔊 Suoni ON' : '🔇 Suoni OFF';
@@ -655,9 +751,6 @@
             playerScores = {};
             
             console.log('🎮 Host v2.3 creato con codice:', gameCode);
-            
-            // Inizia musica menu
-            audio.playMusic('menuMusic');
             
             // Inizializza il gioco su Firebase
             database.ref('games/' + gameCode).set({
@@ -1080,3 +1173,4 @@
     </script>
 </body>
 </html>
+
