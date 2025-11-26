@@ -468,7 +468,6 @@
         // ==================== INITIALIZATION ====================
         document.addEventListener('DOMContentLoaded', () => {
             elements.joinBtn.addEventListener('click', joinGame);
-            simulateGameConnection();
         });
 
         // ==================== GAME FUNCTIONS ====================
@@ -476,22 +475,44 @@
             const name = elements.playerName.value.trim();
             if (name) {
                 playerState.name = name;
+                playerState.connected = true;
+                
                 elements.displayPlayerName.textContent = name;
                 elements.waitingPlayerName.textContent = name;
                 
+                // Vai alla schermata di ATTESA invece che direttamente al gioco
                 screens.login.classList.add('hidden');
-                screens.game.classList.remove('hidden');
+                screens.waiting.classList.remove('hidden');
                 
-                // Simulate joining game
-                simulateGameStart();
+                // Simula attesa per l'host invece di partire subito
+                simulateWaitingForHost();
             }
         }
 
-        function simulateGameStart() {
-            // Simulate connection to game host
-            setTimeout(() => {
-                loadQuestion(currentQuestionIndex);
-            }, 2000);
+        function simulateWaitingForHost() {
+            elements.waitingPlayerScore.textContent = "Waiting for host...";
+            
+            // SIMULAZIONE: aspetta 8 secondi (come se l'host desse il via)
+            let waitTime = 8;
+            const countdown = setInterval(() => {
+                elements.waitingPlayerScore.textContent = `Starting in ${waitTime}s...`;
+                waitTime--;
+                
+                if (waitTime <= 0) {
+                    clearInterval(countdown);
+                    startGame();
+                }
+            }, 1000);
+        }
+
+        function startGame() {
+            playerState.waiting = false;
+            playerState.gameStarted = true;
+            
+            screens.waiting.classList.add('hidden');
+            screens.game.classList.remove('hidden');
+            
+            loadQuestion(0);
         }
 
         function loadQuestion(index) {
@@ -1012,4 +1033,5 @@
 </body>
 
 </html>
+
 
