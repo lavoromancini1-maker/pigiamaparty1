@@ -1,571 +1,313 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEXUS GAME SHOW - Host</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #ff0080;
+            --secondary: #8000ff;
+            --accent: #00ffff;
+            --dark: #0a0a1a;
+            --light: #ffffff;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--dark), #000);
+            color: var(--light);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+        }
+
+        .game-area {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            padding: 30px;
+            border: 2px solid var(--primary);
+        }
+
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .panel {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 20px;
+            border: 1px solid var(--secondary);
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 2.5rem;
+            background: linear-gradient(45deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 20px;
+        }
+
+        .question-container {
+            text-align: center;
+            margin: 30px 0;
+        }
+
+        .question-text {
+            font-size: 2rem;
+            margin: 20px 0;
+            line-height: 1.4;
+        }
+
+        .timer {
+            font-size: 3rem;
+            font-weight: bold;
+            color: var(--primary);
+            margin: 20px 0;
+        }
+
+        .btn {
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            margin: 10px;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .answers-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .answer-option {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .answer-option.correct {
+            background: rgba(0, 255, 100, 0.3);
+            border-color: #00ff88;
+        }
+
+        .player-list {
+            list-style: none;
+        }
+
+        .player-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            margin: 5px 0;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .game-code {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--primary);
+            text-align: center;
+            margin: 15px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="game-area">
+            <h1>NEXUS GAME SHOW - HOST</h1>
+            
+            <div class="question-container">
+                <div id="questionCounter">QUESTION 1 OF 10</div>
+                <div class="question-text" id="questionText">Click START GAME to begin!</div>
+                <div class="timer" id="timer">20</div>
+                
+                <div class="answers-grid" id="answersGrid">
+                    <!-- Answers will appear here -->
+                </div>
+                
+                <button class="btn" id="startBtn">START GAME</button>
+                <button class="btn" id="nextBtn" disabled>NEXT QUESTION</button>
+            </div>
+        </div>
+
+        <div class="sidebar">
+            <div class="panel">
+                <h3>PLAYERS</h3>
+                <ul class="player-list" id="playerList">
+                    <!-- Players will appear here -->
+                </ul>
+            </div>
+            
+            <div class="panel">
+                <h3>JOIN GAME</h3>
+                <div class="game-code" id="gameCode">GAME123</div>
+                <div style="text-align: center; margin: 15px 0;">
+                    <div style="background: white; padding: 15px; border-radius: 10px; display: inline-block;">
+                        <div style="color: black; font-weight: bold;">Scan QR Code</div>
+                        <div style="color: black; font-size: 0.9rem;">Use your phone to join</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
-        // ==================== GAME CONFIGURATION ====================
-        const CONFIG = {
-            TOTAL_QUESTIONS: 60,
-            QUESTION_TIME: 20,
-            POINTS_CORRECT: 10,
-            POINTS_BONUS: 5
-        };
+        // Simple working version
+        console.log("Game Host Loaded");
+        
+        const questions = [
+            {
+                question: "Qual è la capitale dell'Australia?",
+                answers: ["Sydney", "Melbourne", "Canberra", "Perth"],
+                correct: 2
+            },
+            {
+                question: "In quale anno è caduto il muro di Berlino?",
+                answers: ["1987", "1989", "1991", "1985"],
+                correct: 1
+            },
+            {
+                question: "Chi ha scritto 'Il nome della rosa'?",
+                answers: ["Italo Calvino", "Umberto Eco", "Luigi Pirandello", "Alessandro Manzoni"],
+                correct: 1
+            }
+        ];
 
-        // ==================== GAME STATE ====================
-        let gameState = {
-            currentQuestionIndex: 0,  // CAMBIATO: currentQuestion → currentQuestionIndex
-            players: [],
-            timeLeft: CONFIG.QUESTION_TIME,
-            timer: null,
-            gameStarted: false,
-            gameCode: generateGameCode()
-        };
+        let currentQuestion = 0;
+        let timeLeft = 20;
+        let timer;
 
-        // ==================== DOM ELEMENTS ====================
         const elements = {
             questionCounter: document.getElementById('questionCounter'),
             questionText: document.getElementById('questionText'),
-            mediaContainer: document.getElementById('mediaContainer'),
-            answersGrid: document.getElementById('answersGrid'),
             timer: document.getElementById('timer'),
+            answersGrid: document.getElementById('answersGrid'),
+            startBtn: document.getElementById('startBtn'),
             nextBtn: document.getElementById('nextBtn'),
             playerList: document.getElementById('playerList'),
-            gameCode: document.getElementById('gameCode'),
-            playersCount: document.getElementById('playersCount'),
-            completedQuestions: document.getElementById('completedQuestions'),
-            averageScore: document.getElementById('averageScore'),
-            fastestAnswer: document.getElementById('fastestAnswer'),
-            resultsOverlay: document.getElementById('resultsOverlay'),
-            winnerName: document.getElementById('winnerName'),
-            winnerScore: document.getElementById('winnerScore')
+            gameCode: document.getElementById('gameCode')
         };
 
-        // ==================== INITIALIZATION ====================
-        document.addEventListener('DOMContentLoaded', () => {
-            initializeGame();
-            simulatePlayers();
-        });
+        // Initialize
+        elements.gameCode.textContent = 'GAME' + Math.floor(Math.random() * 1000);
+        simulatePlayers();
 
-        function initializeGame() {
-            elements.gameCode.textContent = gameState.gameCode;
-            elements.nextBtn.addEventListener('click', handleNextButton);
-            
-            // NASCONDI la schermata risultati all'inizio
-            elements.resultsOverlay.classList.add('hidden');
-        }
-
-        // ==================== GAME LOGIC ====================
-        function handleNextButton() {
-            if (!gameState.gameStarted) {
-                startGame();
-            } else {
-                nextQuestion();
-            }
-        }
+        elements.startBtn.addEventListener('click', startGame);
+        elements.nextBtn.addEventListener('click', nextQuestion);
 
         function startGame() {
-            gameState.gameStarted = true;
-            gameState.currentQuestionIndex = 0; // RESET
-            elements.nextBtn.textContent = 'NEXT QUESTION';
+            console.log("Game started");
+            elements.startBtn.disabled = true;
+            elements.nextBtn.disabled = false;
             loadQuestion(0);
         }
 
         function loadQuestion(index) {
-            console.log("Loading question:", index); // DEBUG
-            
-            // CONTROLLO IMPORTANTE: se non ci sono domande, esci
-            if (!quizQuestions || quizQuestions.length === 0) {
-                console.error("No questions found!");
-                return;
-            }
-
-            if (index >= quizQuestions.length) {
+            if (index >= questions.length) {
                 endGame();
                 return;
             }
 
-            gameState.currentQuestionIndex = index;
-            const question = quizQuestions[index];
+            currentQuestion = index;
+            const question = questions[index];
             
-            // Update UI
-            elements.questionCounter.textContent = `QUESTION ${index + 1} OF ${quizQuestions.length}`;
+            elements.questionCounter.textContent = `QUESTION ${index + 1} OF ${questions.length}`;
             elements.questionText.textContent = question.question;
-            elements.completedQuestions.textContent = index;
-            
-            // Load media
-            loadMedia(question);
             
             // Load answers
-            loadAnswers(question);
-            
-            // Reset and start timer
-            resetTimer();
-            startTimer();
-            
-            // Simulate player activity
-            simulatePlayerAnswers(question);
-        }
-
-        function loadMedia(question) {
-            elements.mediaContainer.innerHTML = '';
-            
-            if (question.media) {
-                let mediaElement;
-                switch (question.media.type) {
-                    case 'image':
-                        mediaElement = document.createElement('img');
-                        mediaElement.src = question.media.src;
-                        mediaElement.alt = 'Question media';
-                        break;
-                    case 'video':
-                        mediaElement = document.createElement('video');
-                        mediaElement.src = question.media.src;
-                        mediaElement.controls = true;
-                        mediaElement.autoplay = true;
-                        break;
-                    case 'audio':
-                        mediaElement = document.createElement('audio');
-                        mediaElement.src = question.media.src;
-                        mediaElement.controls = true;
-                        mediaElement.autoplay = true;
-                        break;
-                }
-                
-                if (mediaElement) {
-                    mediaElement.style.maxWidth = '100%';
-                    mediaElement.style.borderRadius = '15px';
-                    elements.mediaContainer.appendChild(mediaElement);
-                }
-            }
-        }
-
-        function loadAnswers(question) {
             elements.answersGrid.innerHTML = '';
-            const letters = ['A', 'B', 'C', 'D'];
-            
-            question.answers.forEach((answer, index) => {
-                const answerElement = document.createElement('div');
-                answerElement.className = 'answer-option';
-                answerElement.textContent = answer;
-                answerElement.setAttribute('data-letter', letters[index]);
-                elements.answersGrid.appendChild(answerElement);
+            question.answers.forEach((answer, i) => {
+                const div = document.createElement('div');
+                div.className = 'answer-option';
+                div.textContent = answer;
+                elements.answersGrid.appendChild(div);
             });
+            
+            startTimer();
         }
 
         function startTimer() {
-            gameState.timeLeft = CONFIG.QUESTION_TIME;
-            elements.timer.textContent = gameState.timeLeft;
+            timeLeft = 20;
+            elements.timer.textContent = timeLeft;
             
-            gameState.timer = setInterval(() => {
-                gameState.timeLeft--;
-                elements.timer.textContent = gameState.timeLeft;
+            clearInterval(timer);
+            timer = setInterval(() => {
+                timeLeft--;
+                elements.timer.textContent = timeLeft;
                 
-                if (gameState.timeLeft <= 0) {
-                    clearInterval(gameState.timer);
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
                     showCorrectAnswer();
-                    elements.nextBtn.disabled = false;
                 }
             }, 1000);
         }
 
-        function resetTimer() {
-            clearInterval(gameState.timer);
-            elements.nextBtn.disabled = true;
-        }
-
         function showCorrectAnswer() {
-            const question = quizQuestions[gameState.currentQuestionIndex];
+            const question = questions[currentQuestion];
             const answerElements = elements.answersGrid.querySelectorAll('.answer-option');
-            
-            answerElements.forEach((element, index) => {
-                if (index === question.correct) {
-                    element.classList.add('correct');
-                }
-            });
+            answerElements[question.correct].classList.add('correct');
         }
 
         function nextQuestion() {
-            resetTimer();
-            loadQuestion(gameState.currentQuestionIndex + 1);
+            loadQuestion(currentQuestion + 1);
         }
 
         function endGame() {
-            console.log("Game ended"); // DEBUG
-            clearInterval(gameState.timer);
-            elements.resultsOverlay.classList.remove('hidden');
-            
-            // Trova il vincitore
-            if (gameState.players.length > 0) {
-                const winner = [...gameState.players].sort((a, b) => b.score - a.score)[0];
-                elements.winnerName.textContent = winner.name;
-                elements.winnerScore.textContent = winner.score;
-            } else {
-                elements.winnerName.textContent = "No players";
-                elements.winnerScore.textContent = "0";
-            }
+            elements.questionText.textContent = "GAME COMPLETED!";
+            elements.answersGrid.innerHTML = '';
+            elements.timer.textContent = "END";
+            elements.nextBtn.disabled = true;
         }
 
-        // ==================== PLAYER MANAGEMENT ====================
         function simulatePlayers() {
-            const playerNames = ['ALICE', 'BOB', 'CAROL', 'DAVE', 'EVE', 'FRANK', 'GRACE', 'HENRY'];
-            
-            gameState.players = playerNames.map((name, index) => ({
-                id: index + 1,
-                name: name,
-                score: 0,
-                answered: false,
-                answerTime: 0,
-                isConnected: true
-            }));
-            
-            updateLeaderboard();
-            elements.playersCount.textContent = gameState.players.length;
-        }
-
-        function simulatePlayerAnswers(question) {
-            // Reset all players
-            gameState.players.forEach(player => {
-                player.answered = false;
-                player.answerTime = 0;
-            });
-            
-            // Simulate answers over time
-            let answeredCount = 0;
-            const answerInterval = setInterval(() => {
-                if (answeredCount >= gameState.players.length || gameState.timeLeft <= 0) {
-                    clearInterval(answerInterval);
-                    return;
-                }
-                
-                const availablePlayers = gameState.players.filter(p => !p.answered);
-                if (availablePlayers.length > 0) {
-                    const randomPlayer = availablePlayers[Math.floor(Math.random() * availablePlayers.length)];
-                    randomPlayer.answered = true;
-                    randomPlayer.answerTime = CONFIG.QUESTION_TIME - gameState.timeLeft;
-                    
-                    // 80% chance of correct answer
-                    const isCorrect = Math.random() > 0.2;
-                    if (isCorrect) {
-                        randomPlayer.score += CONFIG.POINTS_CORRECT;
-                        // Bonus for fast answers
-                        if (randomPlayer.answerTime < 5) {
-                            randomPlayer.score += CONFIG.POINTS_BONUS;
-                        }
-                    }
-                    
-                    answeredCount++;
-                    updateLeaderboard();
-                    updateStats();
-                }
-            }, 1000 + Math.random() * 2000);
-        }
-
-        function updateLeaderboard() {
-            const sortedPlayers = [...gameState.players].sort((a, b) => b.score - a.score);
+            const players = ['Alice', 'Bob', 'Charlie', 'Diana'];
             elements.playerList.innerHTML = '';
             
-            sortedPlayers.forEach((player, index) => {
+            players.forEach(player => {
                 const li = document.createElement('li');
-                li.className = `player-item ${player.answered ? 'answered' : ''}`;
-                
+                li.className = 'player-item';
                 li.innerHTML = `
-                    <div class="player-rank">${index + 1}</div>
-                    <div class="player-name">${player.name}</div>
-                    <div class="player-score">${player.score}</div>
-                    <div class="player-status">${player.answered ? '✅' : '⏳'}</div>
+                    <span>${player}</span>
+                    <span>${Math.floor(Math.random() * 100)}</span>
                 `;
-                
                 elements.playerList.appendChild(li);
             });
         }
-
-        function updateStats() {
-            const totalScore = gameState.players.reduce((sum, player) => sum + player.score, 0);
-            const average = Math.round(totalScore / gameState.players.length);
-            elements.averageScore.textContent = average;
-            
-            const answeredPlayers = gameState.players.filter(p => p.answered && p.answerTime > 0);
-            if (answeredPlayers.length > 0) {
-                const fastest = Math.min(...answeredPlayers.map(p => p.answerTime));
-                elements.fastestAnswer.textContent = `${fastest}s`;
-            }
-        }
-
-        // ==================== UTILITIES ====================
-        function generateGameCode() {
-            return Math.random().toString(36).substring(2, 8).toUpperCase();
-        }
-
-        // ==================== QUESTIONS DATABASE ====================
-        const quizQuestions = [
-    // PRIME 10 DOMANDE (Cultura Generale)
-    {
-        question: "Qual è la capitale dell'Australia?",
-        answers: ["Sydney", "Melbourne", "Canberra", "Perth"],
-        correct: 2,
-        points: 10
-    },
-    {
-        question: "In quale anno è caduto il muro di Berlino?",
-        answers: ["1987", "1989", "1991", "1985"],
-        correct: 1,
-        points: 15
-    },
-    {
-        question: "Chi ha scritto 'Il nome della rosa'?",
-        answers: ["Italo Calvino", "Umberto Eco", "Luigi Pirandello", "Alessandro Manzoni"],
-        correct: 1,
-        points: 10
-    },
-    {
-        question: "Qual è l'elemento chimico con simbolo 'Au'?",
-        answers: ["Argento", "Alluminio", "Oro", "Argon"],
-        correct: 2,
-        points: 10
-    },
-    {
-        question: "In quale oceano si trova le Bermuda?",
-        answers: ["Oceano Indiano", "Oceano Pacifico", "Oceano Atlantico", "Oceano Artico"],
-        correct: 2,
-        points: 10
-    },
-    {
-        question: "Chi ha dipinto 'La notte stellata'?",
-        answers: ["Pablo Picasso", "Vincent van Gogh", "Claude Monet", "Salvador Dalí"],
-        correct: 1,
-        points: 15
-    },
-    {
-        question: "Qual è il fiume più lungo d'Italia?",
-        answers: ["Tevere", "Adige", "Arno", "Po"],
-        correct: 3,
-        points: 10
-    },
-    {
-        question: "In quale anno è stato inventato il World Wide Web?",
-        answers: ["1985", "1989", "1991", "1993"],
-        correct: 2,
-        points: 15
-    },
-    {
-        question: "Quale pianeta è noto come il 'Pianeta Rosso'?",
-        answers: ["Venere", "Marte", "Giove", "Saturno"],
-        correct: 1,
-        points: 10
-    },
-    {
-        question: "Chi ha scritto 'Cent'anni di solitudine'?",
-        answers: ["Gabriel García Márquez", "Jorge Luis Borges", "Pablo Neruda", "Isabel Allende"],
-        correct: 0,
-        points: 15
-    },
-
-    // DOMANDE 11-20 (Musica e Audio)
-    {
-        question: "A quale famosa canzone dei Queen appartiene questo estratto?",
-        answers: ["We Will Rock You", "Bohemian Rhapsody", "Another One Bites the Dust", "We Are the Champions"],
-        correct: 1,
-        points: 20,
-        media: {
-            type: "audio",
-            src: "https://www.soundjay.com/button/button-1.mp3"
-        }
-    },
-    {
-        question: "Di quale cantante è questa voce?",
-        answers: ["Elvis Presley", "Frank Sinatra", "Michael Jackson", "Freddie Mercury"],
-        correct: 2,
-        points: 20,
-        media: {
-            type: "audio", 
-            src: "https://www.soundjay.com/button/button-2.mp3"
-        }
-    },
-    {
-        question: "A quale strumento musicale appartiene questo suono?",
-        answers: ["Pianoforte", "Chitarra", "Violino", "Sassofono"],
-        correct: 3,
-        points: 15,
-        media: {
-            type: "audio",
-            src: "https://www.soundjay.com/button/button-3.mp3"
-        }
-    },
-    {
-        question: "Da quale opera lirica è tratto questo assolo?",
-        answers: ["La Traviata", "Il Barbiere di Siviglia", "Carmen", "Nabucco"],
-        correct: 2,
-        points: 25,
-        media: {
-            type: "audio",
-            src: "https://www.soundjay.com/button/button-4.mp3"
-        }
-    },
-    {
-        question: "Quale gruppo rock anni '80 ha cantato questa canzone?",
-        answers: ["Guns N' Roses", "Bon Jovi", "Aerosmith", "AC/DC"],
-        correct: 1,
-        points: 20,
-        media: {
-            type: "audio",
-            src: "https://www.soundjay.com/button/button-5.mp3"
-        }
-    },
-
-    // DOMANDE 21-30 (Arte e Immagini)
-    {
-        question: "In quale anno è stata scattata questa prima fotografia della storia?",
-        answers: ["1826", "1850", "1875", "1901"],
-        correct: 0,
-        points: 20,
-        media: {
-            type: "image",
-            src: "https://via.placeholder.com/400x300/6a11cb/ffffff?text=Prima+Foto+Storia+1826"
-        }
-    },
-    {
-        question: "Quale famoso dipinto è mostrato nell'immagine?",
-        answers: ["La Gioconda", "L'Urlo", "Notte Stellata", "La Ragazza con l'orecchino di perla"],
-        correct: 1,
-        points: 15,
-        media: {
-            type: "image", 
-            src: "https://via.placeholder.com/400x300/2575fc/ffffff?text=L'Urlo+di+Munch"
-        }
-    },
-    {
-        question: "A quale monumento appartiene questa architettura?",
-        answers: ["Colosseo", "Torre Eiffel", "Big Ben", "Taj Mahal"],
-        correct: 3,
-        points: 15,
-        media: {
-            type: "image",
-            src: "https://via.placeholder.com/400x300/ff416c/ffffff?text=Taj+Mahal+India"
-        }
-    },
-    {
-        question: "In quale città si trova questo ponte famoso?",
-        answers: ["Venezia", "Firenze", "Londra", "San Francisco"],
-        correct: 3,
-        points: 15,
-        media: {
-            type: "image",
-            src: "https://via.placeholder.com/400x300/28a745/ffffff?text=Golden+Gate+Bridge"
-        }
-    },
-    {
-        question: "Chi è l'artista di questo famoso autoritratto?",
-        answers: ["Frida Kahlo", "Vincent van Gogh", "Rembrandt", "Leonardo da Vinci"],
-        correct: 0,
-        points: 15,
-        media: {
-            type: "image",
-            src: "https://via.placeholder.com/400x300/ffc107/000000?text=Frida+Kahlo"
-        }
-    },
-
-    // DOMANDE 31-40 (Cinema e Video)
-    {
-        question: "Da quale film famoso è tratta questa scena?",
-        answers: ["Forrest Gump", "Pulp Fiction", "Il Padrino", "Titanic"],
-        correct: 0,
-        points: 25,
-        media: {
-            type: "video",
-            src: "https://www.w3schools.com/html/mov_bbb.mp4"
-        }
-    },
-    {
-        question: "Quale attore ha pronunciato questa famosa frase?",
-        answers: ["Marlon Brando", "Al Pacino", "Robert De Niro", "Jack Nicholson"],
-        correct: 1,
-        points: 20,
-        media: {
-            type: "audio",
-            src: "https://www.soundjay.com/button/button-1.mp3"
-        }
-    },
-    {
-        question: "A quale franchise cinematografico appartiene questo personaggio?",
-        answers: ["Star Wars", "Star Trek", "Marvel", "DC"],
-        correct: 0,
-        points: 15,
-        media: {
-            type: "image",
-            src: "https://via.placeholder.com/400x300/6a11cb/ffffff?text=Darth+Vader"
-        }
-    },
-    {
-        question: "In quale anno è uscito il primeiro film di Harry Potter?",
-        answers: ["1999", "2001", "2003", "2005"],
-        correct: 1,
-        points: 15
-    },
-    {
-        question: "Chi ha diretto 'Il Padrino'?",
-        answers: ["Martin Scorsese", "Francis Ford Coppola", "Steven Spielberg", "Quentin Tarantino"],
-        correct: 1,
-        points: 15
-    },
-
-    // DOMANDE 41-50 (Scienza e Tecnologia)
-    {
-        question: "Quale scienziato ha formulato la teoria della relatività?",
-        answers: ["Isaac Newton", "Albert Einstein", "Galileo Galilei", "Stephen Hawking"],
-        correct: 1,
-        points: 15
-    },
-    {
-        question: "In quale anno è stato inventato il primo iPhone?",
-        answers: ["2005", "2007", "2009", "2011"],
-        correct: 1,
-        points: 15
-    },
-    {
-        question: "Quale è il componente principale del vetro?",
-        answers: ["Silicio", "Carbonio", "Sabbia silicea", "Alluminio"],
-        correct: 2,
-        points: 10
-    },
-    {
-        question: "Chi ha fondato Microsoft?",
-        answers: ["Steve Jobs", "Bill Gates", "Mark Zuckerberg", "Larry Page"],
-        correct: 1,
-        points: 10
-    },
-    {
-        question: "Quale pianeta ha il maggior numero di lune?",
-        answers: ["Giove", "Saturno", "Urano", "Nettuno"],
-        correct: 1,
-        points: 15
-    },
-
-    // DOMANDE 51-60 (Storia e Geografia)
-    {
-        question: "In quale anno è finita la Seconda Guerra Mondiale?",
-        answers: ["1943", "1945", "1947", "1950"],
-        correct: 1,
-        points: 15
-    },
-    {
-        question: "Quale è la montagna più alta del mondo?",
-        answers: ["K2", "Monte Everest", "Monte Bianco", "Kilimangiaro"],
-        correct: 1,
-        points: 10
-    },
-    {
-        question: "Chi è stato il primo presidente degli Stati Uniti?",
-        answers: ["Thomas Jefferson", "George Washington", "Abraham Lincoln", "John Adams"],
-        correct: 1,
-        points: 15
-    },
-    {
-        question: "Quale è il deserto più grande del mondo?",
-        answers: ["Deserto del Sahara", "Deserto Arabico", "Deserto del Gobi", "Antartide"],
-        correct: 3,
-        points: 20
-    },
-    {
-        question: "In quale secolo è vissuto Leonardo da Vinci?",
-        answers: ["XIV secolo", "XV secolo", "XVI secolo", "XVII secolo"],
-        correct: 1,
-        points: 15
-    }
-];
     </script>
+</body>
+</html>
