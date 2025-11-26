@@ -254,16 +254,70 @@
 
         // Initialize
         elements.gameCode.textContent = 'GAME' + Math.floor(Math.random() * 1000);
-        simulatePlayers();
+        // simulatePlayers();  // Commentata - usiamo simulatePlayerConnections invece
 
         elements.startBtn.addEventListener('click', startGame);
         elements.nextBtn.addEventListener('click', nextQuestion);
 
+        // ==================== PLAYER WAITING SYSTEM ====================
+        let connectedPlayers = [];
+        let gameReady = false;
+
+        function updatePlayerList() {
+            elements.playerList.innerHTML = '';
+            connectedPlayers.forEach((player, index) => {
+                const li = document.createElement('li');
+                li.className = 'player-item';
+                li.innerHTML = `
+                    <span>${player.name}</span>
+                    <span>🟢 READY</span>
+                `;
+                elements.playerList.appendChild(li);
+            });
+            
+            // Abilita START solo se ci sono giocatori
+            elements.startBtn.disabled = connectedPlayers.length === 0;
+            document.getElementById('playersCount').textContent = connectedPlayers.length;
+        }
+
+        // Simula giocatori che si connettono
+        function simulatePlayerConnections() {
+            const fakePlayers = [
+                { id: 1, name: 'Alice' },
+                { id: 2, name: 'Bob' },
+                { id: 3, name: 'Charlie' },
+                { id: 4, name: 'Diana' }
+            ];
+            
+            // Aggiungi giocatori gradualmente
+            fakePlayers.forEach((player, index) => {
+                setTimeout(() => {
+                    connectedPlayers.push(player);
+                    updatePlayerList();
+                    console.log(player.name + " joined the game!");
+                }, 2000 * (index + 1));
+            });
+        }
+
+        // Avvia la simulazione quando la pagina carica
+        simulatePlayerConnections();
+
         function startGame() {
-            console.log("Game started");
+            if (connectedPlayers.length === 0) {
+                alert('Wait for players to join!');
+                return;
+            }
+            
+            console.log("Game started with", connectedPlayers.length, "players");
+            gameReady = true;
             elements.startBtn.disabled = true;
             elements.nextBtn.disabled = false;
-            loadQuestion(0);
+            elements.questionText.textContent = "Game starting... Get ready!";
+            
+            // Qui in una versione reale invieresti un segnale a tutti i player
+            setTimeout(() => {
+                loadQuestion(0);
+            }, 3000);
         }
 
         function loadQuestion(index) {
@@ -340,6 +394,7 @@
     </script>
 </body>
 </html>
+
 
 
 
