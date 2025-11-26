@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pigiama Party - Host</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
     <style>
         :root {
             --pink: #ff00c8;
@@ -173,7 +175,23 @@
     </div>
 
     <script>
-        // DOMANDE DEL GIOCO
+        // === CONFIGURA FIREBASE ===
+        // SOSTITUISCI QUESTI VALORI CON QUELLI DEL TUO PROGETTO FIREBASE
+        const firebaseConfig = {
+            apiKey: "AIzaSyC-RrLKSwfM-S5r1gD_RWdjWElWhkgp1vI",
+            authDomain: "pigiamaparty2-b8d66.firebaseapp.com",
+            databaseURL: "https://pigiamaparty2-b8d66-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "pigiamaparty2-b8d66",
+            storageBucket: "pigiamaparty2-b8d66.firebasestorage.app",
+            messagingSenderId: "300420666102",
+            appId: "1:300420666102:web:4170ec1ba37673b88652d7"
+        };
+
+        // Inizializza Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // === DOMANDE DEL GIOCO ===
         const questions = [
             {
                 question: "Qual è la capitale dell'Australia?",
@@ -192,14 +210,15 @@
             }
         ];
 
-        // VARIABILI DI STATO
+        // === VARIABILI DI STATO ===
         let currentQuestion = 0;
         let timeLeft = 20;
         let timer;
         let connectedPlayers = [];
         let playerAnswers = [];
+        let gameCode = '';
 
-        // ELEMENTI DOM
+        // === ELEMENTI DOM ===
         const elements = {
             lobbyScreen: document.getElementById('lobbyScreen'),
             gameScreen: document.getElementById('gameScreen'),
@@ -215,64 +234,61 @@
             answersList: document.getElementById('answersList')
         };
 
-        // INIZIALIZZAZIONE
+        // === INIZIALIZZAZIONE ===
         function initGame() {
-            const gameCode = 'GAME' + Math.floor(1000 + Math.random() * 9000);
+            gameCode = 'GAME' + Math.floor(1000 + Math.random() * 9000);
             elements.gameCode.textContent = gameCode;
             elements.shareCode.textContent = gameCode;
             
-            // Salva codice gioco per i player
-            localStorage.setItem('hostGameCode', gameCode);
+            console.log('🎮 Host creato con codice:', gameCode);
             
-            console.log('🎮 Gioco creato:', gameCode);
-            startListening();
+            // Inizializza il gioco su Firebase
+            database.ref('games/' + gameCode).set({
+                status: 'waiting',
+                host: true,
+                createdAt: Date.now()
+            });
+
+            // Ascolta i player che si connettono
+            database.ref('games/' + gameCode + '/players').on('value', (snapshot) => {
+                const players = snapshot.val() || {};
+                connectedPlayers = Object.values(players);
+                updatePlayerList();
+            });
+
+            // Ascolta le risposte dei player
+            database.ref('games/' + gameCode + '/answers').on('value', (snapshot) => {
+                const answers = snapshot.val() || {};
+                playerAnswers = Object.values(answers);
+                updateAnswersList();
+            });
         }
 
-        // ASCOLTA I PLAYER (usando localStorage come canale semplice)
-        function startListening() {
-            setInterval(() => {
-                // Leggi i player connessi
-                const playersData = localStorage.getItem('connectedPlayers');
-                if (playersData) {
-                    const players = JSON.parse(playersData);
-                    updatePlayerList(players);
-                }
-
-                // Leggi le risposte dei player
-                const answersData = localStorage.getItem('playerAnswers');
-                if (answersData) {
-                    const answers = JSON.parse(answersData);
-                    updateAnswersList(answers);
-                }
-            }, 1000);
-        }
-
-        function updatePlayerList(players) {
-            connectedPlayers = players;
+        function updatePlayerList() {
             elements.playerList.innerHTML = '';
             
-            if (players.length === 0) {
+            if (connectedPlayers.length === 0) {
                 elements.playerList.innerHTML = '<li class="player-item">In attesa di giocatori...</li>';
                 elements.startBtn.disabled = true;
             } else {
-                players.forEach(player => {
+                connectedPlayers.forEach(player => {
                     const li = document.createElement('li');
                     li.className = 'player-item';
                     li.textContent = `🎮 ${player.name}`;
                     elements.playerList.appendChild(li);
                 });
                 elements.startBtn.disabled = false;
+                console.log('👥 Giocatori connessi:', connectedPlayers);
             }
         }
 
-        function updateAnswersList(answers) {
-            playerAnswers = answers;
+        function updateAnswersList() {
             elements.answersList.innerHTML = '';
             
-            if (answers.length === 0) {
+            if (playerAnswers.length === 0) {
                 elements.answersList.innerHTML = '<li>Nessuna risposta ancora...</li>';
             } else {
-                answers.forEach(answer => {
+                playerAnswers.forEach(answer => {
                     const li = document.createElement('li');
                     li.className = 'player-item';
                     li.textContent = `🎯 ${answer.playerName}: Opzione ${answer.answerIndex + 1}`;
@@ -281,15 +297,17 @@
             }
         }
 
-        // FUNZIONI DEL GIOCO
+        // === FUNZIONI DEL GIOCO ===
         function startGame() {
             elements.lobbyScreen.classList.add('hidden');
             elements.gameScreen.classList.remove('hidden');
             
             // Comunica ai player che il gioco inizia
-            localStorage.setItem('gameStatus', 'started');
-            localStorage.setItem('currentQuestion', '0');
-            
+            database.ref('games/' + gameCode).update({
+                status: 'started',
+                currentQuestion: 0
+            });
+
             loadQuestion(0);
         }
 
@@ -308,8 +326,7 @@
             
             // Pulisci risposte precedenti
             elements.answersGrid.innerHTML = '';
-            playerAnswers = [];
-            localStorage.setItem('playerAnswers', JSON.stringify([]));
+            database.ref('games/' + gameCode + '/answers').remove();
             
             // Carica risposte
             question.answers.forEach((answer, i) => {
@@ -320,8 +337,10 @@
             });
             
             // Comunica la domanda ai player
-            localStorage.setItem('currentQuestion', index.toString());
-            localStorage.setItem('currentQuestionData', JSON.stringify(question));
+            database.ref('games/' + gameCode).update({
+                currentQuestion: index,
+                currentQuestionData: question
+            });
             
             startTimer();
         }
@@ -359,14 +378,16 @@
             elements.answersGrid.innerHTML = '';
             elements.timer.textContent = "FINE";
             elements.nextBtn.disabled = true;
-            localStorage.setItem('gameStatus', 'ended');
+            database.ref('games/' + gameCode).update({
+                status: 'ended'
+            });
         }
 
-        // EVENT LISTENERS
+        // === EVENT LISTENERS ===
         elements.startBtn.addEventListener('click', startGame);
         elements.nextBtn.addEventListener('click', nextQuestion);
 
-        // AVVIA IL GIOCO
+        // === AVVIA IL GIOCO ===
         initGame();
     </script>
 </body>
