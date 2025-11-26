@@ -1,0 +1,1004 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEXUS GAME SHOW - Host</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #ff0080;
+            --secondary: #8000ff;
+            --accent: #00ffff;
+            --dark: #0a0a1a;
+            --darker: #050510;
+            --light: #ffffff;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--darker), var(--dark));
+            color: var(--light);
+            min-height: 100vh;
+            padding: 20px;
+            overflow: hidden;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+            height: 95vh;
+            max-width: 1800px;
+            margin: 0 auto;
+        }
+
+        .main-stage {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 25px;
+            border: 3px solid var(--primary);
+            box-shadow: 0 0 50px rgba(255, 0, 128, 0.2);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .main-stage::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary), var(--accent));
+            animation: progress 20s linear;
+        }
+
+        @keyframes progress {
+            0% { width: 0%; }
+            100% { width: 100%; }
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .game-title {
+            font-size: 3rem;
+            background: linear-gradient(45deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .question-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .question-counter {
+            font-size: 1.3rem;
+            color: var(--accent);
+            margin-bottom: 20px;
+        }
+
+        .question-text {
+            font-size: 2.8rem;
+            line-height: 1.3;
+            margin-bottom: 40px;
+            background: linear-gradient(90deg, var(--light), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+        }
+
+        .media-container {
+            margin: 30px 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 250px;
+        }
+
+        .media-container img, .media-container video {
+            max-width: 70%;
+            max-height: 300px;
+            border-radius: 15px;
+            border: 2px solid var(--accent);
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.3);
+        }
+
+        .answers-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .answer-option {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 25px;
+            font-size: 1.3rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .answer-option.correct {
+            background: rgba(0, 255, 100, 0.2);
+            border-color: #00ff88;
+            box-shadow: 0 0 30px rgba(0, 255, 100, 0.4);
+        }
+
+        .answer-option.incorrect {
+            background: rgba(255, 0, 100, 0.2);
+            border-color: #ff0066;
+        }
+
+        .answer-option::before {
+            content: attr(data-letter);
+            position: absolute;
+            top: 10px;
+            left: 15px;
+            font-size: 1rem;
+            font-weight: bold;
+            color: var(--accent);
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 30px;
+        }
+
+        .timer {
+            font-size: 3.5rem;
+            font-weight: bold;
+            color: var(--primary);
+            text-shadow: 0 0 20px var(--primary);
+            padding: 20px 40px;
+            border: 3px solid var(--primary);
+            border-radius: 15px;
+            background: rgba(255, 0, 128, 0.1);
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .btn {
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            padding: 20px 40px;
+            border-radius: 50px;
+            font-size: 1.3rem;
+            cursor: pointer;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(255, 0, 128, 0.4);
+        }
+
+        .btn:disabled {
+            background: rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.3);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .leaderboard-panel {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            border: 2px solid var(--secondary);
+            padding: 25px;
+            flex: 1;
+            box-shadow: 0 0 30px rgba(128, 0, 255, 0.2);
+        }
+
+        .panel-title {
+            text-align: center;
+            font-size: 1.5rem;
+            color: var(--accent);
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .player-list {
+            list-style: none;
+        }
+
+        .player-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            margin-bottom: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .player-item:hover {
+            transform: translateX(5px);
+            border-color: var(--accent);
+        }
+
+        .player-item.answered {
+            background: rgba(0, 255, 255, 0.1);
+            border-color: var(--accent);
+        }
+
+        .player-rank {
+            font-weight: bold;
+            color: var(--accent);
+            width: 30px;
+        }
+
+        .player-name {
+            flex: 1;
+            margin: 0 15px;
+        }
+
+        .player-score {
+            font-weight: bold;
+            color: var(--primary);
+            font-size: 1.2rem;
+        }
+
+        .player-status {
+            width: 20px;
+            text-align: center;
+        }
+
+        .join-panel {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            border: 2px solid var(--accent);
+            padding: 25px;
+            text-align: center;
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.2);
+        }
+
+        .game-code {
+            font-size: 3rem;
+            font-weight: bold;
+            color: var(--primary);
+            margin: 20px 0;
+            text-shadow: 0 0 20px var(--primary);
+        }
+
+        .qr-placeholder {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            display: inline-block;
+            margin: 15px 0;
+        }
+
+        .stats-panel {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            border: 2px solid var(--primary);
+            padding: 20px;
+            box-shadow: 0 0 30px rgba(255, 0, 128, 0.2);
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .results-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .results-content {
+            background: linear-gradient(135deg, var(--dark), var(--darker));
+            border: 3px solid var(--primary);
+            border-radius: 25px;
+            padding: 50px;
+            text-align: center;
+            max-width: 600px;
+            box-shadow: 0 0 50px rgba(255, 0, 128, 0.5);
+        }
+
+        .results-title {
+            font-size: 3rem;
+            color: var(--accent);
+            margin-bottom: 30px;
+        }
+
+        .winner-name {
+            font-size: 4rem;
+            background: linear-gradient(45deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Main Stage -->
+        <div class="main-stage">
+            <div class="header">
+                <div class="game-title">NEXUS GAME SHOW</div>
+                <div class="question-counter" id="questionCounter">QUESTION 1 OF 60</div>
+            </div>
+
+            <div class="question-container">
+                <div class="question-text" id="questionText">Welcome to Nexus Game Show! Get ready to play...</div>
+                
+                <div class="media-container" id="mediaContainer">
+                    <!-- Media content will be loaded here -->
+                </div>
+
+                <div class="answers-grid" id="answersGrid">
+                    <!-- Answer options will be loaded here -->
+                </div>
+
+                <div class="controls">
+                    <div class="timer" id="timer">20</div>
+                    <button class="btn" id="nextBtn">START GAME</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="leaderboard-panel">
+                <div class="panel-title">LEADERBOARD</div>
+                <ul class="player-list" id="playerList">
+                    <!-- Players will be loaded here -->
+                </ul>
+            </div>
+
+            <div class="join-panel">
+                <div class="panel-title">JOIN THE GAME</div>
+                <div class="game-code" id="gameCode">-----</div>
+                <div class="qr-placeholder">
+                    <div style="font-size: 0.9rem; color: #000; text-align: center;">
+                        📱 Scan with your phone<br>
+                        <span style="font-weight: bold; font-size: 1.1rem;">nexus-game.show/play</span>
+                    </div>
+                </div>
+                <div style="margin-top: 15px; font-size: 0.9rem;">
+                    Players joined: <span id="playersCount">0</span>/8
+                </div>
+            </div>
+
+            <div class="stats-panel">
+                <div class="panel-title">GAME STATS</div>
+                <div class="stat-item">
+                    <span>Questions Completed:</span>
+                    <span id="completedQuestions">0</span>
+                </div>
+                <div class="stat-item">
+                    <span>Average Score:</span>
+                    <span id="averageScore">0</span>
+                </div>
+                <div class="stat-item">
+                    <span>Fastest Answer:</span>
+                    <span id="fastestAnswer">0s</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Results Overlay -->
+    <div id="resultsOverlay" class="results-overlay hidden">
+        <div class="results-content">
+            <div class="results-title">GAME COMPLETED!</div>
+            <div>🏆 THE WINNER IS 🏆</div>
+            <div class="winner-name" id="winnerName">PLAYER NAME</div>
+            <div style="margin: 30px 0; font-size: 1.2rem;">
+                Final Score: <span id="winnerScore" style="color: var(--primary);">0</span> points
+            </div>
+            <button class="btn" onclick="location.reload()">NEW GAME</button>
+        </div>
+    </div>
+
+    <script>
+        // ==================== GAME CONFIGURATION ====================
+        const CONFIG = {
+            TOTAL_QUESTIONS: 60,
+            QUESTION_TIME: 20,
+            POINTS_CORRECT: 10,
+            POINTS_BONUS: 5
+        };
+
+        // ==================== GAME STATE ====================
+        let gameState = {
+            currentQuestion: 0,
+            players: [],
+            timeLeft: CONFIG.QUESTION_TIME,
+            timer: null,
+            gameStarted: false,
+            gameCode: generateGameCode()
+        };
+
+        // ==================== DOM ELEMENTS ====================
+        const elements = {
+            questionCounter: document.getElementById('questionCounter'),
+            questionText: document.getElementById('questionText'),
+            mediaContainer: document.getElementById('mediaContainer'),
+            answersGrid: document.getElementById('answersGrid'),
+            timer: document.getElementById('timer'),
+            nextBtn: document.getElementById('nextBtn'),
+            playerList: document.getElementById('playerList'),
+            gameCode: document.getElementById('gameCode'),
+            playersCount: document.getElementById('playersCount'),
+            completedQuestions: document.getElementById('completedQuestions'),
+            averageScore: document.getElementById('averageScore'),
+            fastestAnswer: document.getElementById('fastestAnswer'),
+            resultsOverlay: document.getElementById('resultsOverlay'),
+            winnerName: document.getElementById('winnerName'),
+            winnerScore: document.getElementById('winnerScore')
+        };
+
+        // ==================== INITIALIZATION ====================
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeGame();
+            simulatePlayers();
+        });
+
+        function initializeGame() {
+            elements.gameCode.textContent = gameState.gameCode;
+            elements.nextBtn.addEventListener('click', handleNextButton);
+        }
+
+        // ==================== GAME LOGIC ====================
+        function handleNextButton() {
+            if (!gameState.gameStarted) {
+                startGame();
+            } else {
+                nextQuestion();
+            }
+        }
+
+        function startGame() {
+            gameState.gameStarted = true;
+            elements.nextBtn.textContent = 'NEXT QUESTION';
+            loadQuestion(0);
+        }
+
+        function loadQuestion(index) {
+            if (index >= quizQuestions.length) {
+                endGame();
+                return;
+            }
+
+            gameState.currentQuestion = index;
+            const question = quizQuestions[index];
+            
+            // Update UI
+            elements.questionCounter.textContent = `QUESTION ${index + 1} OF ${CONFIG.TOTAL_QUESTIONS}`;
+            elements.questionText.textContent = question.question;
+            elements.completedQuestions.textContent = index;
+            
+            // Load media
+            loadMedia(question);
+            
+            // Load answers
+            loadAnswers(question);
+            
+            // Reset and start timer
+            resetTimer();
+            startTimer();
+            
+            // Simulate player activity
+            simulatePlayerAnswers(question);
+        }
+
+        function loadMedia(question) {
+            elements.mediaContainer.innerHTML = '';
+            
+            if (question.media) {
+                let mediaElement;
+                switch (question.media.type) {
+                    case 'image':
+                        mediaElement = document.createElement('img');
+                        mediaElement.src = question.media.src;
+                        break;
+                    case 'video':
+                        mediaElement = document.createElement('video');
+                        mediaElement.src = question.media.src;
+                        mediaElement.controls = true;
+                        mediaElement.autoplay = true;
+                        break;
+                    case 'audio':
+                        mediaElement = document.createElement('audio');
+                        mediaElement.src = question.media.src;
+                        mediaElement.controls = true;
+                        mediaElement.autoplay = true;
+                        break;
+                }
+                
+                if (mediaElement) {
+                    mediaElement.style.maxWidth = '100%';
+                    mediaElement.style.borderRadius = '15px';
+                    elements.mediaContainer.appendChild(mediaElement);
+                }
+            }
+        }
+
+        function loadAnswers(question) {
+            elements.answersGrid.innerHTML = '';
+            const letters = ['A', 'B', 'C', 'D'];
+            
+            question.answers.forEach((answer, index) => {
+                const answerElement = document.createElement('div');
+                answerElement.className = 'answer-option';
+                answerElement.textContent = answer;
+                answerElement.setAttribute('data-letter', letters[index]);
+                elements.answersGrid.appendChild(answerElement);
+            });
+        }
+
+        function startTimer() {
+            gameState.timeLeft = CONFIG.QUESTION_TIME;
+            elements.timer.textContent = gameState.timeLeft;
+            
+            gameState.timer = setInterval(() => {
+                gameState.timeLeft--;
+                elements.timer.textContent = gameState.timeLeft;
+                
+                if (gameState.timeLeft <= 0) {
+                    clearInterval(gameState.timer);
+                    showCorrectAnswer();
+                    elements.nextBtn.disabled = false;
+                }
+            }, 1000);
+        }
+
+        function resetTimer() {
+            clearInterval(gameState.timer);
+            elements.nextBtn.disabled = true;
+        }
+
+        function showCorrectAnswer() {
+            const question = quizQuestions[gameState.currentQuestion];
+            const answerElements = elements.answersGrid.querySelectorAll('.answer-option');
+            
+            answerElements.forEach((element, index) => {
+                if (index === question.correct) {
+                    element.classList.add('correct');
+                }
+            });
+        }
+
+        function nextQuestion() {
+            resetTimer();
+            loadQuestion(gameState.currentQuestion + 1);
+        }
+
+        function endGame() {
+            clearInterval(gameState.timer);
+            elements.resultsOverlay.classList.remove('hidden');
+            
+            const winner = [...gameState.players].sort((a, b) => b.score - a.score)[0];
+            elements.winnerName.textContent = winner.name;
+            elements.winnerScore.textContent = winner.score;
+        }
+
+        // ==================== PLAYER MANAGEMENT ====================
+        function simulatePlayers() {
+            const playerNames = ['ALICE', 'BOB', 'CAROL', 'DAVE', 'EVE', 'FRANK', 'GRACE', 'HENRY'];
+            
+            gameState.players = playerNames.map((name, index) => ({
+                id: index + 1,
+                name: name,
+                score: 0,
+                answered: false,
+                answerTime: 0,
+                isConnected: true
+            }));
+            
+            updateLeaderboard();
+            elements.playersCount.textContent = gameState.players.length;
+        }
+
+        function simulatePlayerAnswers(question) {
+            // Reset all players
+            gameState.players.forEach(player => {
+                player.answered = false;
+                player.answerTime = 0;
+            });
+            
+            // Simulate answers over time
+            let answeredCount = 0;
+            const answerInterval = setInterval(() => {
+                if (answeredCount >= gameState.players.length || gameState.timeLeft <= 0) {
+                    clearInterval(answerInterval);
+                    return;
+                }
+                
+                const availablePlayers = gameState.players.filter(p => !p.answered);
+                if (availablePlayers.length > 0) {
+                    const randomPlayer = availablePlayers[Math.floor(Math.random() * availablePlayers.length)];
+                    randomPlayer.answered = true;
+                    randomPlayer.answerTime = CONFIG.QUESTION_TIME - gameState.timeLeft;
+                    
+                    // 80% chance of correct answer
+                    const isCorrect = Math.random() > 0.2;
+                    if (isCorrect) {
+                        randomPlayer.score += CONFIG.POINTS_CORRECT;
+                        // Bonus for fast answers
+                        if (randomPlayer.answerTime < 5) {
+                            randomPlayer.score += CONFIG.POINTS_BONUS;
+                        }
+                    }
+                    
+                    answeredCount++;
+                    updateLeaderboard();
+                    updateStats();
+                }
+            }, 1000 + Math.random() * 2000);
+        }
+
+        function updateLeaderboard() {
+            const sortedPlayers = [...gameState.players].sort((a, b) => b.score - a.score);
+            elements.playerList.innerHTML = '';
+            
+            sortedPlayers.forEach((player, index) => {
+                const li = document.createElement('li');
+                li.className = `player-item ${player.answered ? 'answered' : ''}`;
+                
+                li.innerHTML = `
+                    <div class="player-rank">${index + 1}</div>
+                    <div class="player-name">${player.name}</div>
+                    <div class="player-score">${player.score}</div>
+                    <div class="player-status">${player.answered ? '✅' : '⏳'}</div>
+                `;
+                
+                elements.playerList.appendChild(li);
+            });
+        }
+
+        function updateStats() {
+            const totalScore = gameState.players.reduce((sum, player) => sum + player.score, 0);
+            const average = Math.round(totalScore / gameState.players.length);
+            elements.averageScore.textContent = average;
+            
+            const answeredPlayers = gameState.players.filter(p => p.answered && p.answerTime > 0);
+            if (answeredPlayers.length > 0) {
+                const fastest = Math.min(...answeredPlayers.map(p => p.answerTime));
+                elements.fastestAnswer.textContent = `${fastest}s`;
+            }
+        }
+
+        // ==================== UTILITIES ====================
+        function generateGameCode() {
+            return Math.random().toString(36).substring(2, 8).toUpperCase();
+        }
+
+        // ==================== QUESTIONS DATABASE ====================
+        const quizQuestions = [
+    // PRIME 10 DOMANDE (Cultura Generale)
+    {
+        question: "Qual è la capitale dell'Australia?",
+        answers: ["Sydney", "Melbourne", "Canberra", "Perth"],
+        correct: 2,
+        points: 10
+    },
+    {
+        question: "In quale anno è caduto il muro di Berlino?",
+        answers: ["1987", "1989", "1991", "1985"],
+        correct: 1,
+        points: 15
+    },
+    {
+        question: "Chi ha scritto 'Il nome della rosa'?",
+        answers: ["Italo Calvino", "Umberto Eco", "Luigi Pirandello", "Alessandro Manzoni"],
+        correct: 1,
+        points: 10
+    },
+    {
+        question: "Qual è l'elemento chimico con simbolo 'Au'?",
+        answers: ["Argento", "Alluminio", "Oro", "Argon"],
+        correct: 2,
+        points: 10
+    },
+    {
+        question: "In quale oceano si trova le Bermuda?",
+        answers: ["Oceano Indiano", "Oceano Pacifico", "Oceano Atlantico", "Oceano Artico"],
+        correct: 2,
+        points: 10
+    },
+    {
+        question: "Chi ha dipinto 'La notte stellata'?",
+        answers: ["Pablo Picasso", "Vincent van Gogh", "Claude Monet", "Salvador Dalí"],
+        correct: 1,
+        points: 15
+    },
+    {
+        question: "Qual è il fiume più lungo d'Italia?",
+        answers: ["Tevere", "Adige", "Arno", "Po"],
+        correct: 3,
+        points: 10
+    },
+    {
+        question: "In quale anno è stato inventato il World Wide Web?",
+        answers: ["1985", "1989", "1991", "1993"],
+        correct: 2,
+        points: 15
+    },
+    {
+        question: "Quale pianeta è noto come il 'Pianeta Rosso'?",
+        answers: ["Venere", "Marte", "Giove", "Saturno"],
+        correct: 1,
+        points: 10
+    },
+    {
+        question: "Chi ha scritto 'Cent'anni di solitudine'?",
+        answers: ["Gabriel García Márquez", "Jorge Luis Borges", "Pablo Neruda", "Isabel Allende"],
+        correct: 0,
+        points: 15
+    },
+
+    // DOMANDE 11-20 (Musica e Audio)
+    {
+        question: "A quale famosa canzone dei Queen appartiene questo estratto?",
+        answers: ["We Will Rock You", "Bohemian Rhapsody", "Another One Bites the Dust", "We Are the Champions"],
+        correct: 1,
+        points: 20,
+        media: {
+            type: "audio",
+            src: "https://www.soundjay.com/button/button-1.mp3"
+        }
+    },
+    {
+        question: "Di quale cantante è questa voce?",
+        answers: ["Elvis Presley", "Frank Sinatra", "Michael Jackson", "Freddie Mercury"],
+        correct: 2,
+        points: 20,
+        media: {
+            type: "audio", 
+            src: "https://www.soundjay.com/button/button-2.mp3"
+        }
+    },
+    {
+        question: "A quale strumento musicale appartiene questo suono?",
+        answers: ["Pianoforte", "Chitarra", "Violino", "Sassofono"],
+        correct: 3,
+        points: 15,
+        media: {
+            type: "audio",
+            src: "https://www.soundjay.com/button/button-3.mp3"
+        }
+    },
+    {
+        question: "Da quale opera lirica è tratto questo assolo?",
+        answers: ["La Traviata", "Il Barbiere di Siviglia", "Carmen", "Nabucco"],
+        correct: 2,
+        points: 25,
+        media: {
+            type: "audio",
+            src: "https://www.soundjay.com/button/button-4.mp3"
+        }
+    },
+    {
+        question: "Quale gruppo rock anni '80 ha cantato questa canzone?",
+        answers: ["Guns N' Roses", "Bon Jovi", "Aerosmith", "AC/DC"],
+        correct: 1,
+        points: 20,
+        media: {
+            type: "audio",
+            src: "https://www.soundjay.com/button/button-5.mp3"
+        }
+    },
+
+    // DOMANDE 21-30 (Arte e Immagini)
+    {
+        question: "In quale anno è stata scattata questa prima fotografia della storia?",
+        answers: ["1826", "1850", "1875", "1901"],
+        correct: 0,
+        points: 20,
+        media: {
+            type: "image",
+            src: "https://via.placeholder.com/400x300/6a11cb/ffffff?text=Prima+Foto+Storia+1826"
+        }
+    },
+    {
+        question: "Quale famoso dipinto è mostrato nell'immagine?",
+        answers: ["La Gioconda", "L'Urlo", "Notte Stellata", "La Ragazza con l'orecchino di perla"],
+        correct: 1,
+        points: 15,
+        media: {
+            type: "image", 
+            src: "https://via.placeholder.com/400x300/2575fc/ffffff?text=L'Urlo+di+Munch"
+        }
+    },
+    {
+        question: "A quale monumento appartiene questa architettura?",
+        answers: ["Colosseo", "Torre Eiffel", "Big Ben", "Taj Mahal"],
+        correct: 3,
+        points: 15,
+        media: {
+            type: "image",
+            src: "https://via.placeholder.com/400x300/ff416c/ffffff?text=Taj+Mahal+India"
+        }
+    },
+    {
+        question: "In quale città si trova questo ponte famoso?",
+        answers: ["Venezia", "Firenze", "Londra", "San Francisco"],
+        correct: 3,
+        points: 15,
+        media: {
+            type: "image",
+            src: "https://via.placeholder.com/400x300/28a745/ffffff?text=Golden+Gate+Bridge"
+        }
+    },
+    {
+        question: "Chi è l'artista di questo famoso autoritratto?",
+        answers: ["Frida Kahlo", "Vincent van Gogh", "Rembrandt", "Leonardo da Vinci"],
+        correct: 0,
+        points: 15,
+        media: {
+            type: "image",
+            src: "https://via.placeholder.com/400x300/ffc107/000000?text=Frida+Kahlo"
+        }
+    },
+
+    // DOMANDE 31-40 (Cinema e Video)
+    {
+        question: "Da quale film famoso è tratta questa scena?",
+        answers: ["Forrest Gump", "Pulp Fiction", "Il Padrino", "Titanic"],
+        correct: 0,
+        points: 25,
+        media: {
+            type: "video",
+            src: "https://www.w3schools.com/html/mov_bbb.mp4"
+        }
+    },
+    {
+        question: "Quale attore ha pronunciato questa famosa frase?",
+        answers: ["Marlon Brando", "Al Pacino", "Robert De Niro", "Jack Nicholson"],
+        correct: 1,
+        points: 20,
+        media: {
+            type: "audio",
+            src: "https://www.soundjay.com/button/button-1.mp3"
+        }
+    },
+    {
+        question: "A quale franchise cinematografico appartiene questo personaggio?",
+        answers: ["Star Wars", "Star Trek", "Marvel", "DC"],
+        correct: 0,
+        points: 15,
+        media: {
+            type: "image",
+            src: "https://via.placeholder.com/400x300/6a11cb/ffffff?text=Darth+Vader"
+        }
+    },
+    {
+        question: "In quale anno è uscito il primo film di Harry Potter?",
+        answers: ["1999", "2001", "2003", "2005"],
+        correct: 1,
+        points: 15
+    },
+    {
+        question: "Chi ha diretto 'Il Padrino'?",
+        answers: ["Martin Scorsese", "Francis Ford Coppola", "Steven Spielberg", "Quentin Tarantino"],
+        correct: 1,
+        points: 15
+    },
+
+    // DOMANDE 41-50 (Scienza e Tecnologia)
+    {
+        question: "Quale scienziato ha formulato la teoria della relatività?",
+        answers: ["Isaac Newton", "Albert Einstein", "Galileo Galilei", "Stephen Hawking"],
+        correct: 1,
+        points: 15
+    },
+    {
+        question: "In quale anno è stato inventato il primo iPhone?",
+        answers: ["2005", "2007", "2009", "2011"],
+        correct: 1,
+        points: 15
+    },
+    {
+        question: "Quale è il componente principale del vetro?",
+        answers: ["Silicio", "Carbonio", "Sabbia silicea", "Alluminio"],
+        correct: 2,
+        points: 10
+    },
+    {
+        question: "Chi ha fondato Microsoft?",
+        answers: ["Steve Jobs", "Bill Gates", "Mark Zuckerberg", "Larry Page"],
+        correct: 1,
+        points: 10
+    },
+    {
+        question: "Quale pianeta ha il maggior numero di lune?",
+        answers: ["Giove", "Saturno", "Urano", "Nettuno"],
+        correct: 1,
+        points: 15
+    },
+
+    // DOMANDE 51-60 (Storia e Geografia)
+    {
+        question: "In quale anno è finita la Seconda Guerra Mondiale?",
+        answers: ["1943", "1945", "1947", "1950"],
+        correct: 1,
+        points: 15
+    },
+    {
+        question: "Quale è la montagna più alta del mondo?",
+        answers: ["K2", "Monte Everest", "Monte Bianco", "Kilimangiaro"],
+        correct: 1,
+        points: 10
+    },
+    {
+        question: "Chi è stato il primo presidente degli Stati Uniti?",
+        answers: ["Thomas Jefferson", "George Washington", "Abraham Lincoln", "John Adams"],
+        correct: 1,
+        points: 15
+    },
+    {
+        question: "Quale è il deserto più grande del mondo?",
+        answers: ["Deserto del Sahara", "Deserto Arabico", "Deserto del Gobi", "Antartide"],
+        correct: 3,
+        points: 20
+    },
+    {
+        question: "In quale secolo è vissuto Leonardo da Vinci?",
+        answers: ["XIV secolo", "XV secolo", "XVI secolo", "XVII secolo"],
+        correct: 1,
+        points: 15
+    }
+];
+    </script>
+</body>
+</html>
