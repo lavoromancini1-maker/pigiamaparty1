@@ -127,6 +127,49 @@
         .hidden {
             display: none;
         }
+
+        /* NUOVI STILI AGGIUNTI */
+        .answers-stats {
+            margin: 15px 0;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            border: 1px solid var(--cyan);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--pink), var(--cyan));
+            transition: width 0.3s ease;
+        }
+
+        .quick-actions {
+            margin: 20px 0;
+        }
+
+        .quick-btn {
+            padding: 10px 20px;
+            margin: 5px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--cyan);
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .quick-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
     </style>
 </head>
 <body>
@@ -158,6 +201,20 @@
                 <div class="question-text" id="questionText">La domanda apparirà qui...</div>
                 <div class="timer" id="timer">20</div>
                 
+                <!-- SEZIONE NUOVA - STATISTICHE RISPOSTE -->
+                <div class="answers-stats">
+                    <div id="answersProgress">Risposte: 0/0</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <!-- SEZIONE NUOVA - AZIONI RAPIDE -->
+                <div class="quick-actions">
+                    <button class="quick-btn" id="skipTimerBtn" disabled>SALTA TIMER</button>
+                    <button class="quick-btn" id="showAnswerBtn" disabled>MOSTRA RISPOSTA</button>
+                </div>
+                
                 <div class="answers-grid" id="answersGrid">
                     <!-- Risposte appariranno qui -->
                 </div>
@@ -176,7 +233,6 @@
 
     <script>
         // === CONFIGURA FIREBASE ===
-        // SOSTITUISCI QUESTI VALORI CON QUELLI DEL TUO PROGETTO FIREBASE
         const firebaseConfig = {
             apiKey: "AIzaSyC-RrLKSwfM-S5r1gD_RWdjWElWhkgp1vI",
             authDomain: "pigiamaparty2-b8d66.firebaseapp.com",
@@ -231,7 +287,12 @@
             timer: document.getElementById('timer'),
             answersGrid: document.getElementById('answersGrid'),
             nextBtn: document.getElementById('nextBtn'),
-            answersList: document.getElementById('answersList')
+            answersList: document.getElementById('answersList'),
+            // NUOVI ELEMENTI
+            answersProgress: document.getElementById('answersProgress'),
+            progressFill: document.getElementById('progressFill'),
+            skipTimerBtn: document.getElementById('skipTimerBtn'),
+            showAnswerBtn: document.getElementById('showAnswerBtn')
         };
 
         // === INIZIALIZZAZIONE ===
@@ -282,18 +343,54 @@
             }
         }
 
+        // === FUNZIONI NUOVE PER LE STATISTICHE ===
+        function checkAllPlayersAnswered() {
+            const currentQuestionAnswers = playerAnswers.filter(a => a.questionIndex === currentQuestion);
+            return currentQuestionAnswers.length >= connectedPlayers.length;
+        }
+
+        function updateAnswersProgress() {
+            const currentAnswers = playerAnswers.filter(a => a.questionIndex === currentQuestion);
+            const progress = connectedPlayers.length > 0 ? (currentAnswers.length / connectedPlayers.length) * 100 : 0;
+            
+            elements.answersProgress.textContent = `Risposte: ${currentAnswers.length}/${connectedPlayers.length}`;
+            elements.progressFill.style.width = progress + '%';
+            
+            // Abilita i pulsanti quick action se ci sono risposte
+            elements.skipTimerBtn.disabled = currentAnswers.length === 0;
+            elements.showAnswerBtn.disabled = currentAnswers.length === 0;
+        }
+
         function updateAnswersList() {
             elements.answersList.innerHTML = '';
             
             if (playerAnswers.length === 0) {
                 elements.answersList.innerHTML = '<li>Nessuna risposta ancora...</li>';
             } else {
-                playerAnswers.forEach(answer => {
+                const currentAnswers = playerAnswers.filter(a => a.questionIndex === currentQuestion);
+                
+                currentAnswers.forEach(answer => {
                     const li = document.createElement('li');
                     li.className = 'player-item';
-                    li.textContent = `🎯 ${answer.playerName}: Opzione ${answer.answerIndex + 1}`;
+                    
+                    const question = questions[currentQuestion];
+                    const isCorrect = answer.answerIndex === question.correct;
+                    const icon = isCorrect ? '✅' : '❌';
+                    
+                    li.textContent = `${icon} ${answer.playerName}: Opzione ${answer.answerIndex + 1}`;
                     elements.answersList.appendChild(li);
                 });
+                
+                // Aggiorna le statistiche
+                updateAnswersProgress();
+                
+                // Se tutti hanno risposto, mostra subito la risposta corretta
+                if (checkAllPlayersAnswered() && timeLeft > 0) {
+                    clearInterval(timer);
+                    showCorrectAnswer();
+                    elements.nextBtn.disabled = false;
+                    elements.timer.textContent = "🎉 TUTTI HANNO RISPOSTO!";
+                }
             }
         }
 
@@ -328,6 +425,9 @@
             elements.answersGrid.innerHTML = '';
             database.ref('games/' + gameCode + '/answers').remove();
             
+            // Reset statistiche
+            updateAnswersProgress();
+            
             // Carica risposte
             question.answers.forEach((answer, i) => {
                 const div = document.createElement('div');
@@ -354,6 +454,15 @@
             timer = setInterval(() => {
                 timeLeft--;
                 elements.timer.textContent = timeLeft;
+                
+                // Controlla se tutti hanno risposto
+                if (checkAllPlayersAnswered()) {
+                    clearInterval(timer);
+                    showCorrectAnswer();
+                    elements.nextBtn.disabled = false;
+                    elements.timer.textContent = "🎉 TUTTI HANNO RISPOSTO!";
+                    return;
+                }
                 
                 if (timeLeft <= 0) {
                     clearInterval(timer);
@@ -386,6 +495,18 @@
         // === EVENT LISTENERS ===
         elements.startBtn.addEventListener('click', startGame);
         elements.nextBtn.addEventListener('click', nextQuestion);
+
+        // NUOVI EVENT LISTENERS
+        elements.skipTimerBtn.addEventListener('click', function() {
+            clearInterval(timer);
+            showCorrectAnswer();
+            elements.nextBtn.disabled = false;
+            elements.timer.textContent = "⏩ TIMER SALTATO";
+        });
+
+        elements.showAnswerBtn.addEventListener('click', function() {
+            showCorrectAnswer();
+        });
 
         // === AVVIA IL GIOCO ===
         initGame();
