@@ -418,347 +418,175 @@
 
     <script>
         // ==================== PLAYER STATE ====================
-        let playerState = {
-            name: '',
-            score: 0,
-            currentQuestion: null,
-            answered: false,
-            answerTime: 0,
-            connected: true
-        };
+let playerState = {
+    name: '',
+    score: 0,
+    currentQuestion: null,
+    answered: false,
+    answerTime: 0,
+    connected: false
+};
 
-        // ==================== DOM ELEMENTS ====================
-        const screens = {
-            login: document.getElementById('loginScreen'),
-            game: document.getElementById('gameScreen'),
-            waiting: document.getElementById('waitingScreen')
-        };
+// ==================== DOM ELEMENTS ====================
+const screens = {
+    login: document.getElementById('loginScreen'),
+    game: document.getElementById('gameScreen'),
+    waiting: document.getElementById('waitingScreen')
+};
 
-        const elements = {
-            playerName: document.getElementById('playerName'),
-            joinBtn: document.getElementById('joinBtn'),
-            displayPlayerName: document.getElementById('displayPlayerName'),
-            displayPlayerScore: document.getElementById('displayPlayerScore'),
-            displayQuestion: document.getElementById('displayQuestion'),
-            currentQuestion: document.getElementById('currentQuestion'),
-            nextQuestionNumber: document.getElementById('nextQuestionNumber'),
-            timer: document.getElementById('timer'),
-            answersContainer: document.getElementById('answersContainer'),
-            resultFeedback: document.getElementById('resultFeedback'),
-            mediaContainer: document.getElementById('mediaContainer'),
-            waitingPlayerName: document.getElementById('waitingPlayerName'),
-            waitingPlayerScore: document.getElementById('waitingPlayerScore'),
-            miniLeaderboard: document.getElementById('miniLeaderboard')
-        };
+const elements = {
+    playerName: document.getElementById('playerName'),
+    joinBtn: document.getElementById('joinBtn'),
+    displayPlayerName: document.getElementById('displayPlayerName'),
+    displayPlayerScore: document.getElementById('displayPlayerScore'),
+    displayQuestion: document.getElementById('displayQuestion'),
+    currentQuestion: document.getElementById('currentQuestion'),
+    nextQuestionNumber: document.getElementById('nextQuestionNumber'),
+    timer: document.getElementById('timer'),
+    answersContainer: document.getElementById('answersContainer'),
+    resultFeedback: document.getElementById('resultFeedback'),
+    mediaContainer: document.getElementById('mediaContainer'),
+    waitingPlayerName: document.getElementById('waitingPlayerName'),
+    waitingPlayerScore: document.getElementById('waitingPlayerScore'),
+    miniLeaderboard: document.getElementById('miniLeaderboard')
+};
 
-        // ==================== GAME VARIABLES ====================
-        let gameTimer;
-        let currentQuestionIndex = 0;
-        const QUESTION_TIME = 20;
+// ==================== PUSHER SETUP ====================
+let pusher;
+let channel;
+let gameCode = '';
 
-        // ==================== INITIALIZATION ====================
-        document.addEventListener('DOMContentLoaded', () => {
-            elements.joinBtn.addEventListener('click', joinGame);
-        });
+// ==================== INITIALIZATION ====================
+document.addEventListener('DOMContentLoaded', () => {
+    elements.joinBtn.addEventListener('click', joinGame);
+});
 
-        // ==================== GAME FUNCTIONS ====================
-        function joinGame() {
+// ==================== GAME FUNCTIONS ====================
+function joinGame() {
     const name = elements.playerName.value.trim();
     if (name) {
         playerState.name = name;
-        playerState.connected = true;
         
         elements.displayPlayerName.textContent = name;
         elements.waitingPlayerName.textContent = name;
         
-        // Prova a connetterti al gioco via Pusher
-        const connected = joinGameWithPusher(name);
+        // Chiedi il codice gioco
+        gameCode = prompt("Inserisci il codice gioco (es: GAME123):");
         
-        if (connected) {
-            screens.login.classList.add('hidden');
-            elements.waitingPlayerScore.textContent = "In attesa che l'host inizi il gioco...";
+        if (!gameCode) {
+            alert("Devi inserire un codice gioco!");
+            return;
         }
+        
+        gameCode = gameCode.trim().toUpperCase();
+        console.log("🎮 Joining game:", gameCode);
+        
+        // Configura Pusher
+        pusher = new Pusher('26fcb8b4979ceb555e15', {
+            cluster: 'eu'
+        });
+        
+        // Connetti al canale dell'host
+        channel = pusher.subscribe('game-channel-' + gameCode);
+        
+        // Quando connesso, notifica l'host
+        channel.bind('pusher:subscription_succeeded', function() {
+            console.log("✅ Connected to game:", gameCode);
+            
+            // Notifica l'host
+            channel.trigger('client-player-join', {
+                playerName: name,
+                playerId: pusher.connection.socket_id,
+                gameCode: gameCode,
+                timestamp: Date.now()
+            });
+            
+            // Mostra schermata di attesa
+            screens.login.classList.add('hidden');
+            screens.waiting.classList.remove('hidden');
+            elements.waitingPlayerScore.textContent = "0";
+        });
+        
+        // Quando l'host avvia il gioco
+        channel.bind('client-game-start', function(data) {
+            console.log("🎯 Game starting!", data);
+            screens.waiting.classList.add('hidden');
+            screens.game.classList.remove('hidden');
+            elements.displayQuestion.textContent = "Preparati... la prima domanda arriva tra poco!";
+        });
+        
+        // Quando l'host invia una domanda
+        channel.bind('client-new-question', function(data) {
+            console.log("📝 New question received:", data);
+            loadQuestion(data.question);
+        });
+        
+        // Gestisci errori
+        channel.bind('pusher:subscription_error', function(status) {
+            console.error("❌ Connection failed:", status);
+            alert("Errore di connessione. Controlla il codice gioco!");
+        });
+        
     } else {
         alert("Inserisci un nome!");
     }
 }
-        
-        function showWaitingScreen() {
-    screens.game.classList.add('hidden');
-    screens.waiting.classList.remove('hidden');
-    elements.waitingPlayerScore.textContent = "In attesa che l'host inizi il gioco...";
-}
 
-function loadQuestionData(questionData) {
+function loadQuestion(questionData) {
     playerState.answered = false;
-    playerState.answerTime = 0;
     playerState.currentQuestion = questionData;
     
     // Aggiorna UI
     elements.displayQuestion.textContent = questionData.question;
     elements.currentQuestion.textContent = questionData.index + 1;
-    elements.nextQuestionNumber.textContent = questionData.index + 2;
     elements.resultFeedback.innerHTML = '';
+    elements.mediaContainer.innerHTML = '';
     
     // Carica risposte
     loadAnswers(questionData);
     
+    // Avvia timer
+    startTimer();
+    
     // Mostra schermata gioco
     screens.waiting.classList.add('hidden');
     screens.game.classList.remove('hidden');
-    
-    // Avvia timer locale
-    startTimer();
 }
 
-function updateTimer(timeLeft) {
+function loadAnswers(question) {
+    elements.answersContainer.innerHTML = '';
+    const letters = ['A', 'B', 'C', 'D'];
+    
+    question.answers.forEach((answer, index) => {
+        const button = document.createElement('button');
+        button.className = 'answer-btn';
+        button.textContent = answer;
+        button.setAttribute('data-letter', letters[index]);
+        button.addEventListener('click', () => selectAnswer(index));
+        elements.answersContainer.appendChild(button);
+    });
+}
+
+function startTimer() {
+    let timeLeft = 20;
     elements.timer.textContent = timeLeft;
-}
-
-function showQuestionResults(correctAnswer, playerAnswers) {
-    const answerButtons = elements.answersContainer.querySelectorAll('.answer-btn');
+    playerState.answerTime = 0;
     
-    // Evidenzia risposta corretta
-    answerButtons[correctAnswer].classList.add('correct');
-    
-    // Mostra feedback
-    const playerAnswer = playerAnswers.find(a => a.playerId === pusher.connection.socket_id);
-    if (playerAnswer) {
-        if (playerAnswer.answerIndex === correctAnswer) {
-            const points = calculatePoints(playerState.currentQuestion.points);
-            playerState.score += points;
-            updateScoreDisplay();
-            
-            elements.resultFeedback.innerHTML = `
-                <div class="result-feedback correct-feedback">
-                    ✅ CORRETTO! +${points} PUNTI
-                </div>
-            `;
-        } else {
-            answerButtons[playerAnswer.answerIndex].classList.add('incorrect');
-            elements.resultFeedback.innerHTML = `
-                <div class="result-feedback incorrect-feedback">
-                    ❌ RISPOSTA ERRATA
-                </div>
-            `;
-        }
-    }
-    
-    // Disabilita tutti i pulsanti
-    answerButtons.forEach(button => {
-        button.disabled = true;
-    });
-    
-    // Torna alla schermata di attesa dopo un po'
-    setTimeout(() => {
-        showWaitingForNextQuestion();
-    }, 3000);
-}
-
-function showWaitingForNextQuestion() {
-    updateMiniLeaderboard();
-    screens.game.classList.add('hidden');
-    screens.waiting.classList.remove('hidden');
-    elements.waitingPlayerScore.textContent = playerState.score;
-}
-
-        // ==================== PUSHER SETUP ====================
-let pusher;
-let channel;
-let gameCode = '';
-
-// Funzione per unirsi al gioco con Pusher - VERSIONE CORRETTA
-function joinGameWithPusher(playerName) {
-    // Prima chiedi il codice gioco
-    gameCode = prompt("Inserisci il codice gioco (es: GAME123):");
-    
-    if (!gameCode) {
-        alert("Devi inserire un codice gioco!");
-        return false;
-    }
-    
-    // Pulisci il codice (rimuovi spazi, ecc)
-    gameCode = gameCode.trim().toUpperCase();
-    
-    console.log("🎮 Joining game with code:", gameCode);
-    
-    // Configura Pusher - STESSA CONFIGURAZIONE DELL'HOST
-    pusher = new Pusher('26fcb8b4979ceb555e15', {
-        cluster: 'eu'
-    });
-    
-    // ⚠️ IMPORTANTE: USA LO STESSO CANALE DELL'HOST ⚠️
-    // Host usa: 'game-channel-' + gameCode
-    channel = pusher.subscribe('game-channel-' + gameCode);
-    
-    // Gestisci la connessione
-    channel.bind('pusher:subscription_succeeded', function() {
-        console.log("✅ Successfully joined game:", gameCode);
+    const timerInterval = setInterval(() => {
+        timeLeft--;
+        playerState.answerTime++;
+        elements.timer.textContent = timeLeft;
         
-        // ⚠️ IMPORTANTE: Notifica l'host che ti sei unito
-        // USA LO STESSO EVENTO CHE L'HOST STA ASPETTANDO
-        channel.trigger('client-player-join', {
-            playerName: playerName,
-            playerId: pusher.connection.socket_id,
-            gameCode: gameCode,
-            timestamp: Date.now()
-        });
-        
-        // Mostra schermata di attesa
-        showWaitingScreen();
-    });
-    
-    channel.bind('pusher:subscription_error', function(status) {
-        console.error("❌ Failed to join game:", status);
-        alert("Errore di connessione. Controlla il codice gioco e riprova!");
-        return false;
-    });
-    
-    // Ascolta i comandi dall'host
-    channel.bind('client-game-start', function(data) {
-        console.log("🎯 Game starting command received:", data);
-        if (data.action === 'start') {
-            startGame();
-        }
-    });
-    
-    return true;
-}
-
-// Configura gli ascoltatori del gioco
-function setupGameListeners() {
-    // Quando l'host avvia il gioco
-    channel.bind('client-game-start', function(data) {
-        console.log("Game starting!", data);
-        if (data.action === 'start') {
-            startGame();
-        }
-    });
-    
-    // Quando l'host carica una nuova domanda
-    channel.bind('client-new-question', function(data) {
-        console.log("New question:", data);
-        loadQuestionData(data.question);
-    });
-    
-    // Quando il timer viene aggiornato
-    channel.bind('client-timer-update', function(data) {
-        updateTimer(data.timeLeft);
-    });
-    
-    // Quando si mostrano i risultati
-    channel.bind('client-show-results', function(data) {
-        showQuestionResults(data.correctAnswer, data.playerAnswers);
-    });
-}
-
-
-        function loadQuestion(index) {
-            if (index >= quizQuestions.length) {
-                endGame();
-                return;
-            }
-
-            playerState.answered = false;
-            playerState.answerTime = 0;
-            currentQuestionIndex = index;
-            
-            const question = quizQuestions[index];
-            playerState.currentQuestion = question;
-            
-            // Update UI
-            elements.displayQuestion.textContent = question.question;
-            elements.currentQuestion.textContent = index + 1;
-            elements.nextQuestionNumber.textContent = index + 2;
-            elements.resultFeedback.innerHTML = '';
-            
-            // Load media
-            loadMedia(question);
-            
-            // Load answers
-            loadAnswers(question);
-            
-            // Start timer
-            startTimer();
-            
-            // Show game screen
-            screens.waiting.classList.add('hidden');
-            screens.game.classList.remove('hidden');
-        }
-
-        function loadMedia(question) {
-            elements.mediaContainer.innerHTML = '';
-            
-            if (question.media) {
-                let mediaElement;
-                switch (question.media.type) {
-                    case 'image':
-                        mediaElement = document.createElement('img');
-                        mediaElement.src = question.media.src;
-                        break;
-                    case 'video':
-                        mediaElement = document.createElement('video');
-                        mediaElement.src = question.media.src;
-                        mediaElement.controls = true;
-                        mediaElement.autoplay = true;
-                        break;
-                    case 'audio':
-                        mediaElement = document.createElement('audio');
-                        mediaElement.src = question.media.src;
-                        mediaElement.controls = true;
-                        mediaElement.autoplay = true;
-                        break;
-                }
-                
-                if (mediaElement) {
-                    elements.mediaContainer.appendChild(mediaElement);
-                }
+        if (timeLeft <= 0 || playerState.answered) {
+            clearInterval(timerInterval);
+            if (!playerState.answered) {
+                handleTimeUp();
             }
         }
+    }, 1000);
+}
 
-        function loadAnswers(question) {
-            elements.answersContainer.innerHTML = '';
-            const letters = ['A', 'B', 'C', 'D'];
-            
-            question.answers.forEach((answer, index) => {
-                const button = document.createElement('button');
-                button.className = 'answer-btn';
-                button.textContent = answer;
-                button.setAttribute('data-letter', letters[index]);
-                button.addEventListener('click', () => selectAnswer(index));
-                elements.answersContainer.appendChild(button);
-            });
-        }
-
-        function startTimer() {
-            let timeLeft = QUESTION_TIME;
-            elements.timer.textContent = timeLeft;
-            playerState.answerTime = 0;
-            
-            // Timer countdown
-            const timerInterval = setInterval(() => {
-                timeLeft--;
-                playerState.answerTime++;
-                elements.timer.textContent = timeLeft;
-                
-                if (timeLeft <= 0 || playerState.answered) {
-                    clearInterval(timerInterval);
-                    if (!playerState.answered) {
-                        // Time's up
-                        handleTimeUp();
-                    }
-                }
-            }, 1000);
-            
-            // Visual timer animation
-            gameTimer = setTimeout(() => {
-                if (!playerState.answered) {
-                    handleTimeUp();
-                }
-            }, QUESTION_TIME * 1000);
-        }
-
-        function selectAnswer(selectedIndex) {
+function selectAnswer(selectedIndex) {
     if (playerState.answered) return;
     
     playerState.answered = true;
@@ -769,17 +597,15 @@ function setupGameListeners() {
         button.disabled = true;
     });
     
-    // Invia la risposta all'host
+    // Invia risposta all'host
     channel.trigger('client-player-answer', {
         playerName: playerState.name,
         playerId: pusher.connection.socket_id,
         answerIndex: selectedIndex,
         answerTime: playerState.answerTime,
-        questionIndex: currentQuestionIndex,
         timestamp: Date.now()
     });
     
-    // Mostra "Risposta inviata"
     elements.resultFeedback.innerHTML = `
         <div class="result-feedback" style="background: rgba(255, 255, 0, 0.2); border-color: yellow; color: yellow;">
             ⏳ RISPOSTA INVIATA - ATTENDI RISULTATI
@@ -787,373 +613,35 @@ function setupGameListeners() {
     `;
 }
 
-        function handleTimeUp() {
-            if (playerState.answered) return;
-            
-            playerState.answered = true;
-            const question = playerState.currentQuestion;
-            const answerButtons = elements.answersContainer.querySelectorAll('.answer-btn');
-            
-            answerButtons.forEach(button => {
-                button.disabled = true;
-            });
-            
-            answerButtons[question.correct].classList.add('correct');
-            
-            elements.resultFeedback.innerHTML = `
-                <div class="result-feedback incorrect-feedback">
-                    ⏰ TIME'S UP!
-                </div>
-            `;
-            
-            setTimeout(() => {
-                showWaitingScreen();
-            }, 3000);
-        }
+function handleTimeUp() {
+    if (playerState.answered) return;
+    
+    playerState.answered = true;
+    const answerButtons = elements.answersContainer.querySelectorAll('.answer-btn');
+    
+    answerButtons.forEach(button => {
+        button.disabled = true;
+    });
+    
+    elements.resultFeedback.innerHTML = `
+        <div class="result-feedback incorrect-feedback">
+            ⏰ TEMPO SCADUTO!
+        </div>
+    `;
+}
 
-        function calculatePoints(basePoints) {
-            let points = basePoints;
-            
-            // Speed bonus for answering quickly
-            if (playerState.answerTime < 5) {
-                points += 5;
-            }
-            
-            return points;
-        }
+function updateScoreDisplay() {
+    elements.displayPlayerScore.textContent = playerState.score;
+    elements.waitingPlayerScore.textContent = playerState.score;
+}
 
-        function showWaitingScreen() {
-            updateMiniLeaderboard();
-            screens.game.classList.add('hidden');
-            screens.waiting.classList.remove('hidden');
-            
-            // Simulate next question after delay
-            setTimeout(() => {
-                loadQuestion(currentQuestionIndex + 1);
-            }, 5000);
-        }
 
-        function updateScoreDisplay() {
-            elements.displayPlayerScore.textContent = playerState.score;
-            elements.waitingPlayerScore.textContent = playerState.score;
-        }
-
-        function updateMiniLeaderboard() {
-            // Simulated leaderboard data
-            const leaderboardData = [
-                { name: playerState.name, score: playerState.score, isPlayer: true },
-                { name: 'ALICE', score: playerState.score + 15 },
-                { name: 'BOB', score: playerState.score + 10 },
-                { name: 'CAROL', score: playerState.score + 5 },
-                { name: 'DAVE', score: playerState.score - 5 }
-            ].sort((a, b) => b.score - a.score);
-            
-            elements.miniLeaderboard.innerHTML = leaderboardData.map((player, index) => `
-                <div class="leaderboard-item ${player.isPlayer ? 'current-player' : ''}">
-                    <div class="leaderboard-rank">${index + 1}</div>
-                    <div class="leaderboard-name">${player.name}${player.isPlayer ? ' (YOU)' : ''}</div>
-                    <div class="leaderboard-score">${player.score}</div>
-                </div>
-            `).join('');
-        }
-
-        function endGame() {
-            elements.displayQuestion.textContent = "GAME COMPLETED!";
-            elements.answersContainer.innerHTML = '';
-            elements.resultFeedback.innerHTML = `
-                <div class="result-feedback correct-feedback">
-                    🏆 FINAL SCORE: ${playerState.score} POINTS
-                </div>
-            `;
-        }
-
-        function simulateGameConnection() {
-            // Simulate real-time updates from host
-            setInterval(() => {
-                // In a real implementation, this would receive WebSocket messages
-            }, 1000);
-        }
-
-        // ==================== QUESTIONS DATABASE ====================
-        const quizQuestions = [
-    // PRIME 10 DOMANDE (Cultura Generale)
-    {
-        question: "Qual è la capitale dell'Australia?",
-        answers: ["Sydney", "Melbourne", "Canberra", "Perth"],
-        correct: 2,
-        points: 10
-    },
-    {
-        question: "In quale anno è caduto il muro di Berlino?",
-        answers: ["1987", "1989", "1991", "1985"],
-        correct: 1,
-        points: 15
-    },
-    {
-        question: "Chi ha scritto 'Il nome della rosa'?",
-        answers: ["Italo Calvino", "Umberto Eco", "Luigi Pirandello", "Alessandro Manzoni"],
-        correct: 1,
-        points: 10
-    },
-    {
-        question: "Qual è l'elemento chimico con simbolo 'Au'?",
-        answers: ["Argento", "Alluminio", "Oro", "Argon"],
-        correct: 2,
-        points: 10
-    },
-    {
-        question: "In quale oceano si trova le Bermuda?",
-        answers: ["Oceano Indiano", "Oceano Pacifico", "Oceano Atlantico", "Oceano Artico"],
-        correct: 2,
-        points: 10
-    },
-    {
-        question: "Chi ha dipinto 'La notte stellata'?",
-        answers: ["Pablo Picasso", "Vincent van Gogh", "Claude Monet", "Salvador Dalí"],
-        correct: 1,
-        points: 15
-    },
-    {
-        question: "Qual è il fiume più lungo d'Italia?",
-        answers: ["Tevere", "Adige", "Arno", "Po"],
-        correct: 3,
-        points: 10
-    },
-    {
-        question: "In quale anno è stato inventato il World Wide Web?",
-        answers: ["1985", "1989", "1991", "1993"],
-        correct: 2,
-        points: 15
-    },
-    {
-        question: "Quale pianeta è noto come il 'Pianeta Rosso'?",
-        answers: ["Venere", "Marte", "Giove", "Saturno"],
-        correct: 1,
-        points: 10
-    },
-    {
-        question: "Chi ha scritto 'Cent'anni di solitudine'?",
-        answers: ["Gabriel García Márquez", "Jorge Luis Borges", "Pablo Neruda", "Isabel Allende"],
-        correct: 0,
-        points: 15
-    },
-
-    // DOMANDE 11-20 (Musica e Audio)
-    {
-        question: "A quale famosa canzone dei Queen appartiene questo estratto?",
-        answers: ["We Will Rock You", "Bohemian Rhapsody", "Another One Bites the Dust", "We Are the Champions"],
-        correct: 1,
-        points: 20,
-        media: {
-            type: "audio",
-            src: "https://www.soundjay.com/button/button-1.mp3"
-        }
-    },
-    {
-        question: "Di quale cantante è questa voce?",
-        answers: ["Elvis Presley", "Frank Sinatra", "Michael Jackson", "Freddie Mercury"],
-        correct: 2,
-        points: 20,
-        media: {
-            type: "audio", 
-            src: "https://www.soundjay.com/button/button-2.mp3"
-        }
-    },
-    {
-        question: "A quale strumento musicale appartiene questo suono?",
-        answers: ["Pianoforte", "Chitarra", "Violino", "Sassofono"],
-        correct: 3,
-        points: 15,
-        media: {
-            type: "audio",
-            src: "https://www.soundjay.com/button/button-3.mp3"
-        }
-    },
-    {
-        question: "Da quale opera lirica è tratto questo assolo?",
-        answers: ["La Traviata", "Il Barbiere di Siviglia", "Carmen", "Nabucco"],
-        correct: 2,
-        points: 25,
-        media: {
-            type: "audio",
-            src: "https://www.soundjay.com/button/button-4.mp3"
-        }
-    },
-    {
-        question: "Quale gruppo rock anni '80 ha cantato questa canzone?",
-        answers: ["Guns N' Roses", "Bon Jovi", "Aerosmith", "AC/DC"],
-        correct: 1,
-        points: 20,
-        media: {
-            type: "audio",
-            src: "https://www.soundjay.com/button/button-5.mp3"
-        }
-    },
-
-    // DOMANDE 21-30 (Arte e Immagini)
-    {
-        question: "In quale anno è stata scattata questa prima fotografia della storia?",
-        answers: ["1826", "1850", "1875", "1901"],
-        correct: 0,
-        points: 20,
-        media: {
-            type: "image",
-            src: "https://via.placeholder.com/400x300/6a11cb/ffffff?text=Prima+Foto+Storia+1826"
-        }
-    },
-    {
-        question: "Quale famoso dipinto è mostrato nell'immagine?",
-        answers: ["La Gioconda", "L'Urlo", "Notte Stellata", "La Ragazza con l'orecchino di perla"],
-        correct: 1,
-        points: 15,
-        media: {
-            type: "image", 
-            src: "https://via.placeholder.com/400x300/2575fc/ffffff?text=L'Urlo+di+Munch"
-        }
-    },
-    {
-        question: "A quale monumento appartiene questa architettura?",
-        answers: ["Colosseo", "Torre Eiffel", "Big Ben", "Taj Mahal"],
-        correct: 3,
-        points: 15,
-        media: {
-            type: "image",
-            src: "https://via.placeholder.com/400x300/ff416c/ffffff?text=Taj+Mahal+India"
-        }
-    },
-    {
-        question: "In quale città si trova questo ponte famoso?",
-        answers: ["Venezia", "Firenze", "Londra", "San Francisco"],
-        correct: 3,
-        points: 15,
-        media: {
-            type: "image",
-            src: "https://via.placeholder.com/400x300/28a745/ffffff?text=Golden+Gate+Bridge"
-        }
-    },
-    {
-        question: "Chi è l'artista di questo famoso autoritratto?",
-        answers: ["Frida Kahlo", "Vincent van Gogh", "Rembrandt", "Leonardo da Vinci"],
-        correct: 0,
-        points: 15,
-        media: {
-            type: "image",
-            src: "https://via.placeholder.com/400x300/ffc107/000000?text=Frida+Kahlo"
-        }
-    },
-
-    // DOMANDE 31-40 (Cinema e Video)
-    {
-        question: "Da quale film famoso è tratta questa scena?",
-        answers: ["Forrest Gump", "Pulp Fiction", "Il Padrino", "Titanic"],
-        correct: 0,
-        points: 25,
-        media: {
-            type: "video",
-            src: "https://www.w3schools.com/html/mov_bbb.mp4"
-        }
-    },
-    {
-        question: "Quale attore ha pronunciato questa famosa frase?",
-        answers: ["Marlon Brando", "Al Pacino", "Robert De Niro", "Jack Nicholson"],
-        correct: 1,
-        points: 20,
-        media: {
-            type: "audio",
-            src: "https://www.soundjay.com/button/button-1.mp3"
-        }
-    },
-    {
-        question: "A quale franchise cinematografico appartiene questo personaggio?",
-        answers: ["Star Wars", "Star Trek", "Marvel", "DC"],
-        correct: 0,
-        points: 15,
-        media: {
-            type: "image",
-            src: "https://via.placeholder.com/400x300/6a11cb/ffffff?text=Darth+Vader"
-        }
-    },
-    {
-        question: "In quale anno è uscito il primo film di Harry Potter?",
-        answers: ["1999", "2001", "2003", "2005"],
-        correct: 1,
-        points: 15
-    },
-    {
-        question: "Chi ha diretto 'Il Padrino'?",
-        answers: ["Martin Scorsese", "Francis Ford Coppola", "Steven Spielberg", "Quentin Tarantino"],
-        correct: 1,
-        points: 15
-    },
-
-    // DOMANDE 41-50 (Scienza e Tecnologia)
-    {
-        question: "Quale scienziato ha formulato la teoria della relatività?",
-        answers: ["Isaac Newton", "Albert Einstein", "Galileo Galilei", "Stephen Hawking"],
-        correct: 1,
-        points: 15
-    },
-    {
-        question: "In quale anno è stato inventato il primo iPhone?",
-        answers: ["2005", "2007", "2009", "2011"],
-        correct: 1,
-        points: 15
-    },
-    {
-        question: "Quale è il componente principale del vetro?",
-        answers: ["Silicio", "Carbonio", "Sabbia silicea", "Alluminio"],
-        correct: 2,
-        points: 10
-    },
-    {
-        question: "Chi ha fondato Microsoft?",
-        answers: ["Steve Jobs", "Bill Gates", "Mark Zuckerberg", "Larry Page"],
-        correct: 1,
-        points: 10
-    },
-    {
-        question: "Quale pianeta ha il maggior numero di lune?",
-        answers: ["Giove", "Saturno", "Urano", "Nettuno"],
-        correct: 1,
-        points: 15
-    },
-
-    // DOMANDE 51-60 (Storia e Geografia)
-    {
-        question: "In quale anno è finita la Seconda Guerra Mondiale?",
-        answers: ["1943", "1945", "1947", "1950"],
-        correct: 1,
-        points: 15
-    },
-    {
-        question: "Quale è la montagna più alta del mondo?",
-        answers: ["K2", "Monte Everest", "Monte Bianco", "Kilimangiaro"],
-        correct: 1,
-        points: 10
-    },
-    {
-        question: "Chi è stato il primo presidente degli Stati Uniti?",
-        answers: ["Thomas Jefferson", "George Washington", "Abraham Lincoln", "John Adams"],
-        correct: 1,
-        points: 15
-    },
-    {
-        question: "Quale è il deserto più grande del mondo?",
-        answers: ["Deserto del Sahara", "Deserto Arabico", "Deserto del Gobi", "Antartide"],
-        correct: 3,
-        points: 20
-    },
-    {
-        question: "In quale secolo è vissuto Leonardo da Vinci?",
-        answers: ["XIV secolo", "XV secolo", "XVI secolo", "XVII secolo"],
-        correct: 1,
-        points: 15
-    }
 ];
     </script>
 </body>
 
 </html>
+
 
 
 
