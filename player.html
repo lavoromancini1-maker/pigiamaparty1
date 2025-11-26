@@ -463,22 +463,25 @@
 
         // ==================== GAME FUNCTIONS ====================
         function joinGame() {
-            const name = elements.playerName.value.trim();
-            if (name) {
-                playerState.name = name;
-                playerState.connected = true;
-                
-                elements.displayPlayerName.textContent = name;
-                elements.waitingPlayerName.textContent = name;
-                
-                // Vai alla schermata di ATTESA invece che direttamente al gioco
-                screens.login.classList.add('hidden');
-                screens.waiting.classList.remove('hidden');
-                
-                // Simula attesa per l'host invece di partire subito
-                simulateWaitingForHost();
-            }
+    const name = elements.playerName.value.trim();
+    if (name) {
+        playerState.name = name;
+        playerState.connected = true;
+        
+        elements.displayPlayerName.textContent = name;
+        elements.waitingPlayerName.textContent = name;
+        
+        // Prova a connetterti al gioco via Pusher
+        const connected = joinGameWithPusher(name);
+        
+        if (connected) {
+            screens.login.classList.add('hidden');
+            elements.waitingPlayerScore.textContent = "In attesa che l'host inizi il gioco...";
         }
+    } else {
+        alert("Inserisci un nome!");
+    }
+}
         
         function showWaitingScreen() {
     screens.game.classList.add('hidden');
@@ -564,7 +567,7 @@ let pusher;
 let channel;
 let gameCode = '';
 
-// Funzione per unirsi al gioco con Pusher
+// Funzione per unirsi al gioco con Pusher - VERSIONE CORRETTA
 function joinGameWithPusher(playerName) {
     // Prima chiedi il codice gioco
     gameCode = prompt("Inserisci il codice gioco (es: GAME123):");
@@ -577,21 +580,23 @@ function joinGameWithPusher(playerName) {
     // Pulisci il codice (rimuovi spazi, ecc)
     gameCode = gameCode.trim().toUpperCase();
     
-    console.log("Joining game with code:", gameCode);
+    console.log("🎮 Joining game with code:", gameCode);
     
-    // Configura Pusher
+    // Configura Pusher - STESSA CONFIGURAZIONE DELL'HOST
     pusher = new Pusher('26fcb8b4979ceb555e15', {
         cluster: 'eu'
     });
     
-    // Sottoscriviti al canale specifico del gioco
+    // ⚠️ IMPORTANTE: USA LO STESSO CANALE DELL'HOST ⚠️
+    // Host usa: 'game-channel-' + gameCode
     channel = pusher.subscribe('game-channel-' + gameCode);
     
     // Gestisci la connessione
     channel.bind('pusher:subscription_succeeded', function() {
-        console.log("Successfully joined game:", gameCode);
+        console.log("✅ Successfully joined game:", gameCode);
         
-        // Notifica l'host che ti sei unito
+        // ⚠️ IMPORTANTE: Notifica l'host che ti sei unito
+        // USA LO STESSO EVENTO CHE L'HOST STA ASPETTANDO
         channel.trigger('client-player-join', {
             playerName: playerName,
             playerId: pusher.connection.socket_id,
@@ -604,13 +609,18 @@ function joinGameWithPusher(playerName) {
     });
     
     channel.bind('pusher:subscription_error', function(status) {
-        console.error("Failed to join game:", status);
-        alert("Errore di connessione. Controlla il codice gioco!");
+        console.error("❌ Failed to join game:", status);
+        alert("Errore di connessione. Controlla il codice gioco e riprova!");
         return false;
     });
     
     // Ascolta i comandi dall'host
-    setupGameListeners();
+    channel.bind('client-game-start', function(data) {
+        console.log("🎯 Game starting command received:", data);
+        if (data.action === 'start') {
+            startGame();
+        }
+    });
     
     return true;
 }
@@ -1144,6 +1154,7 @@ function setupGameListeners() {
 </body>
 
 </html>
+
 
 
 
