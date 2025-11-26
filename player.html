@@ -479,37 +479,169 @@
                 simulateWaitingForHost();
             }
         }
+        
+        function showWaitingScreen() {
+    screens.game.classList.add('hidden');
+    screens.waiting.classList.remove('hidden');
+    elements.waitingPlayerScore.textContent = "In attesa che l'host inizi il gioco...";
+}
+
+function loadQuestionData(questionData) {
+    playerState.answered = false;
+    playerState.answerTime = 0;
+    playerState.currentQuestion = questionData;
+    
+    // Aggiorna UI
+    elements.displayQuestion.textContent = questionData.question;
+    elements.currentQuestion.textContent = questionData.index + 1;
+    elements.nextQuestionNumber.textContent = questionData.index + 2;
+    elements.resultFeedback.innerHTML = '';
+    
+    // Carica risposte
+    loadAnswers(questionData);
+    
+    // Mostra schermata gioco
+    screens.waiting.classList.add('hidden');
+    screens.game.classList.remove('hidden');
+    
+    // Avvia timer locale
+    startTimer();
+}
+
+function updateTimer(timeLeft) {
+    elements.timer.textContent = timeLeft;
+}
+
+function showQuestionResults(correctAnswer, playerAnswers) {
+    const answerButtons = elements.answersContainer.querySelectorAll('.answer-btn');
+    
+    // Evidenzia risposta corretta
+    answerButtons[correctAnswer].classList.add('correct');
+    
+    // Mostra feedback
+    const playerAnswer = playerAnswers.find(a => a.playerId === pusher.connection.socket_id);
+    if (playerAnswer) {
+        if (playerAnswer.answerIndex === correctAnswer) {
+            const points = calculatePoints(playerState.currentQuestion.points);
+            playerState.score += points;
+            updateScoreDisplay();
+            
+            elements.resultFeedback.innerHTML = `
+                <div class="result-feedback correct-feedback">
+                    ✅ CORRETTO! +${points} PUNTI
+                </div>
+            `;
+        } else {
+            answerButtons[playerAnswer.answerIndex].classList.add('incorrect');
+            elements.resultFeedback.innerHTML = `
+                <div class="result-feedback incorrect-feedback">
+                    ❌ RISPOSTA ERRATA
+                </div>
+            `;
+        }
+    }
+    
+    // Disabilita tutti i pulsanti
+    answerButtons.forEach(button => {
+        button.disabled = true;
+    });
+    
+    // Torna alla schermata di attesa dopo un po'
+    setTimeout(() => {
+        showWaitingForNextQuestion();
+    }, 3000);
+}
+
+function showWaitingForNextQuestion() {
+    updateMiniLeaderboard();
+    screens.game.classList.add('hidden');
+    screens.waiting.classList.remove('hidden');
+    elements.waitingPlayerScore.textContent = playerState.score;
+}
 
         // ==================== PUSHER SETUP ====================
-        const pusher = new Pusher('26fcb8b4979ceb555e15', {
-            cluster: 'eu'
+let pusher;
+let channel;
+let gameCode = '';
+
+// Funzione per unirsi al gioco con Pusher
+function joinGameWithPusher(playerName) {
+    // Prima chiedi il codice gioco
+    gameCode = prompt("Inserisci il codice gioco (es: GAME123):");
+    
+    if (!gameCode) {
+        alert("Devi inserire un codice gioco!");
+        return false;
+    }
+    
+    // Pulisci il codice (rimuovi spazi, ecc)
+    gameCode = gameCode.trim().toUpperCase();
+    
+    console.log("Joining game with code:", gameCode);
+    
+    // Configura Pusher
+    pusher = new Pusher('26fcb8b4979ceb555e15', {
+        cluster: 'eu'
+    });
+    
+    // Sottoscriviti al canale specifico del gioco
+    channel = pusher.subscribe('game-channel-' + gameCode);
+    
+    // Gestisci la connessione
+    channel.bind('pusher:subscription_succeeded', function() {
+        console.log("Successfully joined game:", gameCode);
+        
+        // Notifica l'host che ti sei unito
+        channel.trigger('client-player-join', {
+            playerName: playerName,
+            playerId: pusher.connection.socket_id,
+            gameCode: gameCode,
+            timestamp: Date.now()
         });
-        const channel = pusher.subscribe('game-night-channel');
+        
+        // Mostra schermata di attesa
+        showWaitingScreen();
+    });
+    
+    channel.bind('pusher:subscription_error', function(status) {
+        console.error("Failed to join game:", status);
+        alert("Errore di connessione. Controlla il codice gioco!");
+        return false;
+    });
+    
+    // Ascolta i comandi dall'host
+    setupGameListeners();
+    
+    return true;
+}
 
-        // Ascolta il comando di start dall'host
-        channel.bind('client-game-start', function(data) {
-            if (data.action === 'start') {
-                console.log("Received start command from host!");
-                startGame();
-            }
-        });
-
-        function simulateWaitingForHost() {
-            elements.waitingPlayerScore.textContent = "Waiting for host to start...";
-            
-            // NON più countdown finto - aspetta il vero comando!
-            // Il gioco partirà quando l'host clicca START
+// Configura gli ascoltatori del gioco
+function setupGameListeners() {
+    // Quando l'host avvia il gioco
+    channel.bind('client-game-start', function(data) {
+        console.log("Game starting!", data);
+        if (data.action === 'start') {
+            startGame();
         }
+    });
+    
+    // Quando l'host carica una nuova domanda
+    channel.bind('client-new-question', function(data) {
+        console.log("New question:", data);
+        loadQuestionData(data.question);
+    });
+    
+    // Quando il timer viene aggiornato
+    channel.bind('client-timer-update', function(data) {
+        updateTimer(data.timeLeft);
+    });
+    
+    // Quando si mostrano i risultati
+    channel.bind('client-show-results', function(data) {
+        showQuestionResults(data.correctAnswer, data.playerAnswers);
+    });
+}
 
-        function startGame() {
-            playerState.waiting = false;
-            playerState.gameStarted = true;
-            
-            screens.waiting.classList.add('hidden');
-            screens.game.classList.remove('hidden');
-            
-            loadQuestion(0);
-        }
 
         function loadQuestion(index) {
             if (index >= quizQuestions.length) {
@@ -617,50 +749,33 @@
         }
 
         function selectAnswer(selectedIndex) {
-            if (playerState.answered) return;
-            
-            playerState.answered = true;
-            const question = playerState.currentQuestion;
-            const answerButtons = elements.answersContainer.querySelectorAll('.answer-btn');
-            
-            // Disable all buttons
-            answerButtons.forEach(button => {
-                button.disabled = true;
-            });
-            
-            // Highlight answers
-            answerButtons[question.correct].classList.add('correct');
-            
-            let feedback;
-            if (selectedIndex === question.correct) {
-                // Correct answer
-                const points = calculatePoints(question.points);
-                playerState.score += points;
-                updateScoreDisplay();
-                
-                feedback = `
-                    <div class="result-feedback correct-feedback">
-                        ✅ CORRECT! +${points} POINTS
-                        ${playerState.answerTime < 5 ? '⚡ SPEED BONUS!' : ''}
-                    </div>
-                `;
-            } else {
-                // Wrong answer
-                answerButtons[selectedIndex].classList.add('incorrect');
-                feedback = `
-                    <div class="result-feedback incorrect-feedback">
-                        ❌ WRONG ANSWER
-                    </div>
-                `;
-            }
-            
-            elements.resultFeedback.innerHTML = feedback;
-            
-            // Move to waiting screen after delay
-            setTimeout(() => {
-                showWaitingScreen();
-            }, 3000);
-        }
+    if (playerState.answered) return;
+    
+    playerState.answered = true;
+    
+    // Disabilita tutti i pulsanti
+    const answerButtons = elements.answersContainer.querySelectorAll('.answer-btn');
+    answerButtons.forEach(button => {
+        button.disabled = true;
+    });
+    
+    // Invia la risposta all'host
+    channel.trigger('client-player-answer', {
+        playerName: playerState.name,
+        playerId: pusher.connection.socket_id,
+        answerIndex: selectedIndex,
+        answerTime: playerState.answerTime,
+        questionIndex: currentQuestionIndex,
+        timestamp: Date.now()
+    });
+    
+    // Mostra "Risposta inviata"
+    elements.resultFeedback.innerHTML = `
+        <div class="result-feedback" style="background: rgba(255, 255, 0, 0.2); border-color: yellow; color: yellow;">
+            ⏳ RISPOSTA INVIATA - ATTENDI RISULTATI
+        </div>
+    `;
+}
 
         function handleTimeUp() {
             if (playerState.answered) return;
@@ -1029,6 +1144,7 @@
 </body>
 
 </html>
+
 
 
 
