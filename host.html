@@ -170,6 +170,18 @@
             opacity: 0.5;
             cursor: not-allowed;
         }
+
+        /* STILI PER RISPOSTE NASCOSTE */
+        .player-item.hidden-answer {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .summary-item {
+            background: rgba(255, 255, 0, 0.1) !important;
+            border-color: yellow !important;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -273,6 +285,7 @@
         let connectedPlayers = [];
         let playerAnswers = [];
         let gameCode = '';
+        let answersRevealed = false; // NUOVA VARIABILE
 
         // === ELEMENTI DOM ===
         const elements = {
@@ -369,23 +382,43 @@
             } else {
                 const currentAnswers = playerAnswers.filter(a => a.questionIndex === currentQuestion);
                 
-                currentAnswers.forEach(answer => {
-                    const li = document.createElement('li');
-                    li.className = 'player-item';
+                // SE LE RISPOSTE NON SONO STATE RIVELATE, MOSTRA SOLO CHE HANNO RISPOSTO
+                if (!answersRevealed) {
+                    currentAnswers.forEach(answer => {
+                        const li = document.createElement('li');
+                        li.className = 'player-item hidden-answer';
+                        li.textContent = `❓ ${answer.playerName}: Risposta inviata`;
+                        elements.answersList.appendChild(li);
+                    });
                     
-                    const question = questions[currentQuestion];
-                    const isCorrect = answer.answerIndex === question.correct;
-                    const icon = isCorrect ? '✅' : '❌';
-                    
-                    li.textContent = `${icon} ${answer.playerName}: Opzione ${answer.answerIndex + 1}`;
-                    elements.answersList.appendChild(li);
-                });
+                    // Se ci sono risposte ma non rivelate, mostra quanti hanno risposto
+                    if (currentAnswers.length > 0) {
+                        const summary = document.createElement('li');
+                        summary.className = 'player-item summary-item';
+                        summary.textContent = `📊 ${currentAnswers.length}/${connectedPlayers.length} giocatori hanno risposto`;
+                        elements.answersList.appendChild(summary);
+                    }
+                } 
+                // SE LE RISPOSTE SONO STATE RIVELATE, MOSTRA CON ICONE ✅/❌
+                else {
+                    currentAnswers.forEach(answer => {
+                        const li = document.createElement('li');
+                        li.className = 'player-item';
+                        
+                        const question = questions[currentQuestion];
+                        const isCorrect = answer.answerIndex === question.correct;
+                        const icon = isCorrect ? '✅' : '❌';
+                        
+                        li.textContent = `${icon} ${answer.playerName}: Opzione ${answer.answerIndex + 1}`;
+                        elements.answersList.appendChild(li);
+                    });
+                }
                 
                 // Aggiorna le statistiche
                 updateAnswersProgress();
                 
-                // Se tutti hanno risposto, mostra subito la risposta corretta
-                if (checkAllPlayersAnswered() && timeLeft > 0) {
+                // Se tutti hanno risposto e le risposte non sono ancora rivelate, mostra subito la risposta corretta
+                if (checkAllPlayersAnswered() && timeLeft > 0 && !answersRevealed) {
                     clearInterval(timer);
                     showCorrectAnswer();
                     elements.nextBtn.disabled = false;
@@ -416,6 +449,9 @@
 
             currentQuestion = index;
             const question = questions[index];
+            
+            // RESETTA LO STATO DELLE RISPOSTE RIVELATE
+            answersRevealed = false;
             
             // Aggiorna UI
             elements.questionCounter.textContent = `DOMANDA ${index + 1}/${questions.length}`;
@@ -476,9 +512,15 @@
             const question = questions[currentQuestion];
             const answerElements = elements.answersGrid.querySelectorAll('.answer-option');
             answerElements[question.correct].classList.add('correct');
+            
+            // RIVELA LE RISPOSTE DEI GIOCATORI
+            answersRevealed = true;
+            updateAnswersList(); // Ricarica la lista con le icone ✅/❌
         }
 
         function nextQuestion() {
+            // Reset dello stato per la prossima domanda
+            answersRevealed = false;
             loadQuestion(currentQuestion + 1);
         }
 
