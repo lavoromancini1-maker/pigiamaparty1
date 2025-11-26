@@ -247,50 +247,61 @@
         let connectedPlayers = [];
         let gameReady = false;
 
-        function updatePlayerList() {
-            elements.playerList.innerHTML = '';
-            connectedPlayers.forEach((player, index) => {
-                const li = document.createElement('li');
-                li.className = 'player-item';
-                li.innerHTML = `
-                    <span>${player.name}</span>
-                    <span>🟢 READY</span>
-                `;
-                elements.playerList.appendChild(li);
-            });
-            
-            // Abilita START solo se ci sono giocatori
-            elements.startBtn.disabled = connectedPlayers.length === 0;
-            document.getElementById('playersCount').textContent = connectedPlayers.length;
-        }
-
-        // Simula giocatori che si connettono
-        function simulatePlayerConnections() {
-            const fakePlayers = [
-                { id: 1, name: 'Alice' },
-                { id: 2, name: 'Bob' },
-                { id: 3, name: 'Charlie' },
-                { id: 4, name: 'Diana' }
-            ];
-            
-            // Aggiungi giocatori gradualmente
-            fakePlayers.forEach((player, index) => {
-                setTimeout(() => {
-                    connectedPlayers.push(player);
-                    updatePlayerList();
-                    console.log(player.name + " joined the game!");
-                }, 2000 * (index + 1));
-            });
-        }
-
-        // Avvia la simulazione quando la pagina carica
-        simulatePlayerConnections();
+    function updatePlayerList() {
+        elements.playerList.innerHTML = '';
+    
+    if (connectedPlayers.length === 0) {
+        const li = document.createElement('li');
+        li.className = 'player-item';
+        li.innerHTML = `<span style="opacity:0.7;">Waiting for players to join...</span>`;
+        elements.playerList.appendChild(li);
+    } else {
+        connectedPlayers.forEach((player, index) => {
+            const li = document.createElement('li');
+            li.className = 'player-item';
+            li.innerHTML = `
+                <span>${player.name}</span>
+                <span>🟢 CONNECTED</span>
+            `;
+            elements.playerList.appendChild(li);
+        });
+    }
+    
+    // Abilita START solo se ci sono giocatori
+    elements.startBtn.disabled = connectedPlayers.length === 0;
+}
 
                // ==================== PUSHER SETUP ====================
         const pusher = new Pusher('26fcb8b4979ceb555e15', {
             cluster: 'eu'
         });
         const channel = pusher.subscribe('game-night-channel');
+
+        // ==================== REAL PLAYER CONNECTIONS ====================
+channel.bind('client-player-join', function(data) {
+    console.log("Player joined:", data.playerName);
+    
+    // Verifica se il giocatore è già connesso
+    const existingPlayer = connectedPlayers.find(p => p.id === data.playerId);
+    if (!existingPlayer) {
+        connectedPlayers.push({
+            id: data.playerId,
+            name: data.playerName
+        });
+        updatePlayerList();
+    }
+});
+
+channel.bind('client-player-leave', function(data) {
+    console.log("Player left:", data.playerName);
+    connectedPlayers = connectedPlayers.filter(p => p.id !== data.playerId);
+    updatePlayerList();
+});
+
+channel.bind('client-player-answer', function(data) {
+    console.log("Player answered:", data.playerName, "Answer:", data.answer);
+    // Qui puoi gestire le risposte dei giocatori
+});
 
         function startGame() {
             if (connectedPlayers.length === 0) {
@@ -390,6 +401,7 @@
     </script>
 </body>
 </html>
+
 
 
 
