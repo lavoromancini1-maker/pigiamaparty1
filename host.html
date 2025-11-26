@@ -1,454 +1,3 @@
-<!DOCTYPE html>
-<html lang="it">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NEXUS GAME SHOW - Host</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        :root {
-            --primary: #ff0080;
-            --secondary: #8000ff;
-            --accent: #00ffff;
-            --dark: #0a0a1a;
-            --darker: #050510;
-            --light: #ffffff;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Orbitron', sans-serif;
-        }
-
-        body {
-            background: linear-gradient(135deg, var(--darker), var(--dark));
-            color: var(--light);
-            min-height: 100vh;
-            padding: 20px;
-            overflow: hidden;
-        }
-
-        .container {
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 20px;
-            height: 95vh;
-            max-width: 1800px;
-            margin: 0 auto;
-        }
-
-        .main-stage {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 25px;
-            border: 3px solid var(--primary);
-            box-shadow: 0 0 50px rgba(255, 0, 128, 0.2);
-            padding: 30px;
-            display: flex;
-            flex-direction: column;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .main-stage::before {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 3px;
-            background: linear-gradient(90deg, var(--primary), var(--secondary), var(--accent));
-            animation: progress 20s linear;
-        }
-
-        @keyframes progress {
-            0% { width: 0%; }
-            100% { width: 100%; }
-        }
-
-        .header {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-
-        .game-title {
-            font-size: 3rem;
-            background: linear-gradient(45deg, var(--primary), var(--accent));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 10px;
-        }
-
-        .question-container {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            text-align: center;
-            padding: 20px;
-        }
-
-        .question-counter {
-            font-size: 1.3rem;
-            color: var(--accent);
-            margin-bottom: 20px;
-        }
-
-        .question-text {
-            font-size: 2.8rem;
-            line-height: 1.3;
-            margin-bottom: 40px;
-            background: linear-gradient(90deg, var(--light), var(--accent));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            text-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
-        }
-
-        .media-container {
-            margin: 30px 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 250px;
-        }
-
-        .media-container img, .media-container video {
-            max-width: 70%;
-            max-height: 300px;
-            border-radius: 15px;
-            border: 2px solid var(--accent);
-            box-shadow: 0 0 30px rgba(0, 255, 255, 0.3);
-        }
-
-        .answers-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            margin: 30px 0;
-        }
-
-        .answer-option {
-            background: rgba(255, 255, 255, 0.05);
-            border: 2px solid rgba(255, 255, 255, 0.1);
-            border-radius: 15px;
-            padding: 25px;
-            font-size: 1.3rem;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .answer-option.correct {
-            background: rgba(0, 255, 100, 0.2);
-            border-color: #00ff88;
-            box-shadow: 0 0 30px rgba(0, 255, 100, 0.4);
-        }
-
-        .answer-option.incorrect {
-            background: rgba(255, 0, 100, 0.2);
-            border-color: #ff0066;
-        }
-
-        .answer-option::before {
-            content: attr(data-letter);
-            position: absolute;
-            top: 10px;
-            left: 15px;
-            font-size: 1rem;
-            font-weight: bold;
-            color: var(--accent);
-        }
-
-        .controls {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 30px;
-        }
-
-        .timer {
-            font-size: 3.5rem;
-            font-weight: bold;
-            color: var(--primary);
-            text-shadow: 0 0 20px var(--primary);
-            padding: 20px 40px;
-            border: 3px solid var(--primary);
-            border-radius: 15px;
-            background: rgba(255, 0, 128, 0.1);
-            animation: pulse 1s infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.7; }
-        }
-
-        .btn {
-            background: linear-gradient(45deg, var(--primary), var(--secondary));
-            color: white;
-            border: none;
-            padding: 20px 40px;
-            border-radius: 50px;
-            font-size: 1.3rem;
-            cursor: pointer;
-            font-weight: bold;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            transition: all 0.3s ease;
-        }
-
-        .btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 25px rgba(255, 0, 128, 0.4);
-        }
-
-        .btn:disabled {
-            background: rgba(255, 255, 255, 0.1);
-            color: rgba(255, 255, 255, 0.3);
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
-        }
-
-        .sidebar {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-
-        .leaderboard-panel {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 20px;
-            border: 2px solid var(--secondary);
-            padding: 25px;
-            flex: 1;
-            box-shadow: 0 0 30px rgba(128, 0, 255, 0.2);
-        }
-
-        .panel-title {
-            text-align: center;
-            font-size: 1.5rem;
-            color: var(--accent);
-            margin-bottom: 20px;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-        }
-
-        .player-list {
-            list-style: none;
-        }
-
-        .player-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px;
-            margin-bottom: 12px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 10px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            transition: all 0.3s ease;
-        }
-
-        .player-item:hover {
-            transform: translateX(5px);
-            border-color: var(--accent);
-        }
-
-        .player-item.answered {
-            background: rgba(0, 255, 255, 0.1);
-            border-color: var(--accent);
-        }
-
-        .player-rank {
-            font-weight: bold;
-            color: var(--accent);
-            width: 30px;
-        }
-
-        .player-name {
-            flex: 1;
-            margin: 0 15px;
-        }
-
-        .player-score {
-            font-weight: bold;
-            color: var(--primary);
-            font-size: 1.2rem;
-        }
-
-        .player-status {
-            width: 20px;
-            text-align: center;
-        }
-
-        .join-panel {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 20px;
-            border: 2px solid var(--accent);
-            padding: 25px;
-            text-align: center;
-            box-shadow: 0 0 30px rgba(0, 255, 255, 0.2);
-        }
-
-        .game-code {
-            font-size: 3rem;
-            font-weight: bold;
-            color: var(--primary);
-            margin: 20px 0;
-            text-shadow: 0 0 20px var(--primary);
-        }
-
-        .qr-placeholder {
-            background: white;
-            padding: 20px;
-            border-radius: 15px;
-            display: inline-block;
-            margin: 15px 0;
-        }
-
-        .stats-panel {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 20px;
-            border: 2px solid var(--primary);
-            padding: 20px;
-            box-shadow: 0 0 30px rgba(255, 0, 128, 0.2);
-        }
-
-        .stat-item {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 10px;
-            padding: 10px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 8px;
-        }
-
-        .hidden {
-            display: none;
-        }
-
-        .results-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.9);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
-
-        .results-content {
-            background: linear-gradient(135deg, var(--dark), var(--darker));
-            border: 3px solid var(--primary);
-            border-radius: 25px;
-            padding: 50px;
-            text-align: center;
-            max-width: 600px;
-            box-shadow: 0 0 50px rgba(255, 0, 128, 0.5);
-        }
-
-        .results-title {
-            font-size: 3rem;
-            color: var(--accent);
-            margin-bottom: 30px;
-        }
-
-        .winner-name {
-            font-size: 4rem;
-            background: linear-gradient(45deg, var(--primary), var(--accent));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin: 20px 0;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <!-- Main Stage -->
-        <div class="main-stage">
-            <div class="header">
-                <div class="game-title">NEXUS GAME SHOW</div>
-                <div class="question-counter" id="questionCounter">QUESTION 1 OF 60</div>
-            </div>
-
-            <div class="question-container">
-                <div class="question-text" id="questionText">Welcome to Nexus Game Show! Get ready to play...</div>
-                
-                <div class="media-container" id="mediaContainer">
-                    <!-- Media content will be loaded here -->
-                </div>
-
-                <div class="answers-grid" id="answersGrid">
-                    <!-- Answer options will be loaded here -->
-                </div>
-
-                <div class="controls">
-                    <div class="timer" id="timer">20</div>
-                    <button class="btn" id="nextBtn">START GAME</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Sidebar -->
-        <div class="sidebar">
-            <div class="leaderboard-panel">
-                <div class="panel-title">LEADERBOARD</div>
-                <ul class="player-list" id="playerList">
-                    <!-- Players will be loaded here -->
-                </ul>
-            </div>
-
-            <div class="join-panel">
-                <div class="panel-title">JOIN THE GAME</div>
-                <div class="game-code" id="gameCode">-----</div>
-                <div class="qr-placeholder">
-                    <div style="font-size: 0.9rem; color: #000; text-align: center;">
-                        📱 Scan with your phone<br>
-                        <span style="font-weight: bold; font-size: 1.1rem;">nexus-game.show/play</span>
-                    </div>
-                </div>
-                <div style="margin-top: 15px; font-size: 0.9rem;">
-                    Players joined: <span id="playersCount">0</span>/8
-                </div>
-            </div>
-
-            <div class="stats-panel">
-                <div class="panel-title">GAME STATS</div>
-                <div class="stat-item">
-                    <span>Questions Completed:</span>
-                    <span id="completedQuestions">0</span>
-                </div>
-                <div class="stat-item">
-                    <span>Average Score:</span>
-                    <span id="averageScore">0</span>
-                </div>
-                <div class="stat-item">
-                    <span>Fastest Answer:</span>
-                    <span id="fastestAnswer">0s</span>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Results Overlay -->
-    <div id="resultsOverlay" class="results-overlay hidden">
-        <div class="results-content">
-            <div class="results-title">GAME COMPLETED!</div>
-            <div>🏆 THE WINNER IS 🏆</div>
-            <div class="winner-name" id="winnerName">PLAYER NAME</div>
-            <div style="margin: 30px 0; font-size: 1.2rem;">
-                Final Score: <span id="winnerScore" style="color: var(--primary);">0</span> points
-            </div>
-            <button class="btn" onclick="location.reload()">NEW GAME</button>
-        </div>
-    </div>
-
     <script>
         // ==================== GAME CONFIGURATION ====================
         const CONFIG = {
@@ -460,7 +9,7 @@
 
         // ==================== GAME STATE ====================
         let gameState = {
-            currentQuestion: 0,
+            currentQuestionIndex: 0,  // CAMBIATO: currentQuestion → currentQuestionIndex
             players: [],
             timeLeft: CONFIG.QUESTION_TIME,
             timer: null,
@@ -496,6 +45,9 @@
         function initializeGame() {
             elements.gameCode.textContent = gameState.gameCode;
             elements.nextBtn.addEventListener('click', handleNextButton);
+            
+            // NASCONDI la schermata risultati all'inizio
+            elements.resultsOverlay.classList.add('hidden');
         }
 
         // ==================== GAME LOGIC ====================
@@ -509,21 +61,30 @@
 
         function startGame() {
             gameState.gameStarted = true;
+            gameState.currentQuestionIndex = 0; // RESET
             elements.nextBtn.textContent = 'NEXT QUESTION';
             loadQuestion(0);
         }
 
         function loadQuestion(index) {
+            console.log("Loading question:", index); // DEBUG
+            
+            // CONTROLLO IMPORTANTE: se non ci sono domande, esci
+            if (!quizQuestions || quizQuestions.length === 0) {
+                console.error("No questions found!");
+                return;
+            }
+
             if (index >= quizQuestions.length) {
                 endGame();
                 return;
             }
 
-            gameState.currentQuestion = index;
+            gameState.currentQuestionIndex = index;
             const question = quizQuestions[index];
             
             // Update UI
-            elements.questionCounter.textContent = `QUESTION ${index + 1} OF ${CONFIG.TOTAL_QUESTIONS}`;
+            elements.questionCounter.textContent = `QUESTION ${index + 1} OF ${quizQuestions.length}`;
             elements.questionText.textContent = question.question;
             elements.completedQuestions.textContent = index;
             
@@ -550,6 +111,7 @@
                     case 'image':
                         mediaElement = document.createElement('img');
                         mediaElement.src = question.media.src;
+                        mediaElement.alt = 'Question media';
                         break;
                     case 'video':
                         mediaElement = document.createElement('video');
@@ -608,7 +170,7 @@
         }
 
         function showCorrectAnswer() {
-            const question = quizQuestions[gameState.currentQuestion];
+            const question = quizQuestions[gameState.currentQuestionIndex];
             const answerElements = elements.answersGrid.querySelectorAll('.answer-option');
             
             answerElements.forEach((element, index) => {
@@ -620,16 +182,23 @@
 
         function nextQuestion() {
             resetTimer();
-            loadQuestion(gameState.currentQuestion + 1);
+            loadQuestion(gameState.currentQuestionIndex + 1);
         }
 
         function endGame() {
+            console.log("Game ended"); // DEBUG
             clearInterval(gameState.timer);
             elements.resultsOverlay.classList.remove('hidden');
             
-            const winner = [...gameState.players].sort((a, b) => b.score - a.score)[0];
-            elements.winnerName.textContent = winner.name;
-            elements.winnerScore.textContent = winner.score;
+            // Trova il vincitore
+            if (gameState.players.length > 0) {
+                const winner = [...gameState.players].sort((a, b) => b.score - a.score)[0];
+                elements.winnerName.textContent = winner.name;
+                elements.winnerScore.textContent = winner.score;
+            } else {
+                elements.winnerName.textContent = "No players";
+                elements.winnerScore.textContent = "0";
+            }
         }
 
         // ==================== PLAYER MANAGEMENT ====================
@@ -923,7 +492,7 @@
         }
     },
     {
-        question: "In quale anno è uscito il primo film di Harry Potter?",
+        question: "In quale anno è uscito il primeiro film di Harry Potter?",
         answers: ["1999", "2001", "2003", "2005"],
         correct: 1,
         points: 15
@@ -992,13 +561,11 @@
         correct: 3,
         points: 20
     },
-        {
+    {
         question: "In quale secolo è vissuto Leonardo da Vinci?",
         answers: ["XIV secolo", "XV secolo", "XVI secolo", "XVII secolo"],
         correct: 1,
         points: 15
-    }   // <-- QUESTA ERA QUELLA MANCANTE!
+    }
 ];
-</script>
-</body>
-</html>
+    </script>
