@@ -284,6 +284,21 @@ console.log("Game Code:", gameCode);
 // Usa un canale normale basato sul codice gioco
 const channel = pusher.subscribe('game-channel-' + gameCode);
 
+        // Aggiungi questa funzione per debug
+function debugPusher() {
+    console.log("=== PUSHER DEBUG ===");
+    console.log("Game Code:", gameCode);
+    console.log("Channel:", 'game-channel-' + gameCode);
+    console.log("Connected Players:", connectedPlayers);
+    console.log("Pusher Connection State:", pusher.connection.state);
+    
+    // Mostra il codice gioco in grande
+    alert("CODICE GIOCO: " + gameCode + "\n\nCondividi questo codice con i player!");
+}
+
+// Chiamala subito dopo aver creato il canale
+debugPusher();
+
 // Gestisci la connessione
 pusher.connection.bind('connected', function() {
     console.log("✅ Host connected to Pusher");
@@ -471,6 +486,7 @@ updatePlayerList();
     </script>
 </body>
 </html>
+
 
 
 
