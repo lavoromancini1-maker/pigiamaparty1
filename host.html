@@ -271,62 +271,112 @@
     elements.startBtn.disabled = connectedPlayers.length === 0;
 }
 
-               // ==================== PUSHER SETUP ====================
+              // ==================== PUSHER SETUP - VERSIONE CORRETTA ====================
 const pusher = new Pusher('26fcb8b4979ceb555e15', {
-    cluster: 'eu',
-    authEndpoint: '/pusher/auth', // Rimuovi questa riga se non hai un backend
-    auth: {
-        params: {
-            userType: 'host'
-        }
-    }
+    cluster: 'eu'
 });
 
-const channel = pusher.subscribe('presence-game-channel'); // Usa presence channel
+// Crea un codice gioco unico
+const gameCode = 'GAME' + Math.floor(100 + Math.random() * 900);
+elements.gameCode.textContent = gameCode;
+console.log("Game Code:", gameCode);
+
+// Usa un canale normale basato sul codice gioco
+const channel = pusher.subscribe('game-channel-' + gameCode);
 
 // Gestisci la connessione
 pusher.connection.bind('connected', function() {
-    console.log("Host connected to Pusher");
-    elements.gameCode.textContent = 'GAME' + Math.floor(100 + Math.random() * 900);
+    console.log("✅ Host connected to Pusher");
+});
+
+pusher.connection.bind('error', function(err) {
+    console.error("❌ Pusher connection error:", err);
 });
 
 // ==================== REAL PLAYER CONNECTIONS ====================
-channel.bind('pusher:subscription_succeeded', function(members) {
-    console.log("Subscription succeeded, members:", members.count);
+// Player che si uniscono al gioco
+channel.bind('client-player-join', function(data) {
+    console.log("🎮 Player joined:", data.playerName, "ID:", data.playerId);
+    
+    // Verifica se il giocatore è già nella lista
+    const existingPlayer = connectedPlayers.find(p => p.id === data.playerId);
+    if (!existingPlayer) {
+        connectedPlayers.push({
+            id: data.playerId,
+            name: data.playerName
+        });
+        updatePlayerList();
+        
+        // Notifica nell'UI
+        showNotification(data.playerName + " si è unito al gioco!");
+    }
+});
+
+// Player che lasciano il gioco  
+channel.bind('client-player-leave', function(data) {
+    console.log("🚪 Player left:", data.playerName);
+    connectedPlayers = connectedPlayers.filter(p => p.id !== data.playerId);
     updatePlayerList();
+    
+    showNotification(data.playerName + " ha lasciato il gioco");
 });
 
-channel.bind('pusher:member_added', function(member) {
-    console.log("Player joined:", member.info);
-    connectedPlayers.push({
-        id: member.id,
-        name: member.info.name
-    });
-    updatePlayerList();
-});
-
-channel.bind('pusher:member_removed', function(member) {
-    console.log("Player left:", member.info);
-    connectedPlayers = connectedPlayers.filter(p => p.id !== member.id);
-    updatePlayerList();
-});
-
-// Messaggi custom dai player
-channel.bind('client-player-ready', function(data) {
-    console.log("Player ready:", data.playerName);
-});
-
+// Player che rispondono alle domande
 channel.bind('client-player-answer', function(data) {
-    console.log("Player answered:", data.playerName, data.answer);
+    console.log("📝 Player answered:", data.playerName, "Answer:", data.answerIndex, "Time:", data.answerTime + "s");
+    
+    // Mostra la risposta del player
+    showNotification(data.playerName + " ha risposto: Opzione " + (data.answerIndex + 1));
+    
+    // Qui puoi aggiungere la logica per gestire le risposte
+    // (controllo correttezza, punteggi, ecc.)
 });
 
-        function startGame() {
+// Funzione per mostrare notifiche temporanee
+function showNotification(message) {
+    // Crea una notifica temporanea
+    const notification = document.createElement('div');
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: rgba(0, 255, 255, 0.9);
+        color: black;
+        padding: 10px 15px;
+        border-radius: 10px;
+        font-weight: bold;
+        z-index: 1000;
+        animation: slideIn 0.3s ease;
+    `;
+    notification.textContent = message;
+    document.body.appendChild(notification);
+    
+    // Rimuovi dopo 3 secondi
+    setTimeout(() => {
+        notification.remove();
+    }, 3000);
+}
+
+// Aggiungi questo stile per l'animazione
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes slideIn {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+`;
+document.head.appendChild(style);
+
+// Inizializza la lista vuota
+updatePlayerList();
+        
+      function startGame() {
     if (connectedPlayers.length === 0) {
         alert('Wait for players to join!');
         return;
     }
     
-    console.log("Game started with", connectedPlayers.length, "players");
+    console.log("🎯 Game started with", connectedPlayers.length, "players");
     gameReady = true;
     elements.startBtn.disabled = true;
     elements.nextBtn.disabled = false;
@@ -335,15 +385,18 @@ channel.bind('client-player-answer', function(data) {
     // INVIA IL COMANDO A TUTTI I PLAYER
     channel.trigger('client-game-start', {
         action: 'start',
-        gameCode: elements.gameCode.textContent,
-        timestamp: Date.now()
+        gameCode: gameCode, // ✅ Usa la variabile invece di elements.gameCode.textContent
+        timestamp: Date.now(),
+        totalPlayers: connectedPlayers.length,
+        hostMessage: "Il gioco sta per iniziare!"
     });
+    
+    console.log("📢 Start command sent to", connectedPlayers.length, "players");
     
     setTimeout(() => {
         loadQuestion(0);
     }, 3000);
 }
-
         function loadQuestion(index) {
             if (index >= questions.length) {
                 endGame();
@@ -418,6 +471,7 @@ channel.bind('client-player-answer', function(data) {
     </script>
 </body>
 </html>
+
 
 
 
