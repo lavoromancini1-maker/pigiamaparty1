@@ -272,60 +272,77 @@
 }
 
                // ==================== PUSHER SETUP ====================
-        const pusher = new Pusher('26fcb8b4979ceb555e15', {
-            cluster: 'eu'
-        });
-        const channel = pusher.subscribe('game-night-channel');
-
-        // ==================== REAL PLAYER CONNECTIONS ====================
-channel.bind('client-player-join', function(data) {
-    console.log("Player joined:", data.playerName);
-    
-    // Verifica se il giocatore è già connesso
-    const existingPlayer = connectedPlayers.find(p => p.id === data.playerId);
-    if (!existingPlayer) {
-        connectedPlayers.push({
-            id: data.playerId,
-            name: data.playerName
-        });
-        updatePlayerList();
+const pusher = new Pusher('26fcb8b4979ceb555e15', {
+    cluster: 'eu',
+    authEndpoint: '/pusher/auth', // Rimuovi questa riga se non hai un backend
+    auth: {
+        params: {
+            userType: 'host'
+        }
     }
 });
 
-channel.bind('client-player-leave', function(data) {
-    console.log("Player left:", data.playerName);
-    connectedPlayers = connectedPlayers.filter(p => p.id !== data.playerId);
+const channel = pusher.subscribe('presence-game-channel'); // Usa presence channel
+
+// Gestisci la connessione
+pusher.connection.bind('connected', function() {
+    console.log("Host connected to Pusher");
+    elements.gameCode.textContent = 'GAME' + Math.floor(100 + Math.random() * 900);
+});
+
+// ==================== REAL PLAYER CONNECTIONS ====================
+channel.bind('pusher:subscription_succeeded', function(members) {
+    console.log("Subscription succeeded, members:", members.count);
     updatePlayerList();
 });
 
+channel.bind('pusher:member_added', function(member) {
+    console.log("Player joined:", member.info);
+    connectedPlayers.push({
+        id: member.id,
+        name: member.info.name
+    });
+    updatePlayerList();
+});
+
+channel.bind('pusher:member_removed', function(member) {
+    console.log("Player left:", member.info);
+    connectedPlayers = connectedPlayers.filter(p => p.id !== member.id);
+    updatePlayerList();
+});
+
+// Messaggi custom dai player
+channel.bind('client-player-ready', function(data) {
+    console.log("Player ready:", data.playerName);
+});
+
 channel.bind('client-player-answer', function(data) {
-    console.log("Player answered:", data.playerName, "Answer:", data.answer);
-    // Qui puoi gestire le risposte dei giocatori
+    console.log("Player answered:", data.playerName, data.answer);
 });
 
         function startGame() {
-            if (connectedPlayers.length === 0) {
-                alert('Wait for players to join!');
-                return;
-            }
-            
-            console.log("Game started with", connectedPlayers.length, "players");
-            gameReady = true;
-            elements.startBtn.disabled = true;
-            elements.nextBtn.disabled = false;
-            elements.questionText.textContent = "Game starting... Get ready!";
-            
-            // INVIA IL COMANDO A TUTTI I PLAYER
-            channel.trigger('client-game-start', {
-                action: 'start',
-                gameId: gameState.gameCode,
-                timestamp: Date.now()
-            });
-            
-            setTimeout(() => {
-                loadQuestion(0);
-            }, 3000);
-        }
+    if (connectedPlayers.length === 0) {
+        alert('Wait for players to join!');
+        return;
+    }
+    
+    console.log("Game started with", connectedPlayers.length, "players");
+    gameReady = true;
+    elements.startBtn.disabled = true;
+    elements.nextBtn.disabled = false;
+    elements.questionText.textContent = "Game starting... Get ready!";
+    
+    // INVIA IL COMANDO A TUTTI I PLAYER
+    channel.trigger('client-game-start', {
+        action: 'start',
+        gameCode: elements.gameCode.textContent,
+        timestamp: Date.now()
+    });
+    
+    setTimeout(() => {
+        loadQuestion(0);
+    }, 3000);
+}
 
         function loadQuestion(index) {
             if (index >= questions.length) {
@@ -401,6 +418,7 @@ channel.bind('client-player-answer', function(data) {
     </script>
 </body>
 </html>
+
 
 
 
