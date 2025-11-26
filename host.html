@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pigiama Party - Host v2.1</title>
+    <title>Pigiama Party - Host v2.2</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&display=swap" rel="stylesheet">
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
@@ -18,6 +18,9 @@
             --pink: #ff00c8;
             --cyan: #00eaff;
             --purple: #7b2cff;
+            --gold: #ffd700;
+            --silver: #c0c0c0;
+            --bronze: #cd7f32;
         }
 
         * {
@@ -200,10 +203,93 @@
             font-size: 0.8rem;
             opacity: 0.7;
         }
+
+        /* CLASSIFICA STYLES */
+        .leaderboard-container {
+            margin: 30px 0;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            border: 2px solid var(--gold);
+        }
+
+        .leaderboard-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            margin: 10px 0;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            border: 1px solid var(--cyan);
+        }
+
+        .leaderboard-rank {
+            font-size: 1.5rem;
+            font-weight: bold;
+            width: 50px;
+            text-align: center;
+        }
+
+        .rank-1 { color: var(--gold); }
+        .rank-2 { color: var(--silver); }
+        .rank-3 { color: var(--bronze); }
+
+        .leaderboard-name {
+            flex: 1;
+            text-align: left;
+            padding: 0 15px;
+            font-size: 1.2rem;
+        }
+
+        .leaderboard-score {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: var(--cyan);
+        }
+
+        .podium {
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            margin: 20px 0;
+            gap: 20px;
+        }
+
+        .podium-item {
+            text-align: center;
+            padding: 20px;
+            border-radius: 10px;
+            min-width: 120px;
+        }
+
+        .podium-1 {
+            background: linear-gradient(135deg, var(--gold), #ffed4e);
+            color: black;
+            height: 180px;
+        }
+
+        .podium-2 {
+            background: linear-gradient(135deg, var(--silver), #e6e6e6);
+            color: black;
+            height: 150px;
+        }
+
+        .podium-3 {
+            background: linear-gradient(135deg, var(--bronze), #e6b800);
+            color: black;
+            height: 120px;
+        }
+
+        .speed-bonus {
+            font-size: 0.9rem;
+            color: #00ff88;
+            margin-left: 5px;
+        }
     </style>
 </head>
 <body>
-    <div class="version">v2.1 - Risposte Nascoste</div>
+    <div class="version">v2.2 - Classifica & Punteggi</div>
     
     <div class="container">
         <h1>🎮 PIGIAMA PARTY - HOST</h1>
@@ -261,11 +347,33 @@
                 </ul>
             </div>
         </div>
+
+        <!-- NUOVA SCHERMATA CLASSIFICA -->
+        <div id="leaderboardScreen" class="hidden">
+            <div class="leaderboard-container">
+                <h2 style="font-size: 2.5rem; margin-bottom: 30px;">🏆 CLASSIFICA FINALE</h2>
+                
+                <!-- PODIO -->
+                <div class="podium" id="podium">
+                    <!-- Il podio verrà generato qui -->
+                </div>
+
+                <!-- CLASSIFICA COMPLETA -->
+                <div style="margin-top: 40px;">
+                    <h3>📊 CLASSIFICA COMPLETA</h3>
+                    <ul class="player-list" id="finalLeaderboard">
+                        <!-- La classifica verrà generata qui -->
+                    </ul>
+                </div>
+
+                <button class="btn" id="restartBtn" style="margin-top: 30px;">NUOVO GIOCO</button>
+            </div>
+        </div>
     </div>
 
     <script>
         // === FORZA REFRESH CACHE ===
-        console.log('🔥 HOST v2.1 - Risposte Nascoste - Caricato: ' + new Date().toLocaleString());
+        console.log('🔥 HOST v2.2 - Classifica & Punteggi - Caricato: ' + new Date().toLocaleString());
         
         // === CONFIGURA FIREBASE ===
         const firebaseConfig = {
@@ -287,17 +395,20 @@
             {
                 question: "Qual è la capitale dell'Australia?",
                 answers: ["Sydney", "Melbourne", "Canberra", "Perth"],
-                correct: 2
+                correct: 2,
+                points: 10
             },
             {
                 question: "In quale anno è caduto il muro di Berlino?",
                 answers: ["1987", "1989", "1991", "1985"],
-                correct: 1
+                correct: 1,
+                points: 15
             },
             {
                 question: "Chi ha scritto 'Il nome della rosa'?",
                 answers: ["Italo Calvino", "Umberto Eco", "Luigi Pirandello", "Alessandro Manzoni"],
-                correct: 1
+                correct: 1,
+                points: 10
             }
         ];
 
@@ -308,12 +419,14 @@
         let connectedPlayers = [];
         let playerAnswers = [];
         let gameCode = '';
-        let answersRevealed = false; // NUOVA VARIABILE
+        let answersRevealed = false;
+        let playerScores = {}; // NUOVA VARIABILE PER I PUNTEGGI
 
         // === ELEMENTI DOM ===
         const elements = {
             lobbyScreen: document.getElementById('lobbyScreen'),
             gameScreen: document.getElementById('gameScreen'),
+            leaderboardScreen: document.getElementById('leaderboardScreen'),
             gameCode: document.getElementById('gameCode'),
             shareCode: document.getElementById('shareCode'),
             playerList: document.getElementById('playerList'),
@@ -328,7 +441,10 @@
             answersProgress: document.getElementById('answersProgress'),
             progressFill: document.getElementById('progressFill'),
             skipTimerBtn: document.getElementById('skipTimerBtn'),
-            showAnswerBtn: document.getElementById('showAnswerBtn')
+            showAnswerBtn: document.getElementById('showAnswerBtn'),
+            finalLeaderboard: document.getElementById('finalLeaderboard'),
+            podium: document.getElementById('podium'),
+            restartBtn: document.getElementById('restartBtn')
         };
 
         // === INIZIALIZZAZIONE ===
@@ -337,20 +453,35 @@
             elements.gameCode.textContent = gameCode;
             elements.shareCode.textContent = gameCode;
             
-            console.log('🎮 Host v2.1 creato con codice:', gameCode);
+            // Reset punteggi
+            playerScores = {};
+            
+            console.log('🎮 Host v2.2 creato con codice:', gameCode);
             
             // Inizializza il gioco su Firebase
             database.ref('games/' + gameCode).set({
                 status: 'waiting',
                 host: true,
                 createdAt: Date.now(),
-                version: '2.1'
+                version: '2.2'
             });
 
             // Ascolta i player che si connettono
             database.ref('games/' + gameCode + '/players').on('value', (snapshot) => {
                 const players = snapshot.val() || {};
                 connectedPlayers = Object.values(players);
+                
+                // Inizializza punteggi per i nuovi player
+                connectedPlayers.forEach(player => {
+                    if (!playerScores[player.name]) {
+                        playerScores[player.name] = {
+                            total: 0,
+                            correctAnswers: 0,
+                            speedBonuses: 0
+                        };
+                    }
+                });
+                
                 updatePlayerList();
             });
 
@@ -398,6 +529,25 @@
             elements.showAnswerBtn.disabled = currentAnswers.length === 0;
         }
 
+        // === FUNZIONE PER CALCOLARE I PUNTI ===
+        function calculatePoints(answer, question) {
+            let points = 0;
+            let speedBonus = 0;
+            
+            // Punti base per risposta corretta
+            if (answer.answerIndex === question.correct) {
+                points += question.points || 10;
+                
+                // Bonus velocità (massimo 5 punti, decresce con il tempo)
+                if (answer.answerTime <= 5) {
+                    speedBonus = 6 - answer.answerTime; // 5 punti se risponde in 1s, 4 in 2s, etc.
+                    points += speedBonus;
+                }
+            }
+            
+            return { points, speedBonus };
+        }
+
         function updateAnswersList() {
             elements.answersList.innerHTML = '';
             
@@ -423,17 +573,35 @@
                         elements.answersList.appendChild(summary);
                     }
                 } 
-                // SE LE RISPOSTE SONO STATE RIVELATE, MOSTRA CON ICONE ✅/❌
+                // SE LE RISPOSTE SONO STATE RIVELATE, MOSTRA CON ICONE ✅/❌ E PUNTI
                 else {
+                    // Calcola i punteggi per questa domanda
+                    const question = questions[currentQuestion];
                     currentAnswers.forEach(answer => {
+                        const pointsData = calculatePoints(answer, question);
+                        
                         const li = document.createElement('li');
                         li.className = 'player-item';
                         
-                        const question = questions[currentQuestion];
                         const isCorrect = answer.answerIndex === question.correct;
                         const icon = isCorrect ? '✅' : '❌';
                         
-                        li.textContent = `${icon} ${answer.playerName}: Opzione ${answer.answerIndex + 1}`;
+                        let pointsText = '';
+                        if (isCorrect) {
+                            pointsText = ` (+${pointsData.points}${pointsData.speedBonus > 0 ? ` <span class="speed-bonus">⚡+${pointsData.speedBonus}</span>` : ''})`;
+                            
+                            // Aggiorna il punteggio totale del player
+                            if (!playerScores[answer.playerName]) {
+                                playerScores[answer.playerName] = { total: 0, correctAnswers: 0, speedBonuses: 0 };
+                            }
+                            playerScores[answer.playerName].total += pointsData.points;
+                            playerScores[answer.playerName].correctAnswers += 1;
+                            if (pointsData.speedBonus > 0) {
+                                playerScores[answer.playerName].speedBonuses += pointsData.speedBonus;
+                            }
+                        }
+                        
+                        li.innerHTML = `${icon} ${answer.playerName}: Opzione ${answer.answerIndex + 1}${pointsText}`;
                         elements.answersList.appendChild(li);
                     });
                 }
@@ -548,11 +716,85 @@
             loadQuestion(currentQuestion + 1);
         }
 
+        // === NUOVA FUNZIONE PER LA CLASSIFICA ===
+        function showLeaderboard() {
+            elements.gameScreen.classList.add('hidden');
+            elements.leaderboardScreen.classList.remove('hidden');
+            
+            // Ordina i player per punteggio
+            const sortedPlayers = Object.entries(playerScores)
+                .sort(([,a], [,b]) => b.total - a.total)
+                .map(([name, data], index) => ({
+                    name,
+                    ...data,
+                    rank: index + 1
+                }));
+            
+            // Crea il podio (primi 3)
+            elements.podium.innerHTML = '';
+            const top3 = sortedPlayers.slice(0, 3);
+            
+            top3.forEach((player, index) => {
+                const podiumItem = document.createElement('div');
+                podiumItem.className = `podium-item podium-${index + 1}`;
+                podiumItem.innerHTML = `
+                    <div style="font-size: 2rem; margin-bottom: 10px;">${getMedalIcon(index + 1)}</div>
+                    <div style="font-weight: bold; font-size: 1.2rem;">${player.name}</div>
+                    <div style="font-size: 1.5rem; margin-top: 10px;">${player.total}p</div>
+                    ${player.speedBonuses > 0 ? `<div style="font-size: 0.8rem; margin-top: 5px;">⚡ ${player.speedBonuses}p bonus</div>` : ''}
+                `;
+                elements.podium.appendChild(podiumItem);
+            });
+            
+            // Crea la classifica completa
+            elements.finalLeaderboard.innerHTML = '';
+            sortedPlayers.forEach((player, index) => {
+                const li = document.createElement('li');
+                li.className = 'leaderboard-item';
+                li.innerHTML = `
+                    <div class="leaderboard-rank rank-${player.rank}">#${player.rank}</div>
+                    <div class="leaderboard-name">${player.name}</div>
+                    <div class="leaderboard-score">
+                        ${player.total}p
+                        ${player.speedBonuses > 0 ? `<span class="speed-bonus">⚡+${player.speedBonuses}</span>` : ''}
+                    </div>
+                `;
+                elements.finalLeaderboard.appendChild(li);
+            });
+        }
+
+        function getMedalIcon(rank) {
+            switch(rank) {
+                case 1: return '🥇';
+                case 2: return '🥈';
+                case 3: return '🥉';
+                default: return '🏆';
+            }
+        }
+
         function endGame() {
-            elements.questionText.textContent = "🎉 GIOCO COMPLETATO!";
-            elements.answersGrid.innerHTML = '';
-            elements.timer.textContent = "FINE";
-            elements.nextBtn.disabled = true;
+            // Calcola i punteggi finali per tutte le risposte
+            playerAnswers.forEach(answer => {
+                if (answer.questionIndex !== undefined) {
+                    const question = questions[answer.questionIndex];
+                    if (question) {
+                        const pointsData = calculatePoints(answer, question);
+                        if (pointsData.points > 0) {
+                            if (!playerScores[answer.playerName]) {
+                                playerScores[answer.playerName] = { total: 0, correctAnswers: 0, speedBonuses: 0 };
+                            }
+                            playerScores[answer.playerName].total += pointsData.points;
+                            playerScores[answer.playerName].correctAnswers += 1;
+                            if (pointsData.speedBonus > 0) {
+                                playerScores[answer.playerName].speedBonuses += pointsData.speedBonus;
+                            }
+                        }
+                    }
+                }
+            });
+            
+            showLeaderboard();
+            
             database.ref('games/' + gameCode).update({
                 status: 'ended'
             });
@@ -574,13 +816,17 @@
             showCorrectAnswer();
         });
 
+        elements.restartBtn.addEventListener('click', function() {
+            location.reload();
+        });
+
         // === AVVIA IL GIOCO ===
         initGame();
         
         // === FORZA REFRESH VISUALE ===
         setTimeout(() => {
-            console.log('🔄 Controllo versione: HOST v2.1 attivo');
-            document.title = "Pigiama Party - Host v2.1";
+            console.log('🔄 Controllo versione: HOST v2.2 attivo');
+            document.title = "Pigiama Party - Host v2.2";
         }, 100);
     </script>
 </body>
