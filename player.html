@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pigiama Party - Player</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
     <style>
         :root {
             --pink: #ff00c8;
@@ -129,6 +131,12 @@
             border: 2px solid yellow;
             color: yellow;
         }
+
+        .connected {
+            background: rgba(0, 255, 100, 0.2);
+            border: 2px solid #00ff88;
+            color: #00ff88;
+        }
     </style>
 </head>
 <body>
@@ -151,6 +159,7 @@
             <div style="font-size: 4rem; margin: 20px 0;">🎯</div>
             <div style="font-size: 1.2rem; margin: 10px 0;" id="playerWelcome">Giocatore</div>
             <div style="opacity: 0.8;">In attesa che l'host avvii il gioco...</div>
+            <div id="connectionStatus" class="result-feedback waiting">Connessione in corso...</div>
         </div>
     </div>
 
@@ -170,15 +179,31 @@
     </div>
 
     <script>
-        // VARIABILI DI STATO
+        // === CONFIGURA FIREBASE ===
+        const firebaseConfig = {
+            apiKey: "AIzaSyC-RrLKSwfM-S5r1gD_RWdjWElWhkgp1vI",
+            authDomain: "pigiamaparty2-b8d66.firebaseapp.com",
+            databaseURL: "https://pigiamaparty2-b8d66-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "pigiamaparty2-b8d66",
+            storageBucket: "pigiamaparty2-b8d66.firebasestorage.app",
+            messagingSenderId: "300420666102",
+            appId: "1:300420666102:web:4170ec1ba37673b88652d7"
+        };
+
+        // Inizializza Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // === VARIABILI DI STATO ===
         let playerState = {
             name: '',
             connected: false,
             currentQuestion: null,
-            answered: false
+            answered: false,
+            gameCode: ''
         };
 
-        // ELEMENTI DOM
+        // === ELEMENTI DOM ===
         const screens = {
             login: document.getElementById('loginScreen'),
             waiting: document.getElementById('waitingScreen'),
@@ -190,6 +215,7 @@
             gameCodeInput: document.getElementById('gameCodeInput'),
             joinBtn: document.getElementById('joinBtn'),
             playerWelcome: document.getElementById('playerWelcome'),
+            connectionStatus: document.getElementById('connectionStatus'),
             questionCounter: document.getElementById('questionCounter'),
             questionText: document.getElementById('questionText'),
             timer: document.getElementById('timer'),
@@ -197,7 +223,7 @@
             resultFeedback: document.getElementById('resultFeedback')
         };
 
-        // UNISCITI AL GIOCO
+        // === UNISCITI AL GIOCO ===
         elements.joinBtn.addEventListener('click', joinGame);
 
         function joinGame() {
@@ -210,6 +236,7 @@
             }
 
             playerState.name = name;
+            playerState.gameCode = gameCode;
             elements.playerWelcome.textContent = name;
 
             // Connetti al gioco
@@ -217,44 +244,57 @@
         }
 
         function connectToGame(playerName, gameCode) {
-            // Leggi i player attuali
-            let connectedPlayers = JSON.parse(localStorage.getItem('connectedPlayers') || '[]');
-            
-            // Aggiungi questo player
-            if (!connectedPlayers.find(p => p.name === playerName)) {
-                connectedPlayers.push({ name: playerName, gameCode: gameCode });
-                localStorage.setItem('connectedPlayers', JSON.stringify(connectedPlayers));
-            }
+            // Verifica se il gioco esiste
+            database.ref('games/' + gameCode).once('value').then((snapshot) => {
+                if (!snapshot.exists()) {
+                    alert('Codice gioco non trovato! Controlla il codice.');
+                    return;
+                }
 
-            // Mostra schermata attesa
-            screens.login.classList.add('hidden');
-            screens.waiting.classList.remove('hidden');
-            
-            // Inizia ad ascoltare
-            startListening();
-        }
+                // Aggiungi player alla lista
+                const playerId = 'player_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+                
+                database.ref('games/' + gameCode + '/players/' + playerId).set({
+                    name: playerName,
+                    joinedAt: Date.now()
+                });
 
-        // ASCOLTA L'HOST
-        function startListening() {
-            setInterval(() => {
-                // Controlla se il gioco è iniziato
-                const gameStatus = localStorage.getItem('gameStatus');
-                if (gameStatus === 'started') {
-                    screens.waiting.classList.add('hidden');
-                    screens.game.classList.remove('hidden');
+                // Mostra schermata attesa
+                screens.login.classList.add('hidden');
+                screens.waiting.classList.remove('hidden');
+                elements.connectionStatus.textContent = '✅ Connesso! In attesa dell\'host...';
+                elements.connectionStatus.className = 'result-feedback connected';
+
+                // Ascolta lo stato del gioco
+                database.ref('games/' + gameCode).on('value', (snapshot) => {
+                    const gameData = snapshot.val();
                     
-                    // Controlla se c'è una nuova domanda
-                    const currentQuestionIndex = localStorage.getItem('currentQuestion');
-                    const questionData = localStorage.getItem('currentQuestionData');
-                    
-                    if (questionData && !playerState.answered) {
-                        const question = JSON.parse(questionData);
-                        if (question && (!playerState.currentQuestion || playerState.currentQuestion.index != currentQuestionIndex)) {
-                            loadQuestion(question, parseInt(currentQuestionIndex));
+                    if (gameData && gameData.status === 'started') {
+                        screens.waiting.classList.add('hidden');
+                        screens.game.classList.remove('hidden');
+                        
+                        // Controlla se c'è una nuova domanda
+                        if (gameData.currentQuestionData && 
+                            (!playerState.currentQuestion || 
+                             playerState.currentQuestion.index !== gameData.currentQuestion)) {
+                            
+                            loadQuestion(gameData.currentQuestionData, gameData.currentQuestion);
                         }
                     }
-                }
-            }, 1000);
+                });
+
+                // Ascolta se il gioco viene cancellato
+                database.ref('games/' + gameCode + '/status').on('value', (snapshot) => {
+                    if (!snapshot.exists()) {
+                        alert('Il gioco è stato terminato dall\'host.');
+                        location.reload();
+                    }
+                });
+
+            }).catch((error) => {
+                console.error('Errore connessione:', error);
+                alert('Errore di connessione al gioco!');
+            });
         }
 
         function loadQuestion(questionData, questionIndex) {
@@ -314,14 +354,14 @@
             });
             
             // Invia risposta all'host
-            let answers = JSON.parse(localStorage.getItem('playerAnswers') || '[]');
-            answers.push({
+            const answerId = 'answer_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+            
+            database.ref('games/' + playerState.gameCode + '/answers/' + answerId).set({
                 playerName: playerState.name,
                 answerIndex: selectedIndex,
                 questionIndex: playerState.currentQuestion.index,
                 timestamp: Date.now()
             });
-            localStorage.setItem('playerAnswers', JSON.stringify(answers));
             
             // Mostra feedback
             elements.resultFeedback.innerHTML = `
