@@ -490,20 +490,25 @@
             }
         }
 
+        // ==================== PUSHER SETUP ====================
+        const pusher = new Pusher('26fcb8b4979ceb555e15', {
+            cluster: 'eu'
+        });
+        const channel = pusher.subscribe('game-night-channel');
+
+        // Ascolta il comando di start dall'host
+        channel.bind('client-game-start', function(data) {
+            if (data.action === 'start') {
+                console.log("Received start command from host!");
+                startGame();
+            }
+        });
+
         function simulateWaitingForHost() {
-            elements.waitingPlayerScore.textContent = "Waiting for host...";
+            elements.waitingPlayerScore.textContent = "Waiting for host to start...";
             
-            // SIMULAZIONE: aspetta 8 secondi (come se l'host desse il via)
-            let waitTime = 8;
-            const countdown = setInterval(() => {
-                elements.waitingPlayerScore.textContent = `Starting in ${waitTime}s...`;
-                waitTime--;
-                
-                if (waitTime <= 0) {
-                    clearInterval(countdown);
-                    startGame();
-                }
-            }, 1000);
+            // NON più countdown finto - aspetta il vero comando!
+            // Il gioco partirà quando l'host clicca START
         }
 
         function startGame() {
@@ -1034,6 +1039,7 @@
 </body>
 
 </html>
+
 
 
 
