@@ -120,6 +120,29 @@
             0%, 100% { transform: translateY(0) rotate(0deg); }
             50% { transform: translateY(-20px) rotate(180deg); }
         }
+
+        /* ==================== MOBILE FIXES ==================== */
+        html, body {
+            overflow: auto;
+            -webkit-overflow-scrolling: touch;
+            height: 100%;
+        }
+
+        .container {
+            min-height: 100vh;
+            overflow-y: auto;
+        }
+
+        * {
+            touch-action: pan-y;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: text;
+        }
+
+        .mode-card {
+            -webkit-tap-highlight-color: transparent;
+        }
     </style>
 </head>
 <body>
@@ -171,3 +194,4 @@
     </script>
 </body>
 </html>
+
