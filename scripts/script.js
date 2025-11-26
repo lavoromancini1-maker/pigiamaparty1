@@ -339,6 +339,101 @@ const quizQuestions = [
         correct: 0,
         points: 10
     }
+        // Aggiungi altre domande qui - MANCANO 15 DOMANDE
+    {
+        question: "DOMANDA 46 - Quale scienziato ha scoperto la penicillina?",
+        answers: ["Louis Pasteur", "Alexander Fleming", "Marie Curie", "Robert Koch"],
+        correct: 1,
+        points: 15
+    },
+    {
+        question: "DOMANDA 47 - In quale anno è stato fondato Google?",
+        answers: ["1996", "1998", "2000", "2002"],
+        correct: 1,
+        points: 15
+    },
+    {
+        question: "DOMANDA 48 - Quale è la capitale del Brasile?",
+        answers: ["Rio de Janeiro", "San Paolo", "Brasilia", "Salvador"],
+        correct: 2,
+        points: 10
+    },
+    {
+        question: "DOMANDA 49 - Chi ha scritto 'Il Piccolo Principe'?",
+        answers: ["Jules Verne", "Antoine de Saint-Exupéry", "Victor Hugo", "Albert Camus"],
+        correct: 1,
+        points: 15
+    },
+    {
+        question: "DOMANDA 50 - Quale pianeta è più vicino al Sole?",
+        answers: ["Venere", "Mercurio", "Marte", "Terra"],
+        correct: 1,
+        points: 10
+    },
+    {
+        question: "DOMANDA 51 - Test video - Da quale film è questa scena?",
+        answers: ["Forrest Gump", "Pulp Fiction", "Il Padrino", "Titanic"],
+        correct: 0,
+        points: 25,
+        media: {
+            type: "video",
+            src: "https://www.w3schools.com/html/mov_bbb.mp4"
+        }
+    },
+    {
+        question: "DOMANDA 52 - In quale secolo è vissuto Leonardo da Vinci?",
+        answers: ["XIV secolo", "XV secolo", "XVI secolo", "XVII secolo"],
+        correct: 1,
+        points: 15
+    },
+    {
+        question: "DOMANDA 53 - Quale è l'oceano più piccolo del mondo?",
+        answers: ["Oceano Indiano", "Oceano Artico", "Oceano Atlantico", "Oceano Pacifico"],
+        correct: 1,
+        points: 15
+    },
+    {
+        question: "DOMANDA 54 - Chi ha composto 'Le quattro stagioni'?",
+        answers: ["Vivaldi", "Mozart", "Bach", "Beethoven"],
+        correct: 0,
+        points: 15
+    },
+    {
+        question: "DOMANDA 55 - Quale organo del corpo umano pompa il sangue?",
+        answers: ["Polmoni", "Cuore", "Fegato", "Reni"],
+        correct: 1,
+        points: 10
+    },
+    {
+        question: "DOMANDA 56 - In quale anno è finita la Prima Guerra Mondiale?",
+        answers: ["1916", "1918", "1920", "1922"],
+        correct: 1,
+        points: 15
+    },
+    {
+        question: "DOMANDA 57 - Quale è il simbolo chimico dell'argento?",
+        answers: ["Ag", "Ar", "Au", "Al"],
+        correct: 0,
+        points: 10
+    },
+    {
+        question: "DOMANDA 58 - Chi ha dipinto 'La nascita di Venere'?",
+        answers: ["Michelangelo", "Raffaello", "Botticelli", "Caravaggio"],
+        correct: 2,
+        points: 15
+    },
+    {
+        question: "DOMANDA 59 - Quale è la lingua ufficiale del Brasile?",
+        answers: ["Spagnolo", "Portoghese", "Francese", "Inglese"],
+        correct: 1,
+        points: 10
+    },
+    {
+        question: "DOMANDA 60 - In quale sport si usa la mazza da baseball?",
+        answers: ["Cricket", "Baseball", "Hockey", "Polo"],
+        correct: 1,
+        points: 10
+    }
 ];
 
 // Stato del gioco
@@ -596,3 +691,4 @@ playAgainBtn.addEventListener('click', () => {
 document.addEventListener('DOMContentLoaded', () => {
     console.log('Game Night Quiz loaded successfully with 60 questions!');
 });
+
