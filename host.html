@@ -303,6 +303,12 @@
         // Avvia la simulazione quando la pagina carica
         simulatePlayerConnections();
 
+               // ==================== PUSHER SETUP ====================
+        const pusher = new Pusher('26fcb8b4979ceb555e15', {
+            cluster: 'eu'
+        });
+        const channel = pusher.subscribe('game-night-channel');
+
         function startGame() {
             if (connectedPlayers.length === 0) {
                 alert('Wait for players to join!');
@@ -315,7 +321,13 @@
             elements.nextBtn.disabled = false;
             elements.questionText.textContent = "Game starting... Get ready!";
             
-            // Qui in una versione reale invieresti un segnale a tutti i player
+            // INVIA IL COMANDO A TUTTI I PLAYER
+            channel.trigger('client-game-start', {
+                action: 'start',
+                gameId: gameState.gameCode,
+                timestamp: Date.now()
+            });
+            
             setTimeout(() => {
                 loadQuestion(0);
             }, 3000);
@@ -395,6 +407,7 @@
     </script>
 </body>
 </html>
+
 
 
 
