@@ -439,8 +439,8 @@
 
     <!-- CONTROLLI AUDIO -->
     <div class="audio-controls">
-        <button class="audio-btn" id="musicToggle">🔊 Musica ON</button>
-        <button class="audio-btn" id="sfxToggle">🔊 Suoni ON</button>
+        <button class="audio-btn" id="musicToggle">🔇 Musica OFF</button>
+        <button class="audio-btn" id="sfxToggle">🔇 Suoni OFF</button>
     </div>
 
     <div class="version">v2.3 - Audio & Animazioni</div>
@@ -581,20 +581,57 @@
             
             // Metodi
             activateAudio() {
-                // Crea un contesto audio vuoto per sbloccare l'audio
-                const AudioContext = window.AudioContext || window.webkitAudioContext;
-                const audioContext = new AudioContext();
+                console.log('🎵 Tentativo di attivazione audio...');
                 
-                // Crea un buffer vuoto e lo suona
-                const buffer = audioContext.createBuffer(1, 1, 22050);
-                const source = audioContext.createBufferSource();
-                source.buffer = buffer;
-                source.connect(audioContext.destination);
-                source.start();
-                
-                // Ripristina il contesto
-                audioContext.resume();
-                
+                try {
+                    // Crea un contesto audio vuoto per sbloccare l'audio
+                    const AudioContext = window.AudioContext || window.webkitAudioContext;
+                    const audioContext = new AudioContext();
+                    
+                    // Crea un buffer vuoto e lo suona
+                    const buffer = audioContext.createBuffer(1, 1, 22050);
+                    const source = audioContext.createBufferSource();
+                    source.buffer = buffer;
+                    source.connect(audioContext.destination);
+                    source.start();
+                    
+                    // Ripristina il contesto
+                    audioContext.resume().then(() => {
+                        console.log('🎵 Contesto audio sbloccato!');
+                        this.audioActivated = true;
+                        this.musicEnabled = true;
+                        this.sfxEnabled = true;
+                        
+                        // Aggiorna UI
+                        document.getElementById('musicToggle').textContent = '🔊 Musica ON';
+                        document.getElementById('sfxToggle').textContent = '🔊 Suoni ON';
+                        
+                        // Nascondi overlay con animazione
+                        const activationOverlay = document.getElementById('audioActivation');
+                        activationOverlay.style.opacity = '0';
+                        activationOverlay.style.transition = 'opacity 0.5s ease';
+                        
+                        setTimeout(() => {
+                            activationOverlay.style.display = 'none';
+                        }, 500);
+                        
+                        // Avvia musica menu
+                        this.playMusic('menuMusic');
+                        
+                        console.log('🎵 Audio attivato con successo!');
+                    }).catch(e => {
+                        console.error('❌ Errore nel ripristino del contesto audio:', e);
+                        this.fallbackAudioActivation();
+                    });
+                    
+                } catch (error) {
+                    console.error('❌ Errore nell\'attivazione audio:', error);
+                    this.fallbackAudioActivation();
+                }
+            },
+            
+            fallbackAudioActivation() {
+                console.log('🔄 Tentativo fallback attivazione audio...');
                 this.audioActivated = true;
                 this.musicEnabled = true;
                 this.sfxEnabled = true;
@@ -606,25 +643,40 @@
                 // Nascondi overlay
                 document.getElementById('audioActivation').style.display = 'none';
                 
-                // Avvia musica menu
-                this.playMusic('menuMusic');
+                // Prova a riprodurre un suono semplice
+                this.playSFX('clickSound');
                 
-                console.log('🎵 Audio attivato!');
+                console.log('🎵 Audio attivato con fallback!');
             },
             
             playMusic(type) {
-                if (!this.musicEnabled || !this.audioActivated) return;
+                if (!this.musicEnabled || !this.audioActivated) {
+                    console.log('🎵 Musica disabilitata o audio non attivato');
+                    return;
+                }
                 
-                // Ferma tutta la musica
-                this.menuMusic.pause();
-                this.gameMusic.pause();
-                this.victoryMusic.pause();
-                
-                // Reset e play nuova musica
-                const music = this[type];
-                music.currentTime = 0;
-                music.volume = 0.7;
-                music.play().catch(e => console.log('Audio error:', e));
+                try {
+                    // Ferma tutta la musica
+                    this.menuMusic.pause();
+                    this.gameMusic.pause();
+                    this.victoryMusic.pause();
+                    
+                    // Reset e play nuova musica
+                    const music = this[type];
+                    music.currentTime = 0;
+                    music.volume = 0.7;
+                    
+                    const playPromise = music.play();
+                    if (playPromise !== undefined) {
+                        playPromise.then(() => {
+                            console.log('🎵 Musica avviata:', type);
+                        }).catch(error => {
+                            console.error('❌ Errore nella riproduzione della musica:', error);
+                        });
+                    }
+                } catch (error) {
+                    console.error('❌ Errore generale nella riproduzione musicale:', error);
+                }
             },
             
             stopAllMusic() {
@@ -634,21 +686,42 @@
             },
             
             playSFX(type) {
-                if (!this.sfxEnabled || !this.audioActivated) return;
-                const sfx = this[type];
-                sfx.currentTime = 0;
-                sfx.volume = 0.6;
-                sfx.play().catch(e => console.log('SFX error:', e));
+                if (!this.sfxEnabled || !this.audioActivated) {
+                    console.log('🔇 SFX disabilitati o audio non attivato');
+                    return;
+                }
+                
+                try {
+                    const sfx = this[type];
+                    sfx.currentTime = 0;
+                    sfx.volume = 0.6;
+                    
+                    const playPromise = sfx.play();
+                    if (playPromise !== undefined) {
+                        playPromise.then(() => {
+                            console.log('🔊 SFX riprodotto:', type);
+                        }).catch(error => {
+                            console.error('❌ Errore nella riproduzione SFX:', error);
+                        });
+                    }
+                } catch (error) {
+                    console.error('❌ Errore generale nella riproduzione SFX:', error);
+                }
             },
             
             toggleMusic() {
-                if (!this.audioActivated) return;
+                if (!this.audioActivated) {
+                    console.log('🔇 Audio non ancora attivato');
+                    return;
+                }
+                
                 this.musicEnabled = !this.musicEnabled;
                 document.getElementById('musicToggle').textContent = 
                     this.musicEnabled ? '🔊 Musica ON' : '🔇 Musica OFF';
                 
                 if (!this.musicEnabled) {
                     this.stopAllMusic();
+                    console.log('🔇 Musica disattivata');
                 } else {
                     // Riproduci musica corrente in base alla schermata
                     if (document.getElementById('lobbyScreen').classList.contains('hidden') === false) {
@@ -658,14 +731,21 @@
                     } else if (document.getElementById('leaderboardScreen').classList.contains('hidden') === false) {
                         this.playMusic('victoryMusic');
                     }
+                    console.log('🔊 Musica attivata');
                 }
             },
             
             toggleSFX() {
-                if (!this.audioActivated) return;
+                if (!this.audioActivated) {
+                    console.log('🔇 Audio non ancora attivato');
+                    return;
+                }
+                
                 this.sfxEnabled = !this.sfxEnabled;
                 document.getElementById('sfxToggle').textContent = 
                     this.sfxEnabled ? '🔊 Suoni ON' : '🔇 Suoni OFF';
+                
+                console.log(this.sfxEnabled ? '🔊 Suoni attivati' : '🔇 Suoni disattivati');
             }
         };
 
@@ -1162,6 +1242,12 @@
             audio.toggleSFX();
         });
 
+        // === EVENT LISTENER PER ATTIVAZIONE AUDIO ===
+        document.getElementById('activateAudio').addEventListener('click', function() {
+            console.log('🎵 Pulsante Attiva Audio cliccato');
+            audio.activateAudio();
+        });
+
         // === AVVIA IL GIOCO ===
         initGame();
         
@@ -1173,4 +1259,3 @@
     </script>
 </body>
 </html>
-
