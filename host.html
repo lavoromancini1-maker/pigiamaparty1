@@ -271,7 +271,7 @@
     elements.startBtn.disabled = connectedPlayers.length === 0;
 }
 
-              // ==================== PUSHER SETUP - VERSIONE CORRETTA ====================
+             // ==================== PUSHER SETUP - VERSIONE CORRETTA ====================
 const pusher = new Pusher('26fcb8b4979ceb555e15', {
     cluster: 'eu'
 });
@@ -284,7 +284,7 @@ console.log("Game Code:", gameCode);
 // Usa un canale normale basato sul codice gioco
 const channel = pusher.subscribe('game-channel-' + gameCode);
 
-        // Aggiungi questa funzione per debug
+// ==================== DEBUG INIZIALE ====================
 function debugPusher() {
     console.log("=== PUSHER DEBUG ===");
     console.log("Game Code:", gameCode);
@@ -295,20 +295,11 @@ function debugPusher() {
     // Mostra il codice gioco in grande
     alert("CODICE GIOCO: " + gameCode + "\n\nCondividi questo codice con i player!");
 }
-
-// Chiamala subito dopo aver creato il canale
 debugPusher();
 
-// Gestisci la connessione
-pusher.connection.bind('connected', function() {
-    console.log("✅ Host connected to Pusher");
-});
+// ==================== GESTIONE PLAYER ====================
+let connectedPlayers = [];
 
-pusher.connection.bind('error', function(err) {
-    console.error("❌ Pusher connection error:", err);
-});
-
-// ==================== REAL PLAYER CONNECTIONS ====================
 // Player che si uniscono al gioco
 channel.bind('client-player-join', function(data) {
     console.log("🎮 Player joined:", data.playerName, "ID:", data.playerId);
@@ -342,12 +333,35 @@ channel.bind('client-player-answer', function(data) {
     
     // Mostra la risposta del player
     showNotification(data.playerName + " ha risposto: Opzione " + (data.answerIndex + 1));
-    
-    // Qui puoi aggiungere la logica per gestire le risposte
-    // (controllo correttezza, punteggi, ecc.)
 });
 
-// Funzione per mostrare notifiche temporanee
+// ==================== FUNZIONI UTILITY ====================
+function updatePlayerList() {
+    console.log("🔄 Updating player list:", connectedPlayers);
+    elements.playerList.innerHTML = '';
+    
+    if (connectedPlayers.length === 0) {
+        const li = document.createElement('li');
+        li.className = 'player-item';
+        li.innerHTML = `<span style="opacity:0.7;">Waiting for players...</span>`;
+        elements.playerList.appendChild(li);
+    } else {
+        connectedPlayers.forEach((player, index) => {
+            const li = document.createElement('li');
+            li.className = 'player-item';
+            li.innerHTML = `
+                <span>${player.name}</span>
+                <span>🟢 CONNECTED</span>
+            `;
+            elements.playerList.appendChild(li);
+        });
+    }
+    
+    // Aggiorna il pulsante START
+    elements.startBtn.disabled = connectedPlayers.length === 0;
+    console.log("✅ Start button disabled:", elements.startBtn.disabled);
+}
+
 function showNotification(message) {
     // Crea una notifica temporanea
     const notification = document.createElement('div');
@@ -372,7 +386,7 @@ function showNotification(message) {
     }, 3000);
 }
 
-// Aggiungi questo stile per l'animazione
+// Aggiungi stile per l'animazione
 const style = document.createElement('style');
 style.textContent = `
     @keyframes slideIn {
@@ -381,6 +395,16 @@ style.textContent = `
     }
 `;
 document.head.appendChild(style);
+
+// ==================== INIZIALIZZAZIONE ====================
+// Gestisci la connessione
+pusher.connection.bind('connected', function() {
+    console.log("✅ Host connected to Pusher");
+});
+
+pusher.connection.bind('error', function(err) {
+    console.error("❌ Pusher connection error:", err);
+});
 
 // Inizializza la lista vuota
 updatePlayerList();
@@ -486,6 +510,7 @@ updatePlayerList();
     </script>
 </body>
 </html>
+
 
 
 
