@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NEXUS QUIZ | Game Night Experience</title>
@@ -117,22 +116,6 @@
             overflow: hidden;
         }
 
-        header::before {
-            content: "";
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: linear-gradient(45deg, transparent, rgba(0, 245, 255, 0.1), transparent);
-            animation: shine 3s infinite;
-        }
-
-        @keyframes shine {
-            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
-            100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
-        }
-
         h1 {
             font-size: 4rem;
             margin-bottom: 10px;
@@ -180,22 +163,6 @@
             flex-direction: column;
             position: relative;
             overflow: hidden;
-        }
-
-        .quiz-container::before {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 3px;
-            background: linear-gradient(90deg, var(--primary), var(--secondary), var(--accent));
-            animation: progress-line 30s linear;
-        }
-
-        @keyframes progress-line {
-            0% { width: 0%; }
-            100% { width: 100%; }
         }
 
         .leaderboard {
@@ -248,21 +215,6 @@
             overflow: hidden;
         }
 
-        .player-item::before {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(0, 245, 255, 0.1), transparent);
-            transition: left 0.5s;
-        }
-
-        .player-item:hover::before {
-            left: 100%;
-        }
-
         .player-item:hover {
             transform: translateX(5px);
             box-shadow: 0 0 15px rgba(0, 245, 255, 0.3);
@@ -272,14 +224,6 @@
             background: rgba(0, 245, 255, 0.1);
             border: 1px solid var(--primary);
             box-shadow: 0 0 15px rgba(0, 245, 255, 0.5);
-        }
-
-        .player-rank {
-            font-size: 1.2rem;
-            font-weight: bold;
-            color: var(--accent);
-            width: 30px;
-            text-align: center;
         }
 
         .player-name {
@@ -306,14 +250,6 @@
             margin-bottom: 15px;
             color: var(--primary);
             text-shadow: 0 0 10px var(--primary);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .question-counter::before {
-            content: "➤";
-            color: var(--accent);
         }
 
         .question-text {
@@ -360,21 +296,6 @@
             text-align: left;
             position: relative;
             overflow: hidden;
-        }
-
-        .answer-btn::before {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(0, 245, 255, 0.1), transparent);
-            transition: left 0.5s;
-        }
-
-        .answer-btn:hover::before {
-            left: 100%;
         }
 
         .answer-btn:hover {
@@ -427,23 +348,6 @@
             font-weight: bold;
             text-transform: uppercase;
             letter-spacing: 1px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .btn::before {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-            transition: left 0.5s;
-        }
-
-        .btn:hover::before {
-            left: 100%;
         }
 
         .btn:hover {
@@ -459,10 +363,6 @@
             box-shadow: none;
         }
 
-        .btn:disabled::before {
-            display: none;
-        }
-
         .login-screen, .results-screen {
             background: rgba(10, 10, 26, 0.9);
             border-radius: 20px;
@@ -473,38 +373,6 @@
             max-width: 700px;
             margin: 50px auto;
             border: 1px solid rgba(0, 245, 255, 0.3);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .login-screen::before, .results-screen::before {
-            content: "";
-            position: absolute;
-            top: -2px;
-            left: -2px;
-            right: -2px;
-            bottom: -2px;
-            background: linear-gradient(45deg, var(--primary), var(--secondary), var(--accent), var(--primary));
-            z-index: -1;
-            border-radius: 22px;
-            animation: rotate 3s linear infinite;
-        }
-
-        @keyframes rotate {
-            0% { filter: hue-rotate(0deg); }
-            100% { filter: hue-rotate(360deg); }
-        }
-
-        .login-screen::after, .results-screen::after {
-            content: "";
-            position: absolute;
-            top: 2px;
-            left: 2px;
-            right: 2px;
-            bottom: 2px;
-            background: rgba(10, 10, 26, 0.9);
-            border-radius: 18px;
-            z-index: -1;
         }
 
         .login-form {
@@ -570,10 +438,6 @@
             letter-spacing: 3px;
         }
 
-        .glitch-text {
-            animation: glitch 0.5s infinite;
-        }
-
         @media (max-width: 1024px) {
             .game-area {
                 flex-direction: column;
@@ -610,7 +474,7 @@
     <div class="container">
         <header>
             <div class="nexus-logo">NEXUS GAMES</div>
-            <h1 class="glitch-text">QUIZ MATRIX</h1>
+            <h1>QUIZ MATRIX</h1>
             <p class="tagline">TEST YOUR KNOWLEDGE IN THE DIGITAL REALM</p>
         </header>
         
@@ -632,7 +496,7 @@
             <div class="game-area">
                 <div class="quiz-container">
                     <div class="question-container">
-                        <div class="question-counter" id="questionCounter">QUESTION 1 OF 60</div>
+                        <div class="question-counter" id="questionCounter">QUESTION 1 OF 10</div>
                         <div class="question-text" id="questionText">Initializing question database...</div>
                         <div class="media-container" id="mediaContainer"></div>
                     </div>
@@ -669,17 +533,17 @@
         // Creazione particelle dinamiche
         function createParticles() {
             const particlesContainer = document.getElementById('particles');
-            const particleCount = 50;
+            const particleCount = 30;
             
             for (let i = 0; i < particleCount; i++) {
                 const particle = document.createElement('div');
                 particle.classList.add('particle');
                 
-                const size = Math.random() * 5 + 2;
+                const size = Math.random() * 4 + 1;
                 const posX = Math.random() * 100;
                 const posY = Math.random() * 100;
                 const delay = Math.random() * 5;
-                const duration = Math.random() * 10 + 5;
+                const duration = Math.random() * 8 + 4;
                 
                 particle.style.width = `${size}px`;
                 particle.style.height = `${size}px`;
@@ -692,9 +556,76 @@
             }
         }
         
-        // Dati del quiz - 60 DOMANDE
+        // Dati del quiz - 10 DOMANDE DI ESEMPIO
         const quizQuestions = [
-            // ... (inserisci qui le tue 60 domande)
+            {
+                question: "Qual è la capitale dell'Australia?",
+                answers: ["Sydney", "Melbourne", "Canberra", "Perth"],
+                correct: 2,
+                points: 10
+            },
+            {
+                question: "In quale anno è caduto il muro di Berlino?",
+                answers: ["1987", "1989", "1991", "1985"],
+                correct: 1,
+                points: 15
+            },
+            {
+                question: "Test Audio - A quale canzone appartiene?",
+                answers: ["We Will Rock You", "Bohemian Rhapsody", "Another One Bites the Dust", "We Are the Champions"],
+                correct: 1,
+                points: 20,
+                media: {
+                    type: "audio",
+                    src: "https://www.soundjay.com/button/button-1.mp3"
+                }
+            },
+            {
+                question: "Test Immagine - Che monumento è?",
+                answers: ["Colosseo", "Torre Eiffel", "Big Ben", "Taj Mahal"],
+                correct: 3,
+                points: 15,
+                media: {
+                    type: "image", 
+                    src: "https://via.placeholder.com/400x300/2575fc/ffffff?text=Monumento+Test"
+                }
+            },
+            {
+                question: "Chi ha scritto 'Il nome della rosa'?",
+                answers: ["Italo Calvino", "Umberto Eco", "Luigi Pirandello", "Alessandro Manzoni"],
+                correct: 1,
+                points: 10
+            },
+            {
+                question: "Qual è l'elemento chimico con simbolo 'Au'?",
+                answers: ["Argento", "Alluminio", "Oro", "Argon"],
+                correct: 2,
+                points: 10
+            },
+            {
+                question: "In quale oceano si trova le Bermuda?",
+                answers: ["Oceano Indiano", "Oceano Pacifico", "Oceano Atlantico", "Oceano Artico"],
+                correct: 2,
+                points: 10
+            },
+            {
+                question: "Chi ha dipinto 'La notte stellata'?",
+                answers: ["Pablo Picasso", "Vincent van Gogh", "Claude Monet", "Salvador Dalí"],
+                correct: 1,
+                points: 15
+            },
+            {
+                question: "Qual è il fiume più lungo d'Italia?",
+                answers: ["Tevere", "Adige", "Arno", "Po"],
+                correct: 3,
+                points: 10
+            },
+            {
+                question: "In quale anno è stato inventato il World Wide Web?",
+                answers: ["1985", "1989", "1991", "1993"],
+                correct: 2,
+                points: 15
+            }
         ];
         
         // Stato del gioco
@@ -725,17 +656,184 @@
         const positionValue = document.getElementById('positionValue');
         const playAgainBtn = document.getElementById('playAgainBtn');
         
+        // Gestione del login
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const playerName = playerNameInput.value.trim();
+            
+            if (playerName) {
+                gameState.currentPlayer = {
+                    id: Date.now().toString(),
+                    name: playerName,
+                    score: 0
+                };
+                
+                gameState.players.push({...gameState.currentPlayer});
+                loginScreen.classList.add('hidden');
+                gameScreen.classList.remove('hidden');
+                updateLeaderboard();
+                loadQuestion();
+            }
+        });
+        
+        // Carica una domanda
+        function loadQuestion() {
+            gameState.answered = false;
+            gameState.timeLeft = 30;
+            timerElement.textContent = `${gameState.timeLeft}s`;
+            nextBtn.disabled = true;
+            
+            const question = quizQuestions[gameState.currentQuestionIndex];
+            questionCounter.textContent = `QUESTION ${gameState.currentQuestionIndex + 1} OF ${quizQuestions.length}`;
+            questionText.textContent = question.question;
+            
+            mediaContainer.innerHTML = '';
+            
+            if (question.media) {
+                if (question.media.type === 'image') {
+                    const img = document.createElement('img');
+                    img.src = question.media.src;
+                    img.alt = 'Immagine domanda';
+                    img.style.maxWidth = '100%';
+                    mediaContainer.appendChild(img);
+                } else if (question.media.type === 'video') {
+                    const video = document.createElement('video');
+                    video.src = question.media.src;
+                    video.controls = true;
+                    video.style.maxWidth = '100%';
+                    mediaContainer.appendChild(video);
+                } else if (question.media.type === 'audio') {
+                    const audio = document.createElement('audio');
+                    audio.src = question.media.src;
+                    audio.controls = true;
+                    audio.style.width = '100%';
+                    mediaContainer.appendChild(audio);
+                }
+            }
+            
+            answersContainer.innerHTML = '';
+            question.answers.forEach((answer, index) => {
+                const button = document.createElement('button');
+                button.className = 'answer-btn';
+                button.textContent = answer;
+                button.addEventListener('click', () => selectAnswer(index));
+                answersContainer.appendChild(button);
+            });
+            
+            startTimer();
+        }
+        
+        // Gestione selezione risposta
+        function selectAnswer(selectedIndex) {
+            if (gameState.answered) return;
+            
+            gameState.answered = true;
+            clearInterval(gameState.timer);
+            
+            const question = quizQuestions[gameState.currentQuestionIndex];
+            const answerButtons = document.querySelectorAll('.answer-btn');
+            
+            answerButtons.forEach(button => {
+                button.disabled = true;
+            });
+            
+            answerButtons[question.correct].classList.add('correct');
+            
+            if (selectedIndex !== question.correct) {
+                answerButtons[selectedIndex].classList.add('incorrect');
+            } else {
+                gameState.score += question.points;
+                const playerIndex = gameState.players.findIndex(p => p.id === gameState.currentPlayer.id);
+                if (playerIndex !== -1) {
+                    gameState.players[playerIndex].score = gameState.score;
+                }
+                updateLeaderboard();
+            }
+            
+            nextBtn.disabled = false;
+        }
+        
+        // Timer per ogni domanda
+        function startTimer() {
+            clearInterval(gameState.timer);
+            
+            gameState.timer = setInterval(() => {
+                gameState.timeLeft--;
+                timerElement.textContent = `${gameState.timeLeft}s`;
+                
+                if (gameState.timeLeft <= 0) {
+                    clearInterval(gameState.timer);
+                    if (!gameState.answered) {
+                        gameState.answered = true;
+                        const answerButtons = document.querySelectorAll('.answer-btn');
+                        answerButtons.forEach(button => {
+                            button.disabled = true;
+                        });
+                        
+                        const question = quizQuestions[gameState.currentQuestionIndex];
+                        answerButtons[question.correct].classList.add('correct');
+                        nextBtn.disabled = false;
+                    }
+                }
+            }, 1000);
+        }
+        
+        // Gestione prossima domanda
+        nextBtn.addEventListener('click', () => {
+            gameState.currentQuestionIndex++;
+            
+            if (gameState.currentQuestionIndex < quizQuestions.length) {
+                loadQuestion();
+            } else {
+                gameScreen.classList.add('hidden');
+                resultsScreen.classList.remove('hidden');
+                finalScore.textContent = gameState.score;
+                
+                const sortedPlayers = [...gameState.players].sort((a, b) => b.score - a.score);
+                const position = sortedPlayers.findIndex(p => p.id === gameState.currentPlayer.id) + 1;
+                positionValue.textContent = position;
+            }
+        });
+        
+        // Aggiorna classifica
+        function updateLeaderboard() {
+            const sortedPlayers = [...gameState.players].sort((a, b) => b.score - a.score);
+            playerList.innerHTML = '';
+            
+            sortedPlayers.forEach((player, index) => {
+                const li = document.createElement('li');
+                li.className = `player-item ${player.id === gameState.currentPlayer.id ? 'current' : ''}`;
+                
+                li.innerHTML = `
+                    <div class="player-name">${index + 1}. ${player.name}</div>
+                    <div class="player-score">${player.score}</div>
+                `;
+                
+                playerList.appendChild(li);
+            });
+        }
+        
+        // Gioca di nuovo
+        playAgainBtn.addEventListener('click', () => {
+            gameState.currentQuestionIndex = 0;
+            gameState.score = 0;
+            
+            const playerIndex = gameState.players.findIndex(p => p.id === gameState.currentPlayer.id);
+            if (playerIndex !== -1) {
+                gameState.players[playerIndex].score = 0;
+            }
+            
+            resultsScreen.classList.add('hidden');
+            gameScreen.classList.remove('hidden');
+            updateLeaderboard();
+            loadQuestion();
+        });
+        
         // Inizializzazione
         document.addEventListener('DOMContentLoaded', () => {
             createParticles();
             console.log('NEXUS QUIZ initialized successfully!');
-            
-            // Aggiungi qui il resto del codice JavaScript per la logica del gioco
-            // (gestione login, caricamento domande, timer, etc.)
         });
-        
-        // Aggiungi qui tutte le funzioni JavaScript del gioco che abbiamo creato prima
-        // (loadQuestion, selectAnswer, startTimer, updateLeaderboard, etc.)
     </script>
 </body>
 </html>
