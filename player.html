@@ -31,6 +31,31 @@
             --border-radius-large: 20px;
         }
 
+        /* === TEMI DINAMICI === */
+        body.theme-space {
+            background: linear-gradient(135deg, #000428 0%, #004e92 100%);
+            --accent-gold: #4FC3F7;
+            --accent-blue: #E040FB;
+            --accent-purple: #7B1FA2;
+            --accent-green: #00E5FF;
+        }
+
+        body.theme-neon {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            --accent-gold: #00FFFF;
+            --accent-blue: #FF00FF;
+            --accent-purple: #FF6B6B;
+            --accent-green: #39FF14;
+        }
+
+        body.theme-royal {
+            background: linear-gradient(135deg, #3a1c71 0%, #d76d77 50%, #ffaf7b 100%);
+            --accent-gold: #FFE082;
+            --accent-blue: #80DEEA;
+            --accent-purple: #CE93D8;
+            --accent-green: #80CBC4;
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -44,6 +69,7 @@
             min-height: 100vh;
             overflow-x: hidden;
             position: relative;
+            transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
         }
 
         /* SFONDO ANIMATO CON EFFETTI TV */
@@ -90,6 +116,7 @@
             position: absolute;
             width: 100%;
             height: 100%;
+            pointer-events: none;
         }
 
         .particle {
@@ -97,6 +124,29 @@
             background: var(--accent-gold);
             border-radius: 50%;
             animation: float 6s infinite ease-in-out;
+            pointer-events: none;
+        }
+
+        /* PARTICELLE CELEBRAZIONE */
+        .celebration-particle {
+            position: fixed;
+            width: 8px;
+            height: 8px;
+            background: var(--accent-gold);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 1000;
+            animation: celebrate 1.5s ease-out forwards;
+        }
+
+        .confetti {
+            position: fixed;
+            width: 12px;
+            height: 12px;
+            background: var(--accent-gold);
+            pointer-events: none;
+            z-index: 1000;
+            animation: confettiFall 3s ease-in forwards;
         }
 
         /* CONTAINER PRINCIPALE */
@@ -456,6 +506,44 @@
             display: none !important;
         }
 
+        /* CONTROLLI TEMI */
+        .theme-controls {
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 1000;
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            max-width: 280px;
+        }
+
+        .theme-btn {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: var(--text-primary);
+            padding: 6px 10px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            flex: 1;
+            min-width: 55px;
+            text-align: center;
+        }
+
+        .theme-btn:hover {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: var(--accent-gold);
+        }
+
+        .theme-btn.active {
+            background: var(--accent-gold);
+            color: #000;
+            border-color: var(--accent-gold);
+        }
+
         /* VERSION INFO */
         .version {
             position: fixed;
@@ -480,6 +568,8 @@
             top: 15px;
             right: 15px;
             z-index: 1000;
+            display: flex;
+            gap: 8px;
         }
 
         .audio-btn {
@@ -487,10 +577,10 @@
             backdrop-filter: blur(10px);
             border: 1px solid var(--accent-blue);
             color: var(--text-primary);
-            padding: 8px 15px;
-            border-radius: 15px;
+            padding: 8px 12px;
+            border-radius: 12px;
             cursor: pointer;
-            font-size: 0.9rem;
+            font-size: 0.8rem;
             transition: all 0.3s ease;
             font-weight: 600;
         }
@@ -627,15 +717,59 @@
             100% { transform: scale(1); opacity: 1; }
         }
 
-        @keyframes confetti {
-            0% { transform: translateY(-100px) rotate(0deg); opacity: 1; }
-            100% { transform: translateY(500px) rotate(360deg); opacity: 0; }
-        }
-
         @keyframes pulseGlow {
             0% { box-shadow: 0 0 0px rgba(0, 255, 136, 0.5); }
             50% { box-shadow: 0 0 20px rgba(0, 255, 136, 0.8); }
             100% { box-shadow: 0 0 0px rgba(0, 255, 136, 0.5); }
+        }
+
+        /* NUOVE ANIMAZIONI */
+        @keyframes celebrate {
+            0% {
+                transform: translate(0, 0) scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: translate(var(--tx, 0), var(--ty, -100px)) scale(0);
+                opacity: 0;
+            }
+        }
+
+        @keyframes confettiFall {
+            0% {
+                transform: translateY(-100px) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        @keyframes themeTransition {
+            0% { filter: brightness(1) blur(0px); }
+            50% { filter: brightness(1.2) blur(5px); }
+            100% { filter: brightness(1) blur(0px); }
+        }
+
+        /* EFFETTO RISPOSTA CONFERMATA */
+        .confirmation-box {
+            background: linear-gradient(135deg, rgba(0, 255, 136, 0.2), rgba(0, 180, 219, 0.1));
+            border: 2px solid var(--accent-green);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: var(--neon-glow-green);
+            text-align: center;
+        }
+
+        /* MESSAGGIO ATTESA HOST */
+        .waiting-host-message {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            margin-top: 20px;
+            font-style: italic;
+            text-align: center;
         }
 
         /* RESPONSIVE */
@@ -677,37 +811,21 @@
             .result-title {
                 font-size: 2rem;
             }
-        }
 
-        /* EFFETTO RISPOSTA CONFERMATA */
-        .confirmation-box {
-            background: linear-gradient(135deg, rgba(0, 255, 136, 0.2), rgba(0, 180, 219, 0.1));
-            border: 2px solid var(--accent-green);
-            border-radius: var(--border-radius);
-            padding: 20px;
-            margin: 20px 0;
-            box-shadow: var(--neon-glow-green);
-            text-align: center;
-        }
+            .theme-controls {
+                top: 70px;
+                left: 50%;
+                transform: translateX(-50%);
+                justify-content: center;
+                max-width: 90%;
+            }
 
-        /* EFFETTO CONFETTI */
-        .confetti {
-            position: fixed;
-            width: 10px;
-            height: 10px;
-            background: var(--accent-gold);
-            opacity: 0;
-            z-index: 1000;
-            pointer-events: none;
-        }
-
-        /* MESSAGGIO ATTESA HOST */
-        .waiting-host-message {
-            font-size: 1.1rem;
-            color: var(--text-secondary);
-            margin-top: 20px;
-            font-style: italic;
-            text-align: center;
+            .audio-controls {
+                top: 70px;
+                right: 50%;
+                transform: translateX(50%);
+                flex-direction: column;
+            }
         }
     </style>
 </head>
@@ -719,12 +837,20 @@
         <div class="particles" id="particlesContainer"></div>
     </div>
 
+    <!-- CONTROLLI TEMI -->
+    <div class="theme-controls">
+        <button class="theme-btn active" data-theme="default">🎮 Default</button>
+        <button class="theme-btn" data-theme="space">🚀 Space</button>
+        <button class="theme-btn" data-theme="neon">🌈 Neon</button>
+        <button class="theme-btn" data-theme="royal">👑 Royal</button>
+    </div>
+
     <!-- CONTROLLO AUDIO PLAYER -->
     <div class="audio-controls">
         <button class="audio-btn" id="sfxToggle">🔊 SFX</button>
     </div>
 
-    <div class="version">Game Show Contestant</div>
+    <div class="version">Game Show Contestant v2.0</div>
     
     <div class="container">
         <!-- SCHERMATA INIZIALE -->
@@ -788,8 +914,6 @@
                 <div class="answers-container" id="answersContainer">
                     <!-- Le risposte appariranno qui -->
                 </div>
-                
-                <!-- RIMOSSO IL PULSANTE SUBMIT -->
             </div>
         </div>
 
@@ -845,7 +969,7 @@
         </div>
     </div>
 
-    <!-- ELEMENTI AUDIO - CON NUOVI SUONI -->
+    <!-- ELEMENTI AUDIO -->
     <audio id="clickSound" preload="auto">
         <source src="audio/Click.wav" type="audio/wav">
     </audio>
@@ -864,7 +988,6 @@
     <audio id="submitSound" preload="auto">
         <source src="audio/start.mp3" type="audio/mpeg">
     </audio>
-    <!-- NUOVI SUONI -->
     <audio id="applauseSound" preload="auto">
         <source src="audio/clap.wav" type="audio/wav">
     </audio>
@@ -888,7 +1011,7 @@
                 particle.style.left = Math.random() * 100 + '%';
                 particle.style.top = Math.random() * 100 + '%';
                 
-                const colors = ['#FFD700', '#00B4DB', '#8A2BE2', '#FF416C'];
+                const colors = ['var(--accent-gold)', 'var(--accent-blue)', 'var(--accent-purple)', '#FF416C'];
                 particle.style.background = colors[Math.floor(Math.random() * colors.length)];
                 
                 particle.style.animationDelay = Math.random() * 6 + 's';
@@ -898,26 +1021,102 @@
             }
         }
 
-        // === CREA EFFETTO CONFETTI ===
-        function createConfetti() {
-            const colors = ['#FFD700', '#00B4DB', '#8A2BE2', '#FF416C', '#00ff88'];
-            for (let i = 0; i < 50; i++) {
-                const confetti = document.createElement('div');
-                confetti.className = 'confetti';
-                confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
-                confetti.style.left = Math.random() * 100 + '%';
-                confetti.style.width = (Math.random() * 10 + 5) + 'px';
-                confetti.style.height = (Math.random() * 10 + 5) + 'px';
-                confetti.style.animation = `confetti ${Math.random() * 2 + 1}s ease-out forwards`;
-                confetti.style.animationDelay = (Math.random() * 0.5) + 's';
-                document.body.appendChild(confetti);
+        // === PARTICELLE DI CELEBRAZIONE ===
+        function createCelebrationParticles(x, y, count = 20) {
+            for (let i = 0; i < count; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'celebration-particle';
                 
-                setTimeout(() => confetti.remove(), 2000);
+                particle.style.left = x + 'px';
+                particle.style.top = y + 'px';
+                
+                const angle = Math.random() * Math.PI * 2;
+                const distance = 50 + Math.random() * 100;
+                const tx = Math.cos(angle) * distance;
+                const ty = Math.sin(angle) * distance;
+                
+                particle.style.setProperty('--tx', tx + 'px');
+                particle.style.setProperty('--ty', ty + 'px');
+                
+                const colors = ['var(--accent-gold)', 'var(--accent-blue)', 'var(--accent-purple)', '#FF416C', '#00FF00'];
+                particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+                
+                const size = 3 + Math.random() * 8;
+                particle.style.width = size + 'px';
+                particle.style.height = size + 'px';
+                
+                document.body.appendChild(particle);
+                
+                setTimeout(() => {
+                    if (particle.parentNode) {
+                        particle.parentNode.removeChild(particle);
+                    }
+                }, 1500);
             }
         }
 
+        // === CONFETTI PER VITTORIA ===
+        function createConfetti() {
+            const confettiCount = 50;
+            
+            for (let i = 0; i < confettiCount; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                
+                confetti.style.left = Math.random() * 100 + 'vw';
+                confetti.style.top = '-20px';
+                
+                const colors = ['var(--accent-gold)', 'var(--accent-blue)', 'var(--accent-purple)', '#FF416C', '#00FF00', '#FFFF00'];
+                confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+                
+                if (Math.random() > 0.5) {
+                    confetti.style.borderRadius = '50%';
+                } else {
+                    confetti.style.borderRadius = '2px';
+                }
+                
+                confetti.style.transform = `rotate(${Math.random() * 360}deg)`;
+                
+                const duration = 2 + Math.random() * 2;
+                confetti.style.animationDuration = duration + 's';
+                
+                document.body.appendChild(confetti);
+                
+                setTimeout(() => {
+                    if (confetti.parentNode) {
+                        confetti.parentNode.removeChild(confetti);
+                    }
+                }, duration * 1000);
+            }
+        }
+
+        // === CAMBIO TEMA DINAMICO ===
+        function changeTheme(themeName) {
+            const body = document.body;
+            const themeButtons = document.querySelectorAll('.theme-btn');
+            
+            body.className = body.className.replace(/theme-\w+/g, '');
+            
+            if (themeName !== 'default') {
+                body.classList.add('theme-' + themeName);
+            }
+            
+            themeButtons.forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.theme === themeName);
+            });
+            
+            body.style.animation = 'themeTransition 0.8s ease';
+            setTimeout(() => {
+                body.style.animation = '';
+            }, 800);
+
+            const particlesContainer = document.getElementById('particlesContainer');
+            particlesContainer.innerHTML = '';
+            createParticles();
+        }
+
         // === FORZA REFRESH CACHE ===
-        console.log('🎮 PLAYER Game Show Edition - Caricato: ' + new Date().toLocaleString());
+        console.log('🎮 PLAYER Game Show Edition v2.0 - Caricato: ' + new Date().toLocaleString());
 
         // === SISTEMA AUDIO AGGIORNATO ===
         const audio = {
@@ -961,7 +1160,6 @@
                     const sfx = this[type];
                     sfx.currentTime = 0;
                     
-                    // Volume personalizzato per ogni suono
                     const volumes = {
                         clickSound: 0.6,
                         correctSound: 0.7,
@@ -1009,7 +1207,7 @@
         let playerName = '';
         let currentQuestionIndex = -1;
         let selectedAnswer = null;
-        let timeLeft = 20; // ⏰ RIDOTTO DA 30 A 20 SECONDI
+        let timeLeft = 20;
         let timer;
         let playerScore = 0;
         let currentQuestionData = null;
@@ -1084,26 +1282,23 @@
                 }
 
                 if (game.status === 'started') {
-                    // SOLO SE È UNA NUOVA DOMANDA
                     if (game.currentQuestion !== currentQuestionIndex) {
                         currentQuestionIndex = game.currentQuestion || 0;
                         console.log(`🎮 Player: Nuova domanda ${currentQuestionIndex + 1}`);
-                        selectedAnswer = null; // RESET RISPOSTA
-                        hasSubmitted = false; // RESET INVIO
+                        selectedAnswer = null;
+                        hasSubmitted = false;
                         showQuestionScreen();
                     }
                 } else if (game.status === 'ended') {
                     showLeaderboard(game.leaderboard || []);
                 }
                 
-                // CONTROLLA SE L'HOST HA RIVELATO LE RISPOSTE
                 if (game.answersRevealed && game.currentQuestion === currentQuestionIndex) {
                     console.log('🎯 Host ha rivelato le risposte! Mostrando risultato...');
                     showQuestionResult();
                 }
             });
 
-            // ASCOLTA LE DOMANDE
             database.ref('games/' + gameCode + '/currentQuestionData').on('value', (snapshot) => {
                 const question = snapshot.val();
                 if (question && question.currentQuestion !== currentQuestionIndex) {
@@ -1154,7 +1349,7 @@
         }
 
         function selectAnswer(index, answerText) {
-            if (hasSubmitted) return; // IMPEDISCE CAMBI RISPOSTA DOPO INVIO
+            if (hasSubmitted) return;
             
             audio.playSFX('clickSound');
             
@@ -1169,7 +1364,12 @@
             selectedAnswer = index;
             elements.selectedAnswerText.textContent = answerText;
             
-            // 🚀 INVIO AUTOMATICO - RIMOSSO PULSANTE SUBMIT
+            // EFFETTO VISIVO: Particele quando si seleziona risposta
+            const rect = selectedButton.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+            createCelebrationParticles(centerX, centerY, 10);
+            
             submitAnswer();
         }
 
@@ -1179,7 +1379,7 @@
             audio.playSFX('submitSound');
             hasSubmitted = true;
             
-            const answerTime = 20 - timeLeft; // ⏰ MODIFICATO PER 20 SECONDI
+            const answerTime = 20 - timeLeft;
             console.log(`⏱️ Answer time: ${answerTime}s (bonus: ${answerTime <= 5 ? 'YES' : 'NO'})`);
             
             database.ref('games/' + gameCode + '/answers').push({
@@ -1195,7 +1395,7 @@
         }
 
         function startTimer() {
-            timeLeft = 20; // ⏰ RIDOTTO DA 30 A 20 SECONDI
+            timeLeft = 20;
             elements.timer.textContent = timeLeft;
             elements.timer.classList.remove('warning');
             
@@ -1222,7 +1422,6 @@
             }, 1000);
         }
 
-        // === FUNZIONE: MOSTRA RISULTATO DOMANDA ===
         function showQuestionResult() {
             if (!currentQuestionData || selectedAnswer === null) {
                 console.log('❌ Dati mancanti per mostrare il risultato');
@@ -1230,14 +1429,13 @@
             }
             
             const isCorrect = selectedAnswer === currentQuestionData.correct;
-            const answerTime = 20 - (timeLeft > 0 ? timeLeft : 0); // ⏰ MODIFICATO PER 20 SECONDI
+            const answerTime = 20 - (timeLeft > 0 ? timeLeft : 0);
             const basePoints = currentQuestionData.points || 10;
             const speedBonus = (answerTime <= 5) ? (6 - answerTime) : 0;
             const totalPoints = isCorrect ? (basePoints + speedBonus) : 0;
             
             console.log(`🎯 Risultato: ${isCorrect ? 'CORRETTO' : 'SBAGLIATO'}, Punti: ${totalPoints}`);
             
-            // FERMA IL TIMER SE È ANCORA ATTIVO
             clearInterval(timer);
             
             let resultHTML = '';
@@ -1254,9 +1452,9 @@
                 `;
                 elements.resultCard.className = 'tv-card correct-result';
                 
-                // EFFETTI PER RISPOSTA CORRETTA
                 audio.playSFX('applauseSound');
                 createConfetti();
+                createCelebrationParticles(window.innerWidth / 2, window.innerHeight / 2, 30);
                 
             } else {
                 resultHTML = `
@@ -1269,15 +1467,11 @@
                 `;
                 elements.resultCard.className = 'tv-card wrong-result';
                 
-                // EFFETTI PER RISPOSTA SBAGLIATA
                 audio.playSFX('fartSound');
             }
             
             elements.resultContainer.innerHTML = resultHTML;
             showScreen('questionResultScreen');
-            
-            // 🎯 RIMOSSO IL TIMEOUT AUTOMATICO - RIMANE FINCHE' HOST NON DA IL VIA
-            // La schermata rimane finché l'host non avvia la prossima domanda
         }
 
         function showLeaderboard(leaderboard) {
@@ -1330,6 +1524,14 @@
             audio.toggleSFX();
         });
 
+        // CONTROLLI TEMI
+        document.querySelectorAll('.theme-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                audio.playSFX('clickSound');
+                changeTheme(this.dataset.theme);
+            });
+        });
+
         elements.gameCodeInput.addEventListener('keypress', function(e) {
             if (e.key === 'Enter') joinGame();
         });
@@ -1339,7 +1541,7 @@
 
         // === INIZIALIZZAZIONE ===
         createParticles();
-        console.log('🎮 Player Game Show Edition ready!');
+        console.log('🎮 Player Game Show Edition v2.0 ready!');
         
         setTimeout(() => {
             document.title = "Pigiama Party - Contestant";
