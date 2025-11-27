@@ -534,7 +534,7 @@
                 joinedAt: Date.now()
             });
 
-            // Ascolta lo stato del gioco
+                       // Ascolta lo stato del gioco
             database.ref('games/' + gameCode).on('value', (snapshot) => {
                 const game = snapshot.val();
                 if (!game) {
@@ -543,6 +543,9 @@
                 }
 
                 if (game.status === 'started') {
+                    // CORREZIONE: Sincronizza l'indice della domanda con l'host
+                    currentQuestionIndex = game.currentQuestion || 0;
+                    console.log(`🎮 Player: Gioco iniziato, domanda ${currentQuestionIndex + 1}`);
                     showQuestionScreen();
                 } else if (game.status === 'ended') {
                     showLeaderboard(game.leaderboard || []);
@@ -565,29 +568,34 @@
             showScreen('questionScreen');
         }
 
-        function showQuestion(question) {
-            // Reset stato
-            selectedAnswer = null;
-            elements.submitBtn.disabled = true;
-            elements.submitBtn.textContent = 'INVIA RISPOSTA';
-            
-            // Aggiorna UI
-            elements.questionText.textContent = question.question;
-            elements.questionNumber.textContent = `Domanda ${currentQuestionIndex + 1}`;
-            
-            // Pulisci e ricrea risposte
-            elements.answersContainer.innerHTML = '';
-            question.answers.forEach((answer, index) => {
-                const button = document.createElement('button');
-                button.className = 'answer-btn';
-                button.textContent = answer;
-                button.onclick = () => selectAnswer(index, answer);
-                elements.answersContainer.appendChild(button);
-            });
-            
-            showScreen('questionScreen');
-            startTimer();
-        }
+function showQuestion(question) {
+    // CORREZIONE CRITICA: Aggiorna l'indice della domanda con quello dell'host
+    currentQuestionIndex = question.currentQuestion || currentQuestionIndex;
+    
+    console.log(`📝 Player: Mostrando domanda ${currentQuestionIndex + 1}`, question);
+    
+    // Reset stato
+    selectedAnswer = null;
+    elements.submitBtn.disabled = true;
+    elements.submitBtn.textContent = 'INVIA RISPOSTA';
+    
+    // Aggiorna UI
+    elements.questionText.textContent = question.question;
+    elements.questionNumber.textContent = `Domanda ${currentQuestionIndex + 1}`;
+    
+    // Pulisci e ricrea risposte
+    elements.answersContainer.innerHTML = '';
+    question.answers.forEach((answer, index) => {
+        const button = document.createElement('button');
+        button.className = 'answer-btn';
+        button.textContent = answer;
+        button.onclick = () => selectAnswer(index, answer);
+        elements.answersContainer.appendChild(button);
+    });
+    
+    showScreen('questionScreen');
+    startTimer();
+}
 
         function selectAnswer(index, answerText) {
             audio.playSFX('clickSound');
@@ -724,4 +732,5 @@
     </script>
 </body>
 </html>
+
 
