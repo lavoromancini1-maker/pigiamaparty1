@@ -3,180 +3,103 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pigiama Party - Host v2.5</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <title>Pigiama Party - Game Master</title>
+    
+    <!-- Font Apple-like -->
+    <link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
     
-    <!-- META TAG ANTI-CACHE -->
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <meta http-equiv="Pragma" content="no-cache">
-    <meta http-equiv="Expires" content="0">
-    
     <style>
-        /* I tuoi stili CSS rimangono invariati */
+        /* === STILE APPLE FUTURISTICO === */
         :root {
-            --pink: #ff00c8;
-            --cyan: #00eaff;
-            --purple: #7b2cff;
-            --gold: #ffd700;
-            --silver: #c0c0c0;
-            --bronze: #cd7f32;
+            --bg-primary: #000000;
+            --bg-secondary: #1d1d1f;
+            --bg-card: rgba(255, 255, 255, 0.05);
+            --bg-card-hover: rgba(255, 255, 255, 0.08);
+            --text-primary: #ffffff;
+            --text-secondary: #a1a1a6;
+            --accent-blue: #007aff;
+            --accent-purple: #5856d6;
+            --accent-pink: #ff2d55;
+            --success: #34c759;
+            --warning: #ffcc00;
+            --danger: #ff3b30;
+            --gradient-primary: linear-gradient(135deg, #007aff, #5856d6);
+            --gradient-accent: linear-gradient(135deg, #ff2d55, #ff9500);
+            --shadow-soft: 0 8px 30px rgba(0, 0, 0, 0.12);
+            --shadow-deep: 0 20px 60px rgba(0, 0, 0, 0.3);
+            --border-radius: 20px;
+            --border-radius-large: 30px;
         }
 
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Orbitron', sans-serif;
+            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
         }
 
         body {
-            background: linear-gradient(135deg, #000 0%, #0e0030 100%);
-            color: white;
-            padding: 20px;
-            text-align: center;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
             overflow-x: hidden;
+            position: relative;
+            padding: 20px;
+        }
+
+        /* Effetto particellare di sfondo */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.03) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 45, 85, 0.03) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(0, 122, 255, 0.02) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
         }
 
         .container {
-            max-width: 800px;
+            max-width: 1200px;
             margin: 0 auto;
+            padding: 40px 20px;
         }
 
-        h1 {
-            background: linear-gradient(90deg, var(--pink), var(--cyan));
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 50px;
+            opacity: 0;
+            animation: fadeInUp 1s ease-out 0.2s forwards;
+        }
+
+        .logo {
+            font-size: 3.5rem;
+            font-weight: 700;
+            background: var(--gradient-primary);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            margin: 20px 0;
+            background-clip: text;
+            margin-bottom: 16px;
+            letter-spacing: -0.02em;
         }
 
-        .game-code {
-            font-size: 3rem;
-            font-weight: bold;
-            color: var(--cyan);
-            margin: 20px 0;
-            padding: 20px;
-            border: 3px solid var(--cyan);
-            border-radius: 15px;
-            display: inline-block;
-        }
-
-        .btn {
-            padding: 15px 30px;
-            margin: 10px;
-            border: none;
-            border-radius: 25px;
-            background: linear-gradient(90deg, var(--pink), var(--purple));
-            color: white;
+        .subtitle {
             font-size: 1.2rem;
-            cursor: pointer;
-            font-weight: bold;
-            transition: all 0.3s ease;
+            color: var(--text-secondary);
+            font-weight: 400;
+            letter-spacing: -0.01em;
+            opacity: 0;
+            animation: fadeInUp 1s ease-out 0.4s forwards;
         }
 
-        .btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 25px rgba(255, 0, 128, 0.4);
-        }
-
-        .btn:active {
-            transform: translateY(-1px);
-        }
-
-        .btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
-        }
-
-        .players-container {
-            margin: 30px 0;
-        }
-
-        .player-list {
-            list-style: none;
-            margin: 20px 0;
-        }
-
-        .player-item {
-            padding: 15px;
-            margin: 10px 0;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-            border: 1px solid var(--cyan);
-        }
-
-        .question-container {
-            margin: 30px 0;
-            padding: 20px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 15px;
-            border: 2px solid var(--pink);
-        }
-
-        .question-text {
-            font-size: 1.5rem;
-            margin: 20px 0;
-        }
-
-        .timer {
-            font-size: 3rem;
-            color: var(--cyan);
-            margin: 20px 0;
-            transition: all 0.3s ease;
-        }
-
-        .timer.warning {
-            color: #ff4444;
-            text-shadow: 0 0 20px #ff4444;
-            animation: pulse 0.5s infinite alternate;
-        }
-
-        @keyframes pulse {
-            from { transform: scale(1); }
-            to { transform: scale(1.1); }
-        }
-
-        .answers-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin: 20px 0;
-        }
-
-        .answer-option {
-            padding: 20px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-            cursor: pointer;
-            border: 2px solid transparent;
-            transition: all 0.3s ease;
-        }
-
-        .answer-option:hover {
-            background: rgba(255, 255, 255, 0.15);
-            transform: translateY(-2px);
-        }
-
-        .answer-option.correct {
-            background: rgba(0, 255, 100, 0.2);
-            border-color: #00ff88;
-            animation: correctGlow 0.6s ease;
-        }
-
-        @keyframes correctGlow {
-            0% { box-shadow: 0 0 0px #00ff88; }
-            50% { box-shadow: 0 0 30px #00ff88; }
-            100% { box-shadow: 0 0 0px #00ff88; }
-        }
-
-        .hidden {
-            display: none;
-        }
-
-        /* ANIMAZIONI SCHERMATE */
+        /* Schermate */
         .screen {
             animation: screenEnter 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
         }
@@ -192,136 +115,330 @@
             }
         }
 
-        /* NUOVI STILI AGGIUNTI */
-        .answers-stats {
-            margin: 15px 0;
-            padding: 10px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 10px;
-            border: 1px solid var(--cyan);
+        .hidden {
+            display: none !important;
+        }
+
+        /* Card principale */
+        .main-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: var(--border-radius-large);
+            padding: 40px;
+            margin-bottom: 30px;
+            transition: all 0.4s ease;
+        }
+
+        .main-card:hover {
+            background: var(--bg-card-hover);
+            border-color: rgba(255, 255, 255, 0.12);
+        }
+
+        /* Game Code */
+        .game-code-section {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .game-code-label {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            margin-bottom: 15px;
+            font-weight: 500;
+        }
+
+        .game-code {
+            font-size: 3.5rem;
+            font-weight: 700;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            padding: 20px 40px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--border-radius);
+            display: inline-block;
+            margin: 10px 0;
+        }
+
+        /* Player List */
+        .players-section {
+            margin: 40px 0;
+        }
+
+        .section-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .player-list {
+            list-style: none;
+            display: grid;
+            gap: 12px;
+        }
+
+        .player-item {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 18px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .player-item:hover {
+            background: rgba(255, 255, 255, 0.06);
+            transform: translateX(5px);
+        }
+
+        .player-icon {
+            font-size: 1.2rem;
+        }
+
+        .player-name {
+            flex: 1;
+            font-weight: 500;
+        }
+
+        /* Bottoni */
+        .btn-primary {
+            background: var(--gradient-primary);
+            color: white;
+            border: none;
+            padding: 16px 32px;
+            border-radius: 25px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-deep);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Question Card */
+        .question-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: var(--border-radius-large);
+            padding: 40px;
+            margin-bottom: 30px;
+        }
+
+        .question-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .question-counter {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .question-text {
+            font-size: 1.8rem;
+            font-weight: 600;
+            line-height: 1.4;
+            margin-bottom: 30px;
+            color: var(--text-primary);
+        }
+
+        /* Timer */
+        .timer-container {
+            text-align: center;
+            margin: 30px 0;
+        }
+
+        .timer {
+            font-size: 4rem;
+            font-weight: 700;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            transition: all 0.3s ease;
+        }
+
+        .timer.warning {
+            background: linear-gradient(135deg, #ff3b30, #ff9500);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: pulse 0.5s infinite alternate;
+        }
+
+        @keyframes pulse {
+            from { opacity: 1; }
+            to { opacity: 0.7; }
+        }
+
+        /* Answers Grid */
+        .answers-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .answer-option {
+            background: rgba(255, 255, 255, 0.03);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 25px;
+            color: var(--text-primary);
+            font-size: 1.1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .answer-option:hover {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .answer-option.correct {
+            background: rgba(52, 199, 89, 0.15);
+            border-color: var(--success);
+            color: var(--success);
+        }
+
+        /* Progress Bar */
+        .progress-section {
+            margin: 25px 0;
+        }
+
+        .progress-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
         }
 
         .progress-bar {
             width: 100%;
-            height: 10px;
+            height: 6px;
             background: rgba(255, 255, 255, 0.1);
-            border-radius: 5px;
-            margin: 10px 0;
+            border-radius: 3px;
             overflow: hidden;
         }
 
         .progress-fill {
             height: 100%;
-            background: linear-gradient(90deg, var(--pink), var(--cyan));
+            background: var(--gradient-primary);
             transition: width 0.3s ease;
         }
 
+        /* Quick Actions */
         .quick-actions {
-            margin: 20px 0;
+            display: flex;
+            gap: 15px;
+            margin: 25px 0;
+            justify-content: center;
         }
 
-        .quick-btn {
-            padding: 10px 20px;
-            margin: 5px;
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid var(--cyan);
-            color: white;
-            border-radius: 8px;
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-primary);
+            padding: 12px 24px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
             cursor: pointer;
             transition: all 0.3s ease;
         }
 
-        .quick-btn:hover:not(:disabled) {
-            background: rgba(255, 255, 255, 0.2);
-            transform: translateY(-2px);
+        .btn-secondary:hover:not(:disabled) {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-1px);
         }
 
-        .quick-btn:disabled {
-            opacity: 0.5;
+        .btn-secondary:disabled {
+            opacity: 0.4;
             cursor: not-allowed;
         }
 
-        /* STILI PER RISPOSTE NASCOSTE */
-        .player-item.hidden-answer {
-            background: rgba(255, 255, 255, 0.05);
-            border-color: rgba(255, 255, 255, 0.2);
+        /* Answers List */
+        .answers-list {
+            list-style: none;
+            margin-top: 20px;
         }
 
-        .summary-item {
-            background: rgba(255, 255, 0, 0.1) !important;
-            border-color: yellow !important;
-            font-weight: bold;
+        .answer-item {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 15px 20px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.3s ease;
         }
-        
-        /* VERSION INFO */
-        .version {
-            position: fixed;
-            bottom: 10px;
-            right: 10px;
-            background: rgba(255, 255, 255, 0.1);
-            padding: 5px 10px;
-            border-radius: 10px;
-            font-size: 0.8rem;
+
+        .answer-item.hidden-answer {
             opacity: 0.7;
         }
 
-        /* CLASSIFICA STYLES */
-        .leaderboard-container {
-            margin: 30px 0;
-            padding: 20px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 15px;
-            border: 2px solid var(--gold);
-        }
-
-        .leaderboard-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px;
-            margin: 10px 0;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-            border: 1px solid var(--cyan);
-        }
-
-        .leaderboard-rank {
-            font-size: 1.5rem;
-            font-weight: bold;
-            width: 50px;
+        /* Leaderboard */
+        .leaderboard-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: var(--border-radius-large);
+            padding: 40px;
             text-align: center;
         }
 
-        .rank-1 { color: var(--gold); }
-        .rank-2 { color: var(--silver); }
-        .rank-3 { color: var(--bronze); }
-
-        .leaderboard-name {
-            flex: 1;
-            text-align: left;
-            padding: 0 15px;
-            font-size: 1.2rem;
-        }
-
-        .leaderboard-score {
-            font-size: 1.3rem;
-            font-weight: bold;
-            color: var(--cyan);
+        .leaderboard-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #ffd700, #ffed4e);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 40px;
         }
 
         .podium {
             display: flex;
             justify-content: center;
             align-items: flex-end;
-            margin: 20px 0;
             gap: 20px;
+            margin: 40px 0;
         }
 
         .podium-item {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 30px 20px;
             text-align: center;
-            padding: 20px;
-            border-radius: 10px;
-            min-width: 120px;
+            min-width: 140px;
             animation: podiumRise 1s ease-out;
         }
 
@@ -331,197 +448,312 @@
         }
 
         .podium-1 {
-            background: linear-gradient(135deg, var(--gold), #ffed4e);
-            color: black;
+            background: linear-gradient(135deg, #ffd700, #ffed4e);
+            color: #000;
             height: 180px;
         }
 
         .podium-2 {
-            background: linear-gradient(135deg, var(--silver), #e6e6e6);
-            color: black;
+            background: linear-gradient(135deg, #c0c0c0, #e6e6e6);
+            color: #000;
             height: 150px;
         }
 
         .podium-3 {
-            background: linear-gradient(135deg, var(--bronze), #e6b800);
-            color: black;
+            background: linear-gradient(135deg, #cd7f32, #e6b800);
+            color: #000;
             height: 120px;
         }
 
-        .speed-bonus {
-            font-size: 0.9rem;
-            color: #00ff88;
-            margin-left: 5px;
-        }
-
-        /* AUDIO CONTROLS */
+        /* Audio Controls */
         .audio-controls {
             position: fixed;
-            top: 10px;
-            left: 10px;
+            top: 20px;
+            right: 20px;
             z-index: 1000;
+            display: flex;
+            gap: 10px;
         }
 
         .audio-btn {
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid var(--cyan);
-            color: white;
-            padding: 8px 12px;
-            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-primary);
+            padding: 8px 16px;
+            border-radius: 15px;
+            font-size: 0.8rem;
             cursor: pointer;
-            font-size: 0.9rem;
             transition: all 0.3s ease;
-            margin: 2px;
         }
 
         .audio-btn:hover {
-            background: rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.1);
         }
 
-        /* ACTIVATION OVERLAY */
+        /* Activation Overlay */
         .audio-activation {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.9);
+            background: rgba(0, 0, 0, 0.95);
             display: flex;
             justify-content: center;
             align-items: center;
             z-index: 10000;
-            flex-direction: column;
         }
 
-        .activation-box {
-            background: linear-gradient(135deg, var(--pink), var(--purple));
-            padding: 40px;
-            border-radius: 20px;
+        .activation-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(30px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--border-radius-large);
+            padding: 50px 40px;
             text-align: center;
-            max-width: 400px;
+            max-width: 500px;
             margin: 20px;
         }
 
         .activation-title {
-            font-size: 2rem;
+            font-size: 2.2rem;
+            font-weight: 700;
             margin-bottom: 20px;
-            color: white;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
         .activation-btn {
-            background: rgba(255, 255, 255, 0.9);
-            color: black;
+            background: var(--gradient-primary);
+            color: white;
             border: none;
-            padding: 15px 30px;
-            font-size: 1.2rem;
+            padding: 18px 36px;
             border-radius: 25px;
+            font-size: 1.2rem;
+            font-weight: 600;
             cursor: pointer;
-            font-weight: bold;
-            margin: 10px;
             transition: all 0.3s ease;
+            margin-top: 20px;
         }
 
         .activation-btn:hover {
-            transform: scale(1.05);
-            background: white;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-deep);
+        }
+
+        /* Version */
+        .version {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-secondary);
+            padding: 8px 16px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px 15px;
+            }
+            
+            .logo {
+                font-size: 2.5rem;
+            }
+            
+            .game-code {
+                font-size: 2.5rem;
+                padding: 15px 25px;
+            }
+            
+            .answers-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .podium {
+                flex-direction: column;
+                align-items: center;
+                gap: 15px;
+            }
+            
+            .podium-item {
+                height: 120px !important;
+                min-width: 200px;
+            }
+            
+            .main-card, .question-card, .leaderboard-card {
+                padding: 25px 20px;
+            }
+        }
+
+        /* Animazioni */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
     </style>
 </head>
 <body>
     <!-- OVERLAY ATTIVAZIONE AUDIO -->
     <div id="audioActivation" class="audio-activation">
-        <div class="activation-box">
-            <div class="activation-title">🎵 ATTIVA L'AUDIO</div>
-            <p style="margin-bottom: 30px; opacity: 0.9;">Clicca il pulsante qui sotto per attivare la musica e i suoni del gioco</p>
-            <button class="activation-btn" id="activateAudio">🎮 ATTIVA AUDIO</button>
-            <p style="margin-top: 20px; font-size: 0.9rem; opacity: 0.7;">(Necessario per l'esperienza completa)</p>
+        <div class="activation-card">
+            <div class="activation-title">🎵 Audio Activation</div>
+            <p style="margin-bottom: 30px; color: var(--text-secondary); line-height: 1.6;">
+                Enable audio for the complete gaming experience with background music and sound effects.
+            </p>
+            <button class="activation-btn" id="activateAudio">🎮 Enable Audio</button>
+            <p style="margin-top: 20px; font-size: 0.9rem; color: var(--text-secondary);">
+                Required for full immersion
+            </p>
         </div>
     </div>
 
     <!-- CONTROLLI AUDIO -->
     <div class="audio-controls">
-        <button class="audio-btn" id="musicToggle">🔇 Musica OFF</button>
-        <button class="audio-btn" id="sfxToggle">🔇 Suoni OFF</button>
+        <button class="audio-btn" id="musicToggle">🔇 Music</button>
+        <button class="audio-btn" id="sfxToggle">🔇 SFX</button>
     </div>
 
-    <div class="version">v2.5 - Bug Fix</div>
+    <div class="version">VisionOS 2.0</div>
     
     <div class="container">
-        <h1>🎮 PIGIAMA PARTY - HOST</h1>
-        
-        <div id="lobbyScreen" class="screen">
-            <div class="game-code" id="gameCode">GAME123</div>
-            <div style="margin: 20px 0;">
-                <div style="background: white; color: black; padding: 15px; border-radius: 10px; display: inline-block;">
-                    <div style="font-weight: bold;">Condividi questo codice:</div>
-                    <div style="font-size: 2rem; font-weight: bold;" id="shareCode">GAME123</div>
-                </div>
-            </div>
-
-            <div class="players-container">
-                <h3>👥 GIOCATORI CONNESSI</h3>
-                <ul class="player-list" id="playerList">
-                    <li class="player-item">In attesa di giocatori...</li>
-                </ul>
-            </div>
-
-            <button class="btn" id="startBtn" disabled>AVVIA GIOCO</button>
+        <!-- HEADER -->
+        <div class="header">
+            <h1 class="logo">🎮 Pigiama Party</h1>
+            <div class="subtitle">Game Master Controller</div>
         </div>
 
+        <!-- SCHERMATA LOBBY -->
+        <div id="lobbyScreen" class="screen">
+            <div class="main-card">
+                <div class="game-code-section">
+                    <div class="game-code-label">Game Code</div>
+                    <div class="game-code" id="gameCode">GAME123</div>
+                    <p style="color: var(--text-secondary); margin-top: 15px;">
+                        Share this code with players to join the game
+                    </p>
+                </div>
+
+                <div class="players-section">
+                    <div class="section-title">
+                        <span>👥</span>
+                        Connected Players
+                    </div>
+                    <ul class="player-list" id="playerList">
+                        <li class="player-item">
+                            <span class="player-icon">⏳</span>
+                            <span class="player-name">Waiting for players...</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <div style="text-align: center; margin-top: 40px;">
+                    <button class="btn-primary" id="startBtn" disabled>
+                        <span>🚀</span>
+                        Start Game
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- SCHERMATA GIOCO -->
         <div id="gameScreen" class="screen hidden">
-            <div class="question-container">
-                <div id="questionCounter">DOMANDA 1/3</div>
-                <div class="question-text" id="questionText">La domanda apparirà qui...</div>
-                <div class="timer" id="timer">20</div>
+            <div class="question-card">
+                <div class="question-header">
+                    <div class="question-counter" id="questionCounter">Question 1/3</div>
+                </div>
                 
-                <!-- SEZIONE NUOVA - STATISTICHE RISPOSTE -->
-                <div class="answers-stats">
-                    <div id="answersProgress">Risposte: 0/0</div>
+                <div class="question-text" id="questionText">
+                    The question will appear here...
+                </div>
+
+                <div class="timer-container">
+                    <div class="timer" id="timer">20</div>
+                </div>
+
+                <!-- Progress Bar -->
+                <div class="progress-section">
+                    <div class="progress-info">
+                        <span>Player Answers</span>
+                        <span id="answersProgress">0/0</span>
+                    </div>
                     <div class="progress-bar">
                         <div class="progress-fill" id="progressFill" style="width: 0%"></div>
                     </div>
                 </div>
 
-                <!-- SEZIONE NUOVA - AZIONI RAPIDE -->
+                <!-- Quick Actions -->
                 <div class="quick-actions">
-                    <button class="quick-btn" id="skipTimerBtn" disabled>SALTA TIMER</button>
-                    <button class="quick-btn" id="showAnswerBtn" disabled>MOSTRA RISPOSTA</button>
+                    <button class="btn-secondary" id="skipTimerBtn" disabled>Skip Timer</button>
+                    <button class="btn-secondary" id="showAnswerBtn" disabled>Show Answer</button>
                 </div>
-                
+
+                <!-- Answers Grid -->
                 <div class="answers-grid" id="answersGrid">
-                    <!-- Risposte appariranno qui -->
+                    <!-- Answers will appear here -->
                 </div>
-                
-                <button class="btn" id="nextBtn">PROSSIMA DOMANDA</button>
+
+                <div style="text-align: center; margin-top: 30px;">
+                    <button class="btn-primary" id="nextBtn">
+                        <span>➡️</span>
+                        Next Question
+                    </button>
+                </div>
             </div>
 
-            <div class="players-container">
-                <h3>🎯 RISPOSTE DEI GIOCATORI</h3>
-                <ul class="player-list" id="answersList">
-                    <li>Nessuna risposta ancora...</li>
+            <!-- Answers List -->
+            <div class="main-card">
+                <div class="section-title">
+                    <span>🎯</span>
+                    Player Answers
+                </div>
+                <ul class="answers-list" id="answersList">
+                    <li class="answer-item">
+                        <span>⏳</span>
+                        <span>No answers yet...</span>
+                    </li>
                 </ul>
             </div>
         </div>
 
         <!-- SCHERMATA CLASSIFICA -->
         <div id="leaderboardScreen" class="screen hidden">
-            <div class="leaderboard-container">
-                <h2 style="font-size: 2.5rem; margin-bottom: 30px;">🏆 CLASSIFICA FINALE</h2>
+            <div class="leaderboard-card">
+                <div class="leaderboard-title">🏆 Final Results</div>
                 
-                <!-- PODIO -->
+                <!-- Podio -->
                 <div class="podium" id="podium">
-                    <!-- Il podio verrà generato qui -->
+                    <!-- Podium will be generated here -->
                 </div>
 
-                <!-- CLASSIFICA COMPLETA -->
-                <div style="margin-top: 40px;">
-                    <h3>📊 CLASSIFICA COMPLETA</h3>
-                    <ul class="player-list" id="finalLeaderboard">
-                        <!-- La classifica verrà generata qui -->
+                <!-- Classifica Completa -->
+                <div style="margin-top: 50px;">
+                    <div class="section-title" style="justify-content: center;">
+                        <span>📊</span>
+                        Complete Leaderboard
+                    </div>
+                    <ul class="player-list" id="finalLeaderboard" style="max-width: 600px; margin: 0 auto;">
+                        <!-- Leaderboard will be generated here -->
                     </ul>
                 </div>
 
-                <button class="btn" id="restartBtn" style="margin-top: 30px;">NUOVO GIOCO</button>
+                <div style="text-align: center; margin-top: 40px;">
+                    <button class="btn-primary" id="restartBtn">
+                        <span>🔄</span>
+                        New Game
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -556,11 +788,12 @@
         <source src="audio/start.mp3" type="audio/mpeg">
     </audio>
 
+    <!-- IL RESTANTE CODICE JAVASCRIPT RIMANE INVARIATO -->
     <script>
         // === FORZA REFRESH CACHE ===
-        console.log('🔥 HOST v2.5 - Bug Fix - Caricato: ' + new Date().toLocaleString());
+        console.log('🎮 HOST Apple Style - Caricato: ' + new Date().toLocaleString());
         
-        // === SISTEMA AUDIO SEMPLIFICATO ===
+        // === SISTEMA AUDIO ===
         const audio = {
             // Musica
             menuMusic: document.getElementById('menuMusic'),
@@ -582,10 +815,9 @@
             
             // Metodi
             async activateAudio() {
-                console.log('🎵 Tentativo di attivazione audio...');
+                console.log('🎵 Attivazione audio...');
                 
                 try {
-                    // Sblocca l'audio
                     this.clickSound.volume = 0.01;
                     await this.clickSound.play();
                     this.clickSound.pause();
@@ -595,11 +827,9 @@
                     this.musicEnabled = true;
                     this.sfxEnabled = true;
                     
-                    // Aggiorna UI
-                    document.getElementById('musicToggle').textContent = '🔊 Musica ON';
-                    document.getElementById('sfxToggle').textContent = '🔊 Suoni ON';
+                    document.getElementById('musicToggle').textContent = '🔊 Music';
+                    document.getElementById('sfxToggle').textContent = '🔊 SFX';
                     
-                    // Nascondi overlay
                     const activationOverlay = document.getElementById('audioActivation');
                     activationOverlay.style.opacity = '0';
                     activationOverlay.style.transition = 'opacity 0.5s ease';
@@ -608,15 +838,14 @@
                         activationOverlay.style.display = 'none';
                     }, 500);
                     
-                    // Avvia musica menu
                     setTimeout(() => {
                         this.playMusic('menuMusic');
                     }, 100);
                     
-                    console.log('🎵 Audio attivato con successo!');
+                    console.log('🎵 Audio attivato!');
                     
                 } catch (error) {
-                    console.error('❌ Errore nell\'attivazione audio:', error);
+                    console.error('❌ Errore attivazione audio:', error);
                     this.audioActivated = true;
                     this.musicEnabled = true;
                     this.sfxEnabled = true;
@@ -627,17 +856,14 @@
                 if (!this.musicEnabled || !this.audioActivated) return;
                 
                 try {
-                    // Ferma tutta la musica
                     this.stopAllMusic();
-                    
-                    // Reset e play nuova musica
                     const music = this[type];
                     music.currentTime = 0;
                     music.volume = 0.3;
                     await music.play();
                     console.log('🎵 Musica avviata:', type);
                 } catch (error) {
-                    console.error('❌ Errore nella riproduzione della musica:', error);
+                    console.error('❌ Errore musica:', error);
                 }
             },
             
@@ -656,19 +882,17 @@
                     sfx.currentTime = 0;
                     sfx.volume = 0.6;
                     await sfx.play();
-                    console.log('🔊 SFX riprodotto:', type);
+                    console.log('🔊 SFX:', type);
                 } catch (error) {
-                    console.error('❌ Errore nella riproduzione SFX:', error);
+                    console.error('❌ Errore SFX:', error);
                 }
             },
             
             toggleMusic() {
                 if (!this.audioActivated) return;
-                
                 this.musicEnabled = !this.musicEnabled;
                 document.getElementById('musicToggle').textContent = 
-                    this.musicEnabled ? '🔊 Musica ON' : '🔇 Musica OFF';
-                
+                    this.musicEnabled ? '🔊 Music' : '🔇 Music';
                 if (!this.musicEnabled) {
                     this.stopAllMusic();
                 } else {
@@ -686,7 +910,7 @@
                 if (!this.audioActivated) return;
                 this.sfxEnabled = !this.sfxEnabled;
                 document.getElementById('sfxToggle').textContent = 
-                    this.sfxEnabled ? '🔊 Suoni ON' : '🔇 Suoni OFF';
+                    this.sfxEnabled ? '🔊 SFX' : '🔇 SFX';
             }
         };
 
@@ -743,7 +967,6 @@
             gameScreen: document.getElementById('gameScreen'),
             leaderboardScreen: document.getElementById('leaderboardScreen'),
             gameCode: document.getElementById('gameCode'),
-            shareCode: document.getElementById('shareCode'),
             playerList: document.getElementById('playerList'),
             startBtn: document.getElementById('startBtn'),
             questionCounter: document.getElementById('questionCounter'),
@@ -765,27 +988,22 @@
         function initGame() {
             gameCode = 'GAME' + Math.floor(1000 + Math.random() * 9000);
             elements.gameCode.textContent = gameCode;
-            elements.shareCode.textContent = gameCode;
             
-            // Reset punteggi
             playerScores = {};
             
-            console.log('🎮 Host v2.5 creato con codice:', gameCode);
+            console.log('🎮 Host creato con codice:', gameCode);
             
-            // Inizializza il gioco su Firebase
             database.ref('games/' + gameCode).set({
                 status: 'waiting',
                 host: true,
                 createdAt: Date.now(),
-                version: '2.5'
+                version: 'Apple-2.0'
             });
 
-            // Ascolta i player che si connettono
             database.ref('games/' + gameCode + '/players').on('value', (snapshot) => {
                 const players = snapshot.val() || {};
                 connectedPlayers = Object.values(players);
                 
-                // Inizializza punteggi per i nuovi player
                 connectedPlayers.forEach(player => {
                     if (!playerScores[player.name]) {
                         playerScores[player.name] = {
@@ -799,7 +1017,6 @@
                 updatePlayerList();
             });
 
-            // Ascolta le risposte dei player
             database.ref('games/' + gameCode + '/answers').on('value', (snapshot) => {
                 const answers = snapshot.val() || {};
                 playerAnswers = Object.values(answers);
@@ -811,24 +1028,21 @@
             elements.playerList.innerHTML = '';
             
             if (connectedPlayers.length === 0) {
-                elements.playerList.innerHTML = '<li class="player-item">In attesa di giocatori...</li>';
+                elements.playerList.innerHTML = '<li class="player-item"><span class="player-icon">⏳</span><span class="player-name">Waiting for players...</span></li>';
                 elements.startBtn.disabled = true;
             } else {
                 connectedPlayers.forEach(player => {
                     const li = document.createElement('li');
                     li.className = 'player-item';
-                    li.textContent = `🎮 ${player.name}`;
+                    li.innerHTML = `<span class="player-icon">🎮</span><span class="player-name">${player.name}</span>`;
                     elements.playerList.appendChild(li);
                 });
                 elements.startBtn.disabled = false;
-                console.log('👥 Giocatori connessi:', connectedPlayers);
             }
         }
 
-        // === FUNZIONI CORRETTE PER LE STATISTICHE ===
         function checkAllPlayersAnswered() {
             const currentQuestionAnswers = playerAnswers.filter(a => a.questionIndex === currentQuestion);
-            console.log(`📊 Controllo risposte: ${currentQuestionAnswers.length}/${connectedPlayers.length} per domanda ${currentQuestion}`);
             return currentQuestionAnswers.length >= connectedPlayers.length && connectedPlayers.length > 0;
         }
 
@@ -836,24 +1050,20 @@
             const currentAnswers = playerAnswers.filter(a => a.questionIndex === currentQuestion);
             const progress = connectedPlayers.length > 0 ? (currentAnswers.length / connectedPlayers.length) * 100 : 0;
             
-            elements.answersProgress.textContent = `Risposte: ${currentAnswers.length}/${connectedPlayers.length}`;
+            elements.answersProgress.textContent = `${currentAnswers.length}/${connectedPlayers.length}`;
             elements.progressFill.style.width = progress + '%';
             
-            // Abilita i pulsanti quick action se ci sono risposte
             elements.skipTimerBtn.disabled = currentAnswers.length === 0;
             elements.showAnswerBtn.disabled = currentAnswers.length === 0;
         }
 
-        // === FUNZIONE PER CALCOLARE I PUNTI ===
         function calculatePoints(answer, question) {
             let points = 0;
             let speedBonus = 0;
             
-            // Punti base per risposta corretta
             if (answer.answerIndex === question.correct) {
                 points += question.points || 10;
                 
-                // Bonus velocità (massimo 5 punti, decresce con il tempo)
                 if (answer.answerTime <= 5) {
                     speedBonus = 6 - answer.answerTime;
                     points += speedBonus;
@@ -867,45 +1077,40 @@
             elements.answersList.innerHTML = '';
             
             if (playerAnswers.length === 0) {
-                elements.answersList.innerHTML = '<li>Nessuna risposta ancora...</li>';
+                elements.answersList.innerHTML = '<li class="answer-item"><span>⏳</span><span>No answers yet...</span></li>';
             } else {
                 const currentAnswers = playerAnswers.filter(a => a.questionIndex === currentQuestion);
                 
-                // SE LE RISPOSTE NON SONO STATE RIVELATE, MOSTRA SOLO CHE HANNO RISPOSTO
                 if (!answersRevealed) {
                     currentAnswers.forEach(answer => {
                         const li = document.createElement('li');
-                        li.className = 'player-item hidden-answer';
-                        li.textContent = `❓ ${answer.playerName}: Risposta inviata`;
+                        li.className = 'answer-item hidden-answer';
+                        li.innerHTML = `<span>❓</span><span>${answer.playerName}: Answer submitted</span>`;
                         elements.answersList.appendChild(li);
                     });
                     
-                    // Se ci sono risposte ma non rivelate, mostra quanti hanno risposto
                     if (currentAnswers.length > 0) {
                         const summary = document.createElement('li');
-                        summary.className = 'player-item summary-item';
-                        summary.textContent = `📊 ${currentAnswers.length}/${connectedPlayers.length} giocatori hanno risposto`;
+                        summary.className = 'answer-item';
+                        summary.style.background = 'rgba(255, 255, 0, 0.1)';
+                        summary.innerHTML = `<span>📊</span><span>${currentAnswers.length}/${connectedPlayers.length} players answered</span>`;
                         elements.answersList.appendChild(summary);
                     }
-                } 
-                // SE LE RISPOSTE SONO STATE RIVELATE, MOSTRA CON ICONE ✅/❌ E PUNTI
-                else {
-                    // Calcola i punteggi per questa domanda
+                } else {
                     const question = questions[currentQuestion];
                     currentAnswers.forEach(answer => {
                         const pointsData = calculatePoints(answer, question);
                         
                         const li = document.createElement('li');
-                        li.className = 'player-item';
+                        li.className = 'answer-item';
                         
                         const isCorrect = answer.answerIndex === question.correct;
                         const icon = isCorrect ? '✅' : '❌';
                         
                         let pointsText = '';
                         if (isCorrect) {
-                            pointsText = ` (+${pointsData.points}${pointsData.speedBonus > 0 ? ` <span class="speed-bonus">⚡+${pointsData.speedBonus}</span>` : ''})`;
+                            pointsText = ` (+${pointsData.points}${pointsData.speedBonus > 0 ? ` ⚡+${pointsData.speedBonus}` : ''})`;
                             
-                            // Aggiorna il punteggio totale del player
                             if (!playerScores[answer.playerName]) {
                                 playerScores[answer.playerName] = { total: 0, correctAnswers: 0, speedBonuses: 0 };
                             }
@@ -916,37 +1121,31 @@
                             }
                         }
                         
-                        li.innerHTML = `${icon} ${answer.playerName}: Opzione ${answer.answerIndex + 1}${pointsText}`;
+                        li.innerHTML = `${icon} <span>${answer.playerName}: Option ${answer.answerIndex + 1}${pointsText}</span>`;
                         elements.answersList.appendChild(li);
                     });
                 }
                 
-                // Aggiorna le statistiche
                 updateAnswersProgress();
                 
-                // CORREZIONE CRITICA: Controllo risposte complete durante il timer
                 if (checkAllPlayersAnswered() && timeLeft > 0 && !answersRevealed) {
-                    console.log('🎉 Tutti hanno risposto! Fermando timer...');
                     clearInterval(timer);
                     showCorrectAnswer();
                     elements.nextBtn.disabled = false;
-                    elements.timer.textContent = "🎉 TUTTI HANNO RISPOSTO!";
+                    elements.timer.textContent = "🎉 ALL ANSWERED!";
                 }
             }
         }
 
-        // === FUNZIONI DEL GIOCO CORRETTE ===
         function startGame() {
             audio.playSFX('startSound');
             audio.playMusic('gameMusic');
             
-            // Animazione transizione
             elements.lobbyScreen.classList.add('hidden');
             setTimeout(() => {
                 elements.gameScreen.classList.remove('hidden');
             }, 300);
             
-            // Comunica ai player che il gioco inizia
             database.ref('games/' + gameCode).update({
                 status: 'started',
                 currentQuestion: 0
@@ -966,24 +1165,19 @@
             currentQuestion = index;
             const question = questions[index];
             
-            // CORREZIONE CRITICA: Reset completo per ogni domanda
-            playerAnswers = []; // Reset risposte per la nuova domanda
+            playerAnswers = [];
             answersRevealed = false;
             
-            console.log(`🔄 Caricando domanda ${index + 1}, reset risposte`);
+            console.log(`🔄 Caricando domanda ${index + 1}`);
             
-            // Aggiorna UI
-            elements.questionCounter.textContent = `DOMANDA ${index + 1}/${questions.length}`;
+            elements.questionCounter.textContent = `Question ${index + 1}/${questions.length}`;
             elements.questionText.textContent = question.question;
             
-            // Pulisci risposte precedenti
             elements.answersGrid.innerHTML = '';
-            database.ref('games/' + gameCode + '/answers').remove(); // Pulisce Firebase
+            database.ref('games/' + gameCode + '/answers').remove();
             
-            // Reset statistiche
             updateAnswersProgress();
             
-            // Carica risposte
             question.answers.forEach((answer, i) => {
                 const div = document.createElement('div');
                 div.className = 'answer-option';
@@ -991,7 +1185,6 @@
                 elements.answersGrid.appendChild(div);
             });
             
-            // Comunica la domanda ai player
             database.ref('games/' + gameCode).update({
                 currentQuestion: index,
                 currentQuestionData: question
@@ -1011,22 +1204,19 @@
                 timeLeft--;
                 elements.timer.textContent = timeLeft;
                 
-                // Effetto timer che scade
                 if (timeLeft <= 5) {
                     elements.timer.classList.add('warning');
-                    // CORREZIONE: Timer audio solo negli ultimi 3 secondi e non a ogni secondo
                     if (timeLeft === 3 || timeLeft === 2 || timeLeft === 1) {
                         audio.playSFX('timerSound');
                     }
                 }
                 
-                // Controlla se tutti hanno risposto (doppio controllo)
                 if (checkAllPlayersAnswered() && timeLeft > 0 && !answersRevealed) {
                     console.log('⏰ Timer fermato - tutti hanno risposto');
                     clearInterval(timer);
                     showCorrectAnswer();
                     elements.nextBtn.disabled = false;
-                    elements.timer.textContent = "🎉 TUTTI HANNO RISPOSTO!";
+                    elements.timer.textContent = "🎉 ALL ANSWERED!";
                     return;
                 }
                 
@@ -1043,82 +1233,68 @@
             const answerElements = elements.answersGrid.querySelectorAll('.answer-option');
             answerElements[question.correct].classList.add('correct');
             
-            // Suono risposta corretta
             audio.playSFX('correctSound');
             
-            // RIVELA LE RISPOSTE DEI GIOCATORI
             answersRevealed = true;
-            updateAnswersList(); // Ricarica la lista con le icone ✅/❌
+            updateAnswersList();
         }
 
         function nextQuestion() {
             audio.playSFX('transitionSound');
-            
-            // Reset dello stato per la prossima domanda
             answersRevealed = false;
             loadQuestion(currentQuestion + 1);
         }
 
-        // === FUNZIONE PER LA CLASSIFICA ===
-function showLeaderboard() {
-    audio.playMusic('victoryMusic');
-    
-    // Animazione transizione
-    elements.gameScreen.classList.add('hidden');
-    setTimeout(() => {
-        elements.leaderboardScreen.classList.remove('hidden');
-    }, 300);
-    
-    // Ordina i player per punteggio
-    const sortedPlayers = Object.entries(playerScores)
-        .sort(([,a], [,b]) => b.total - a.total)
-        .map(([name, data], index) => ({
-            name,
-            score: data.total,  // CAMBIA: usa 'score' invece di 'total'
-            correctAnswers: data.correctAnswers,
-            speedBonuses: data.speedBonuses,
-            rank: index + 1
-        }));
-    
-    // === AGGIUNGI QUESTA RIGA CRITICA ===
-    // Invia la classifica a Firebase per i player
-    database.ref('games/' + gameCode).update({
-        leaderboard: sortedPlayers,
-        status: 'ended'
-    });
-    
-    // Crea il podio (primi 3)
-    elements.podium.innerHTML = '';
-    const top3 = sortedPlayers.slice(0, 3);
-    
-    top3.forEach((player, index) => {
-        const podiumItem = document.createElement('div');
-        podiumItem.className = `podium-item podium-${index + 1}`;
-        podiumItem.innerHTML = `
-            <div style="font-size: 2rem; margin-bottom: 10px;">${getMedalIcon(index + 1)}</div>
-            <div style="font-weight: bold; font-size: 1.2rem;">${player.name}</div>
-            <div style="font-size: 1.5rem; margin-top: 10px;">${player.score}p</div>  <!-- CAMBIA: total → score -->
-            ${player.speedBonuses > 0 ? `<div style="font-size: 0.8rem; margin-top: 5px;">⚡ ${player.speedBonuses}p bonus</div>` : ''}
-        `;
-        elements.podium.appendChild(podiumItem);
-    });
-    
-    // Crea la classifica completa
-    elements.finalLeaderboard.innerHTML = '';
-    sortedPlayers.forEach((player, index) => {
-        const li = document.createElement('li');
-        li.className = 'leaderboard-item';
-        li.innerHTML = `
-            <div class="leaderboard-rank rank-${player.rank}">#${player.rank}</div>
-            <div class="leaderboard-name">${player.name}</div>
-            <div class="leaderboard-score">
-                ${player.score}p  <!-- CAMBIA: total → score -->
-                ${player.speedBonuses > 0 ? `<span class="speed-bonus">⚡+${player.speedBonuses}</span>` : ''}
-            </div>
-        `;
-        elements.finalLeaderboard.appendChild(li);
-    });
-}
+        function showLeaderboard() {
+            audio.playMusic('victoryMusic');
+            
+            elements.gameScreen.classList.add('hidden');
+            setTimeout(() => {
+                elements.leaderboardScreen.classList.remove('hidden');
+            }, 300);
+            
+            const sortedPlayers = Object.entries(playerScores)
+                .sort(([,a], [,b]) => b.total - a.total)
+                .map(([name, data], index) => ({
+                    name,
+                    score: data.total,
+                    correctAnswers: data.correctAnswers,
+                    speedBonuses: data.speedBonuses,
+                    rank: index + 1
+                }));
+            
+            database.ref('games/' + gameCode).update({
+                leaderboard: sortedPlayers,
+                status: 'ended'
+            });
+            
+            elements.podium.innerHTML = '';
+            const top3 = sortedPlayers.slice(0, 3);
+            
+            top3.forEach((player, index) => {
+                const podiumItem = document.createElement('div');
+                podiumItem.className = `podium-item podium-${index + 1}`;
+                podiumItem.innerHTML = `
+                    <div style="font-size: 2rem; margin-bottom: 10px;">${getMedalIcon(index + 1)}</div>
+                    <div style="font-weight: bold; font-size: 1.2rem;">${player.name}</div>
+                    <div style="font-size: 1.5rem; margin-top: 10px;">${player.score}p</div>
+                    ${player.speedBonuses > 0 ? `<div style="font-size: 0.8rem; margin-top: 5px;">⚡ ${player.speedBonuses}p bonus</div>` : ''}
+                `;
+                elements.podium.appendChild(podiumItem);
+            });
+            
+            elements.finalLeaderboard.innerHTML = '';
+            sortedPlayers.forEach((player, index) => {
+                const li = document.createElement('li');
+                li.className = 'player-item';
+                li.innerHTML = `
+                    <span class="player-icon">${getMedalIcon(player.rank)}</span>
+                    <span class="player-name">${player.name}</span>
+                    <span style="font-weight: 600; color: var(--accent-blue);">${player.score}p</span>
+                `;
+                elements.finalLeaderboard.appendChild(li);
+            });
+        }
 
         function getMedalIcon(rank) {
             switch(rank) {
@@ -1130,7 +1306,6 @@ function showLeaderboard() {
         }
 
         function endGame() {
-            // Calcola i punteggi finali per tutte le risposte
             playerAnswers.forEach(answer => {
                 if (answer.questionIndex !== undefined) {
                     const question = questions[answer.questionIndex];
@@ -1151,7 +1326,6 @@ function showLeaderboard() {
             });
             
             showLeaderboard();
-            
         }
 
         // === EVENT LISTENERS ===
@@ -1165,13 +1339,12 @@ function showLeaderboard() {
             nextQuestion();
         });
 
-        // NUOVI EVENT LISTENERS
         elements.skipTimerBtn.addEventListener('click', function() {
             audio.playSFX('clickSound');
             clearInterval(timer);
             showCorrectAnswer();
             elements.nextBtn.disabled = false;
-            elements.timer.textContent = "⏩ TIMER SALTATO";
+            elements.timer.textContent = "⏩ TIMER SKIPPED";
         });
 
         elements.showAnswerBtn.addEventListener('click', function() {
@@ -1184,7 +1357,6 @@ function showLeaderboard() {
             location.reload();
         });
 
-        // CONTROLLI AUDIO
         document.getElementById('musicToggle').addEventListener('click', function() {
             audio.playSFX('clickSound');
             audio.toggleMusic();
@@ -1194,7 +1366,6 @@ function showLeaderboard() {
             audio.toggleSFX();
         });
 
-        // === EVENT LISTENER PER ATTIVAZIONE AUDIO ===
         document.getElementById('activateAudio').addEventListener('click', function() {
             console.log('🎵 Pulsante Attiva Audio cliccato');
             audio.activateAudio();
@@ -1203,12 +1374,10 @@ function showLeaderboard() {
         // === AVVIA IL GIOCO ===
         initGame();
         
-        // === FORZA REFRESH VISUALE ===
         setTimeout(() => {
-            console.log('🔄 Controllo versione: HOST v2.5 attivo');
-            document.title = "Pigiama Party - Host v2.5";
+            console.log('🔄 HOST Apple Style attivo');
+            document.title = "Pigiama Party - Game Master";
         }, 100);
     </script>
 </body>
 </html>
-
