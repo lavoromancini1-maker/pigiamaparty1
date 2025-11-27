@@ -5,45 +5,65 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pigiama Party - Home</title>
     
-    <!-- FONT CORRETTO -->
+    <!-- FONT ORIGINALE -->
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&display=swap" rel="stylesheet">
     
-    <!-- CSS CORRETTO -->
-    <link rel="stylesheet" href="style.css">
-    
     <style>
-        /* STILI SPECIFICI PER LA HOME PAGE */
-        .home-container {
+        /* === STILE ORIGINALE PIGIAMA PARTY === */
+        :root {
+            --pink: #ff00c8;
+            --cyan: #00eaff;
+            --purple: #7b2cff;
+            --gold: #ffd700;
+            --silver: #c0c0c0;
+            --bronze: #cd7f32;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #000 0%, #0e0030 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        .container {
             max-width: 1000px;
             margin: 0 auto;
             padding: 40px 20px;
         }
-        
-        .main-logo {
-            background: linear-gradient(90deg, #ff00c8, #00eaff);
+
+        .logo {
+            background: linear-gradient(90deg, var(--pink), var(--cyan));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             font-size: 4rem;
             font-weight: 900;
             margin-bottom: 10px;
-            text-align: center;
         }
-        
+
         .tagline {
-            color: #00eaff;
+            color: var(--cyan);
             font-size: 1.5rem;
             margin-bottom: 50px;
-            text-align: center;
             font-weight: 500;
         }
-        
+
         .mode-selector {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 30px;
             margin-top: 40px;
         }
-        
+
         .mode-card {
             background: rgba(255, 255, 255, 0.1);
             border: 2px solid transparent;
@@ -54,35 +74,35 @@
             transition: all 0.3s ease;
             backdrop-filter: blur(10px);
         }
-        
+
         .mode-card:hover {
             transform: translateY(-10px);
-            border-color: #00eaff;
+            border-color: var(--cyan);
             box-shadow: 0 15px 40px rgba(0, 234, 255, 0.3);
             background: rgba(255, 255, 255, 0.15);
         }
-        
+
         .mode-icon {
             font-size: 4rem;
             margin-bottom: 20px;
         }
-        
+
         .mode-title {
             font-size: 1.8rem;
             font-weight: bold;
-            color: #ff00c8;
+            color: var(--pink);
             margin-bottom: 15px;
         }
-        
+
         .mode-description {
             color: rgba(255, 255, 255, 0.8);
             line-height: 1.6;
             font-size: 1rem;
         }
-        
+
         /* Responsive */
         @media (max-width: 768px) {
-            .main-logo {
+            .logo {
                 font-size: 2.5rem;
             }
             
@@ -107,8 +127,8 @@
                 font-size: 1.5rem;
             }
         }
-        
-        /* Animazione di ingresso */
+
+        /* Animazioni */
         @keyframes fadeInUp {
             from {
                 opacity: 0;
@@ -119,70 +139,59 @@
                 transform: translateY(0);
             }
         }
-        
+
         .mode-card {
             animation: fadeInUp 0.6s ease-out;
         }
-        
+
         .mode-card:nth-child(1) { animation-delay: 0.1s; }
         .mode-card:nth-child(2) { animation-delay: 0.2s; }
         .mode-card:nth-child(3) { animation-delay: 0.3s; }
+
+        .version {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 5px 10px;
+            border-radius: 10px;
+            font-size: 0.8rem;
+            opacity: 0.7;
+        }
     </style>
 </head>
 <body>
     
-    <div class="home-container">
-        <!-- LOGO PRINCIPALE -->
-        <h1 class="main-logo">🎮 PIGIAMA PARTY</h1>
+    <div class="container">
+        <h1 class="logo">🎮 PIGIAMA PARTY</h1>
         <div class="tagline">THE ULTIMATE TRIVIA EXPERIENCE</div>
         
-        <!-- SELEZIONE MODALITÀ -->
         <div class="mode-selector">
             
-            <!-- HOST -->
             <div class="mode-card" onclick="location.href='host.html'">
                 <div class="mode-icon">🖥️</div>
                 <div class="mode-title">GAME MASTER</div>
-                <div class="mode-description">
-                    Host the game on your big screen. Control the flow, manage players, 
-                    and create an unforgettable gaming experience for everyone.
-                </div>
+                <div class="mode-description">Host the game on your big screen. Control the flow, manage players, and create an unforgettable experience.</div>
             </div>
             
-            <!-- PLAYER -->
             <div class="mode-card" onclick="location.href='player.html'">
                 <div class="mode-icon">📱</div>
                 <div class="mode-title">PLAYER</div>
-                <div class="mode-description">
-                    Join the game from your phone. Answer questions, compete with friends, 
-                    climb the leaderboard, and show your trivia skills!
-                </div>
+                <div class="mode-description">Join the game from your phone. Answer questions, compete with friends, and climb the leaderboard.</div>
             </div>
             
-            <!-- SPECTATOR -->
             <div class="mode-card" onclick="location.href='spectator.html'">
                 <div class="mode-icon">👀</div>
                 <div class="mode-title">SPECTATOR</div>
-                <div class="mode-description">
-                    Watch the action live. Follow the game progress, see all answers 
-                    in real-time, and enjoy the show without the pressure!
-                </div>
+                <div class="mode-description">Watch the action live. Follow the game progress and see all the answers in real-time.</div>
             </div>
             
         </div>
-        
-        <!-- INFO VERSIONE -->
-        <div style="margin-top: 50px; color: rgba(255,255,255,0.5); font-size: 0.9rem;">
-            v2.5 - Audio & Transizioni
-        </div>
     </div>
 
+    <div class="version">v2.5</div>
+
     <script>
-        // Animazione al caricamento
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('🎮 Pigiama Party - Home Page loaded');
-        });
-        
         // Effetto click sui card
         document.querySelectorAll('.mode-card').forEach(card => {
             card.addEventListener('click', function() {
@@ -192,6 +201,8 @@
                 }, 150);
             });
         });
+
+        console.log('🎮 Home Page loaded successfully');
     </script>
 
 </body>
