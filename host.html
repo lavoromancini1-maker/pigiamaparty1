@@ -3,20 +3,429 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pigiama Party - Host v2.5</title>
-
-    <!-- FONT CORRETTO -->
+    <title>Pigiama Party - Host v2.4</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&display=swap" rel="stylesheet">
-    
-    <!-- PERCORSO CSS CORRETTO -->
-    <link rel="stylesheet" href="style.css">
-    
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
     
+    <!-- META TAG ANTI-CACHE -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
+    
+    <style>
+        /* I tuoi stili CSS rimangono invariati */
+        :root {
+            --pink: #ff00c8;
+            --cyan: #00eaff;
+            --purple: #7b2cff;
+            --gold: #ffd700;
+            --silver: #c0c0c0;
+            --bronze: #cd7f32;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #000 0%, #0e0030 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            background: linear-gradient(90deg, var(--pink), var(--cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin: 20px 0;
+        }
+
+        .game-code {
+            font-size: 3rem;
+            font-weight: bold;
+            color: var(--cyan);
+            margin: 20px 0;
+            padding: 20px;
+            border: 3px solid var(--cyan);
+            border-radius: 15px;
+            display: inline-block;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            margin: 10px;
+            border: none;
+            border-radius: 25px;
+            background: linear-gradient(90deg, var(--pink), var(--purple));
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(255, 0, 128, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(-1px);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .players-container {
+            margin: 30px 0;
+        }
+
+        .player-list {
+            list-style: none;
+            margin: 20px 0;
+        }
+
+        .player-item {
+            padding: 15px;
+            margin: 10px 0;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            border: 1px solid var(--cyan);
+        }
+
+        .question-container {
+            margin: 30px 0;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            border: 2px solid var(--pink);
+        }
+
+        .question-text {
+            font-size: 1.5rem;
+            margin: 20px 0;
+        }
+
+        .timer {
+            font-size: 3rem;
+            color: var(--cyan);
+            margin: 20px 0;
+            transition: all 0.3s ease;
+        }
+
+        .timer.warning {
+            color: #ff4444;
+            text-shadow: 0 0 20px #ff4444;
+            animation: pulse 0.5s infinite alternate;
+        }
+
+        @keyframes pulse {
+            from { transform: scale(1); }
+            to { transform: scale(1.1); }
+        }
+
+        .answers-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .answer-option {
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .answer-option:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .answer-option.correct {
+            background: rgba(0, 255, 100, 0.2);
+            border-color: #00ff88;
+            animation: correctGlow 0.6s ease;
+        }
+
+        @keyframes correctGlow {
+            0% { box-shadow: 0 0 0px #00ff88; }
+            50% { box-shadow: 0 0 30px #00ff88; }
+            100% { box-shadow: 0 0 0px #00ff88; }
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* ANIMAZIONI SCHERMATE */
+        .screen {
+            animation: screenEnter 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        @keyframes screenEnter {
+            0% { 
+                opacity: 0; 
+                transform: translateY(30px) scale(0.95);
+            }
+            100% { 
+                opacity: 1; 
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        /* NUOVI STILI AGGIUNTI */
+        .answers-stats {
+            margin: 15px 0;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            border: 1px solid var(--cyan);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--pink), var(--cyan));
+            transition: width 0.3s ease;
+        }
+
+        .quick-actions {
+            margin: 20px 0;
+        }
+
+        .quick-btn {
+            padding: 10px 20px;
+            margin: 5px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--cyan);
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .quick-btn:hover:not(:disabled) {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .quick-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* STILI PER RISPOSTE NASCOSTE */
+        .player-item.hidden-answer {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .summary-item {
+            background: rgba(255, 255, 0, 0.1) !important;
+            border-color: yellow !important;
+            font-weight: bold;
+        }
+        
+        /* VERSION INFO */
+        .version {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 5px 10px;
+            border-radius: 10px;
+            font-size: 0.8rem;
+            opacity: 0.7;
+        }
+
+        /* CLASSIFICA STYLES */
+        .leaderboard-container {
+            margin: 30px 0;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            border: 2px solid var(--gold);
+        }
+
+        .leaderboard-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            margin: 10px 0;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            border: 1px solid var(--cyan);
+        }
+
+        .leaderboard-rank {
+            font-size: 1.5rem;
+            font-weight: bold;
+            width: 50px;
+            text-align: center;
+        }
+
+        .rank-1 { color: var(--gold); }
+        .rank-2 { color: var(--silver); }
+        .rank-3 { color: var(--bronze); }
+
+        .leaderboard-name {
+            flex: 1;
+            text-align: left;
+            padding: 0 15px;
+            font-size: 1.2rem;
+        }
+
+        .leaderboard-score {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: var(--cyan);
+        }
+
+        .podium {
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            margin: 20px 0;
+            gap: 20px;
+        }
+
+        .podium-item {
+            text-align: center;
+            padding: 20px;
+            border-radius: 10px;
+            min-width: 120px;
+            animation: podiumRise 1s ease-out;
+        }
+
+        @keyframes podiumRise {
+            0% { transform: translateY(100px); opacity: 0; }
+            100% { transform: translateY(0); opacity: 1; }
+        }
+
+        .podium-1 {
+            background: linear-gradient(135deg, var(--gold), #ffed4e);
+            color: black;
+            height: 180px;
+        }
+
+        .podium-2 {
+            background: linear-gradient(135deg, var(--silver), #e6e6e6);
+            color: black;
+            height: 150px;
+        }
+
+        .podium-3 {
+            background: linear-gradient(135deg, var(--bronze), #e6b800);
+            color: black;
+            height: 120px;
+        }
+
+        .speed-bonus {
+            font-size: 0.9rem;
+            color: #00ff88;
+            margin-left: 5px;
+        }
+
+        /* AUDIO CONTROLS */
+        .audio-controls {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            z-index: 1000;
+        }
+
+        .audio-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--cyan);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            margin: 2px;
+        }
+
+        .audio-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        /* ACTIVATION OVERLAY */
+        .audio-activation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            flex-direction: column;
+        }
+
+        .activation-box {
+            background: linear-gradient(135deg, var(--pink), var(--purple));
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            max-width: 400px;
+            margin: 20px;
+        }
+
+        .activation-title {
+            font-size: 2rem;
+            margin-bottom: 20px;
+            color: white;
+        }
+
+        .activation-btn {
+            background: rgba(255, 255, 255, 0.9);
+            color: black;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            margin: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .activation-btn:hover {
+            transform: scale(1.05);
+            background: white;
+        }
+    </style>
 </head>
 <body>
     <!-- OVERLAY ATTIVAZIONE AUDIO -->
@@ -35,7 +444,7 @@
         <button class="audio-btn" id="sfxToggle">🔇 Suoni OFF</button>
     </div>
 
-    <div class="version">v2.5 - Audio Locale</div>
+    <div class="version">v2.4 - Audio Fix</div>
     
     <div class="container">
         <h1>🎮 PIGIAMA PARTY - HOST</h1>
@@ -122,7 +531,7 @@
         <source src="audio/menu.mp3" type="audio/mpeg">
     </audio>
     <audio id="gameMusic" loop preload="auto">
-        <source src="audio/thinking-time-148496.mp3?v=2" type="audio/mpeg">
+        <source src="audio/thinking-time-148496.mp3" type="audio/mpeg">
     </audio>
     <audio id="victoryMusic" preload="auto">
         <source src="audio/victory.mp3" type="audio/mpeg">
@@ -151,170 +560,247 @@
         // === FORZA REFRESH CACHE ===
         console.log('🔥 HOST v2.4 - Audio Fix - Caricato: ' + new Date().toLocaleString());
         
-// === SISTEMA AUDIO MIGLIORATO ===
-const audio = {
-    // Musica
-    menuMusic: document.getElementById('menuMusic'),
-    gameMusic: document.getElementById('gameMusic'),
-    victoryMusic: document.getElementById('victoryMusic'),
-    
-    // Sound Effects
-    clickSound: document.getElementById('clickSound'),
-    correctSound: document.getElementById('correctSound'),
-    wrongSound: document.getElementById('wrongSound'),
-    transitionSound: document.getElementById('transitionSound'),
-    timerSound: document.getElementById('timerSound'),
-    startSound: document.getElementById('startSound'),
-    
-    // Stato
-    musicEnabled: false,
-    sfxEnabled: false,
-    audioActivated: false,
-    
-    // Metodi
-    async activateAudio() {
-        console.log('🎵 Tentativo di attivazione audio...');
-        
-        try {
-            // PRIMA riproduci un suono breve per sbloccare l'audio
-            await this.playUnlockSound();
+        // === SISTEMA AUDIO MIGLIORATO ===
+        const audio = {
+            // Musica
+            menuMusic: document.getElementById('menuMusic'),
+            gameMusic: document.getElementById('gameMusic'),
+            victoryMusic: document.getElementById('victoryMusic'),
             
-            this.audioActivated = true;
-            this.musicEnabled = true;
-            this.sfxEnabled = true;
+            // Sound Effects
+            clickSound: document.getElementById('clickSound'),
+            correctSound: document.getElementById('correctSound'),
+            wrongSound: document.getElementById('wrongSound'),
+            transitionSound: document.getElementById('transitionSound'),
+            timerSound: document.getElementById('timerSound'),
+            startSound: document.getElementById('startSound'),
             
-            // Aggiorna UI
-            document.getElementById('musicToggle').textContent = '🔊 Musica ON';
-            document.getElementById('sfxToggle').textContent = '🔊 Suoni ON';
+            // Stato
+            musicEnabled: false,
+            sfxEnabled: false,
+            audioActivated: false,
+            audioContext: null,
             
-            // Nascondi overlay con animazione
-            const activationOverlay = document.getElementById('audioActivation');
-            activationOverlay.style.opacity = '0';
-            activationOverlay.style.transition = 'opacity 0.5s ease';
+            // Metodi
+            async activateAudio() {
+                console.log('🎵 Tentativo di attivazione audio...');
+                
+                try {
+                    // PRIMA riproduci un suono breve per sbloccare l'audio
+                    await this.playUnlockSound();
+                    
+                    // POI inizializza il contesto audio
+                    const AudioContext = window.AudioContext || window.webkitAudioContext;
+                    this.audioContext = new AudioContext();
+                    
+                    // Connetti tutti gli elementi audio al contesto
+                    this.connectAudioElements();
+                    
+                    await this.audioContext.resume();
+                    
+                    this.audioActivated = true;
+                    this.musicEnabled = true;
+                    this.sfxEnabled = true;
+                    
+                    // Aggiorna UI
+                    document.getElementById('musicToggle').textContent = '🔊 Musica ON';
+                    document.getElementById('sfxToggle').textContent = '🔊 Suoni ON';
+                    
+                    // Nascondi overlay con animazione
+                    const activationOverlay = document.getElementById('audioActivation');
+                    activationOverlay.style.opacity = '0';
+                    activationOverlay.style.transition = 'opacity 0.5s ease';
+                    
+                    setTimeout(() => {
+                        activationOverlay.style.display = 'none';
+                    }, 500);
+                    
+                    // Avvia musica menu DOPO un breve delay
+                    setTimeout(() => {
+                        this.playMusic('menuMusic');
+                    }, 100);
+                    
+                    console.log('🎵 Audio attivato con successo!');
+                    
+                } catch (error) {
+                    console.error('❌ Errore nell\'attivazione audio:', error);
+                    this.fallbackAudioActivation();
+                }
+            },
             
-            setTimeout(() => {
-                activationOverlay.style.display = 'none';
-            }, 500);
-            
-            // Avvia musica menu DOPO un breve delay
-            setTimeout(() => {
-                this.playMusic('menuMusic');
-            }, 100);
-            
-            console.log('🎵 Audio attivato con successo!');
-            
-        } catch (error) {
-            console.error('❌ Errore nell\'attivazione audio:', error);
-            this.fallbackAudioActivation();
-        }
-    },
-    
-    async playUnlockSound() {
-        return new Promise((resolve) => {
-            try {
-                // Prova a riprodurre un suono breve per sbloccare
-                this.clickSound.volume = 0.01;
-                this.clickSound.play().then(() => {
-                    this.clickSound.pause();
-                    this.clickSound.currentTime = 0;
-                    resolve();
-                }).catch(() => {
-                    resolve(); // Fallback silenzioso
+            async playUnlockSound() {
+                return new Promise((resolve) => {
+                    try {
+                        // Crea un suono breve per sbloccare l'audio
+                        const unlockSound = new Audio();
+                        unlockSound.src = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==';
+                        unlockSound.volume = 0.001; // Quasi silenzioso
+                        
+                        const playPromise = unlockSound.play();
+                        if (playPromise !== undefined) {
+                            playPromise.then(() => {
+                                unlockSound.pause();
+                                resolve();
+                            }).catch(() => {
+                                resolve(); // Fallback silenzioso
+                            });
+                        } else {
+                            resolve();
+                        }
+                    } catch (e) {
+                        resolve(); // Fallback silenzioso
+                    }
                 });
-            } catch (e) {
-                resolve(); // Fallback silenzioso
+            },
+            
+            connectAudioElements() {
+                // Collega tutti gli elementi audio al contesto audio
+                const audioElements = [
+                    this.menuMusic, this.gameMusic, this.victoryMusic,
+                    this.clickSound, this.correctSound, this.wrongSound,
+                    this.transitionSound, this.timerSound, this.startSound
+                ];
+                
+                audioElements.forEach(element => {
+                    if (this.audioContext) {
+                        const source = this.audioContext.createMediaElementSource(element);
+                        source.connect(this.audioContext.destination);
+                    }
+                });
+            },
+            
+            fallbackAudioActivation() {
+                console.log('🔄 Tentativo fallback attivazione audio...');
+                this.audioActivated = true;
+                this.musicEnabled = true;
+                this.sfxEnabled = true;
+                
+                // Aggiorna UI
+                document.getElementById('musicToggle').textContent = '🔊 Musica ON';
+                document.getElementById('sfxToggle').textContent = '🔊 Suoni ON';
+                
+                // Nascondi overlay
+                document.getElementById('audioActivation').style.display = 'none';
+                
+                console.log('🎵 Audio attivato con fallback!');
+            },
+            
+            async playMusic(type) {
+                if (!this.musicEnabled || !this.audioActivated) {
+                    console.log('🎵 Musica disabilitata o audio non attivato');
+                    return;
+                }
+                
+                try {
+                    // Ferma tutta la musica
+                    this.stopAllMusic();
+                    
+                    // Reset e play nuova musica
+                    const music = this[type];
+                    music.currentTime = 0;
+                    music.volume = 0.3; // Volume più basso per la musica di sottofondo
+                    
+                    const playPromise = music.play();
+                    if (playPromise !== undefined) {
+                        await playPromise;
+                        console.log('🎵 Musica avviata:', type);
+                    }
+                } catch (error) {
+                    console.error('❌ Errore nella riproduzione della musica:', error);
+                    // Prova a riprodurre con volume 0 e poi aumentare
+                    this.retryMusicPlayback(type);
+                }
+            },
+            
+            async retryMusicPlayback(type) {
+                try {
+                    const music = this[type];
+                    music.volume = 0;
+                    await music.play();
+                    
+                    // Aumenta gradualmente il volume
+                    let volume = 0;
+                    const fadeIn = setInterval(() => {
+                        volume += 0.05;
+                        music.volume = volume;
+                        if (volume >= 0.3) {
+                            clearInterval(fadeIn);
+                        }
+                    }, 100);
+                    
+                    console.log('🎵 Musica avviata con fade-in:', type);
+                } catch (error) {
+                    console.error('❌ Errore anche nel retry della musica:', error);
+                }
+            },
+            
+            stopAllMusic() {
+                [this.menuMusic, this.gameMusic, this.victoryMusic].forEach(music => {
+                    music.pause();
+                    music.currentTime = 0;
+                });
+            },
+            
+            async playSFX(type) {
+                if (!this.sfxEnabled || !this.audioActivated) {
+                    console.log('🔇 SFX disabilitati o audio non attivato');
+                    return;
+                }
+                
+                try {
+                    const sfx = this[type];
+                    sfx.currentTime = 0;
+                    sfx.volume = 0.6;
+                    
+                    const playPromise = sfx.play();
+                    if (playPromise !== undefined) {
+                        await playPromise;
+                        console.log('🔊 SFX riprodotto:', type);
+                    }
+                } catch (error) {
+                    console.error('❌ Errore nella riproduzione SFX:', error);
+                }
+            },
+            
+            toggleMusic() {
+                if (!this.audioActivated) {
+                    console.log('🔇 Audio non ancora attivato');
+                    return;
+                }
+                
+                this.musicEnabled = !this.musicEnabled;
+                document.getElementById('musicToggle').textContent = 
+                    this.musicEnabled ? '🔊 Musica ON' : '🔇 Musica OFF';
+                
+                if (!this.musicEnabled) {
+                    this.stopAllMusic();
+                    console.log('🔇 Musica disattivata');
+                } else {
+                    // Riproduci musica corrente in base alla schermata
+                    if (document.getElementById('lobbyScreen').classList.contains('hidden') === false) {
+                        this.playMusic('menuMusic');
+                    } else if (document.getElementById('gameScreen').classList.contains('hidden') === false) {
+                        this.playMusic('gameMusic');
+                    } else if (document.getElementById('leaderboardScreen').classList.contains('hidden') === false) {
+                        this.playMusic('victoryMusic');
+                    }
+                    console.log('🔊 Musica attivata');
+                }
+            },
+            
+            toggleSFX() {
+                if (!this.audioActivated) {
+                    console.log('🔇 Audio non ancora attivato');
+                    return;
+                }
+                
+                this.sfxEnabled = !this.sfxEnabled;
+                document.getElementById('sfxToggle').textContent = 
+                    this.sfxEnabled ? '🔊 Suoni ON' : '🔇 Suoni OFF';
+                
+                console.log(this.sfxEnabled ? '🔊 Suoni attivati' : '🔇 Suoni disattivati');
             }
-        });
-    },
-    
-    async playMusic(type) {
-        if (!this.musicEnabled || !this.audioActivated) {
-            console.log('🎵 Musica disabilitata o audio non attivato');
-            return;
-        }
-        
-        try {
-            // Ferma tutta la musica
-            this.stopAllMusic();
-            
-            // Reset e play nuova musica
-            const music = this[type];
-            music.currentTime = 0;
-            music.volume = 0.3; // Volume moderato
-            
-            await music.play();
-            console.log('🎵 Musica avviata:', type);
-            
-        } catch (error) {
-            console.error('❌ Errore nella riproduzione della musica:', error);
-        }
-    },
-    
-    stopAllMusic() {
-        [this.menuMusic, this.gameMusic, this.victoryMusic].forEach(music => {
-            music.pause();
-            music.currentTime = 0;
-        });
-    },
-    
-    async playSFX(type) {
-        if (!this.sfxEnabled || !this.audioActivated) {
-            console.log('🔇 SFX disabilitati o audio non attivato');
-            return;
-        }
-        
-        try {
-            const sfx = this[type];
-            sfx.currentTime = 0;
-            sfx.volume = 0.6;
-            
-            await sfx.play();
-            console.log('🔊 SFX riprodotto:', type);
-            
-        } catch (error) {
-            console.error('❌ Errore nella riproduzione SFX:', error);
-        }
-    },
-    
-    toggleMusic() {
-        if (!this.audioActivated) {
-            console.log('🔇 Audio non ancora attivato');
-            return;
-        }
-        
-        this.musicEnabled = !this.musicEnabled;
-        document.getElementById('musicToggle').textContent = 
-            this.musicEnabled ? '🔊 Musica ON' : '🔇 Musica OFF';
-        
-        if (!this.musicEnabled) {
-            this.stopAllMusic();
-            console.log('🔇 Musica disattivata');
-        } else {
-            // Riproduci musica corrente in base alla schermata
-            if (document.getElementById('lobbyScreen').classList.contains('hidden') === false) {
-                this.playMusic('menuMusic');
-            } else if (document.getElementById('gameScreen').classList.contains('hidden') === false) {
-                this.playMusic('gameMusic');
-            } else if (document.getElementById('leaderboardScreen').classList.contains('hidden') === false) {
-                this.playMusic('victoryMusic');
-            }
-            console.log('🔊 Musica attivata');
-        }
-    },
-    
-    toggleSFX() {
-        if (!this.audioActivated) {
-            console.log('🔇 Audio non ancora attivato');
-            return;
-        }
-        
-        this.sfxEnabled = !this.sfxEnabled;
-        document.getElementById('sfxToggle').textContent = 
-            this.sfxEnabled ? '🔊 Suoni ON' : '🔇 Suoni OFF';
-        
-        console.log(this.sfxEnabled ? '🔊 Suoni attivati' : '🔇 Suoni disattivati');
-    }
-};
+        };
 
         // === CONFIGURA FIREBASE ===
         const firebaseConfig = {
@@ -825,9 +1311,3 @@ const audio = {
     </script>
 </body>
 </html>
-
-
-
-
-
-
