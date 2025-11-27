@@ -25,6 +25,7 @@
             --neon-glow: 0 0 20px rgba(255, 215, 0, 0.7);
             --neon-glow-blue: 0 0 20px rgba(0, 180, 219, 0.7);
             --neon-glow-green: 0 0 20px rgba(0, 255, 136, 0.7);
+            --neon-glow-red: 0 0 20px rgba(255, 65, 108, 0.7);
             --shadow-deep: 0 10px 40px rgba(0, 0, 0, 0.6);
             --border-radius: 12px;
             --border-radius-large: 20px;
@@ -493,6 +494,78 @@
             border-color: var(--accent-gold);
         }
 
+        /* SCHERMATA RISULTATO DOMANDA */
+        .result-container {
+            text-align: center;
+            padding: 30px;
+        }
+
+        .result-icon {
+            font-size: 5rem;
+            margin-bottom: 20px;
+            animation: resultBounce 0.6s ease;
+        }
+
+        .result-title {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .result-message {
+            font-size: 1.3rem;
+            color: var(--text-secondary);
+            margin-bottom: 25px;
+            line-height: 1.5;
+        }
+
+        .points-earned {
+            font-size: 2rem;
+            font-weight: 800;
+            margin: 20px 0;
+            padding: 15px 30px;
+            border-radius: var(--border-radius);
+            display: inline-block;
+        }
+
+        .correct-result {
+            background: linear-gradient(135deg, rgba(0, 255, 136, 0.2), rgba(0, 180, 219, 0.1));
+            border: 3px solid var(--accent-green);
+            box-shadow: var(--neon-glow-green);
+        }
+
+        .correct-title {
+            background: linear-gradient(135deg, var(--accent-green), #00B4DB);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .correct-points {
+            background: linear-gradient(135deg, var(--accent-green), #00B4DB);
+            color: #000;
+            font-weight: 900;
+        }
+
+        .wrong-result {
+            background: linear-gradient(135deg, rgba(255, 65, 108, 0.2), rgba(255, 75, 43, 0.1));
+            border: 3px solid var(--accent-red);
+            box-shadow: var(--neon-glow-red);
+        }
+
+        .wrong-title {
+            background: linear-gradient(135deg, var(--accent-red), #FF9500);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .wrong-points {
+            background: linear-gradient(135deg, var(--accent-red), #FF9500);
+            color: #000;
+            font-weight: 900;
+        }
+
         /* ANIMAZIONI */
         @keyframes scanlines {
             0% { transform: translateY(0); }
@@ -542,6 +615,17 @@
             100% { opacity: 1; transform: translateX(0); filter: blur(0); }
         }
 
+        @keyframes resultBounce {
+            0% { transform: scale(0); opacity: 0; }
+            60% { transform: scale(1.2); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        @keyframes confetti {
+            0% { transform: translateY(-100px) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(500px) rotate(360deg); opacity: 0; }
+        }
+
         /* RESPONSIVE */
         @media (max-width: 768px) {
             .container {
@@ -573,6 +657,14 @@
                 padding: 12px 25px;
                 font-size: 1rem;
             }
+            
+            .result-icon {
+                font-size: 4rem;
+            }
+            
+            .result-title {
+                font-size: 2rem;
+            }
         }
 
         /* EFFETTO RISPOSTA CONFERMATA */
@@ -584,6 +676,17 @@
             margin: 20px 0;
             box-shadow: var(--neon-glow-green);
             text-align: center;
+        }
+
+        /* EFFETTO CONFETTI */
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            background: var(--accent-gold);
+            opacity: 0;
+            z-index: 1000;
+            pointer-events: none;
         }
     </style>
 </head>
@@ -693,6 +796,15 @@
             </div>
         </div>
 
+        <!-- SCHERMATA RISULTATO DOMANDA -->
+        <div id="questionResultScreen" class="screen hidden">
+            <div class="tv-card" id="resultCard">
+                <div class="result-container" id="resultContainer">
+                    <!-- Il risultato verrà mostrato qui -->
+                </div>
+            </div>
+        </div>
+
         <!-- SCHERMATA CLASSIFICA -->
         <div id="leaderboardScreen" class="screen hidden">
             <div class="leaderboard-container">
@@ -712,7 +824,7 @@
         </div>
     </div>
 
-    <!-- ELEMENTI AUDIO - SOLO SUONI (NO MUSICA) -->
+    <!-- ELEMENTI AUDIO - CON NUOVI SUONI -->
     <audio id="clickSound" preload="auto">
         <source src="audio/Click.wav" type="audio/wav">
     </audio>
@@ -730,6 +842,13 @@
     </audio>
     <audio id="submitSound" preload="auto">
         <source src="audio/start.mp3" type="audio/mpeg">
+    </audio>
+    <!-- NUOVI SUONI -->
+    <audio id="applauseSound" preload="auto">
+        <source src="audio/clap.wav" type="audio/wav">
+    </audio>
+    <audio id="fartSound" preload="auto">
+        <source src="audio/fart.wav" type="audio/wav">
     </audio>
 
     <script>
@@ -758,10 +877,28 @@
             }
         }
 
+        // === CREA EFFETTO CONFETTI ===
+        function createConfetti() {
+            const colors = ['#FFD700', '#00B4DB', '#8A2BE2', '#FF416C', '#00ff88'];
+            for (let i = 0; i < 50; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.left = Math.random() * 100 + '%';
+                confetti.style.width = (Math.random() * 10 + 5) + 'px';
+                confetti.style.height = (Math.random() * 10 + 5) + 'px';
+                confetti.style.animation = `confetti ${Math.random() * 2 + 1}s ease-out forwards`;
+                confetti.style.animationDelay = (Math.random() * 0.5) + 's';
+                document.body.appendChild(confetti);
+                
+                setTimeout(() => confetti.remove(), 2000);
+            }
+        }
+
         // === FORZA REFRESH CACHE ===
         console.log('🎮 PLAYER Game Show Edition - Caricato: ' + new Date().toLocaleString());
 
-        // === SISTEMA AUDIO SEMPLIFICATO (SOLO SUONI) ===
+        // === SISTEMA AUDIO AGGIORNATO ===
         const audio = {
             clickSound: document.getElementById('clickSound'),
             correctSound: document.getElementById('correctSound'),
@@ -769,6 +906,8 @@
             transitionSound: document.getElementById('transitionSound'),
             timerSound: document.getElementById('timerSound'),
             submitSound: document.getElementById('submitSound'),
+            applauseSound: document.getElementById('applauseSound'),
+            fartSound: document.getElementById('fartSound'),
             
             sfxEnabled: true,
             audioActivated: false,
@@ -800,7 +939,20 @@
                 try {
                     const sfx = this[type];
                     sfx.currentTime = 0;
-                    sfx.volume = 0.6;
+                    
+                    // Volume personalizzato per ogni suono
+                    const volumes = {
+                        clickSound: 0.6,
+                        correctSound: 0.7,
+                        wrongSound: 0.7,
+                        transitionSound: 0.6,
+                        timerSound: 0.5,
+                        submitSound: 0.7,
+                        applauseSound: 0.8,
+                        fartSound: 0.9
+                    };
+                    
+                    sfx.volume = volumes[type] || 0.6;
                     await sfx.play();
                     console.log('🔊 SFX player:', type);
                 } catch (error) {
@@ -839,6 +991,7 @@
         let timeLeft = 30;
         let timer;
         let playerScore = 0;
+        let currentQuestionData = null;
 
         // === ELEMENTI DOM ===
         const elements = {
@@ -846,6 +999,7 @@
             waitingScreen: document.getElementById('waitingScreen'),
             questionScreen: document.getElementById('questionScreen'),
             answerSubmittedScreen: document.getElementById('answerSubmittedScreen'),
+            questionResultScreen: document.getElementById('questionResultScreen'),
             leaderboardScreen: document.getElementById('leaderboardScreen'),
             gameCodeInput: document.getElementById('gameCodeInput'),
             playerName: document.getElementById('playerName'),
@@ -860,7 +1014,9 @@
             submitBtn: document.getElementById('submitBtn'),
             selectedAnswerText: document.getElementById('selectedAnswerText'),
             leaderboardList: document.getElementById('leaderboardList'),
-            playerScore: document.getElementById('playerScore')
+            playerScore: document.getElementById('playerScore'),
+            resultContainer: document.getElementById('resultContainer'),
+            resultCard: document.getElementById('resultCard')
         };
 
         // === FUNZIONI PRINCIPALI ===
@@ -897,6 +1053,15 @@
                 joinedAt: Date.now()
             });
 
+            // Ascolta quando l'host rivela le risposte
+            database.ref('games/' + gameCode + '/answersRevealed').on('value', (snapshot) => {
+                const answersRevealed = snapshot.val();
+                if (answersRevealed && currentQuestionData) {
+                    console.log('🎯 Risposte rivelate! Mostrando risultato...');
+                    showQuestionResult();
+                }
+            });
+
             database.ref('games/' + gameCode).on('value', (snapshot) => {
                 const game = snapshot.val();
                 if (!game) {
@@ -916,6 +1081,7 @@
             database.ref('games/' + gameCode + '/currentQuestionData').on('value', (snapshot) => {
                 const question = snapshot.val();
                 if (question) {
+                    currentQuestionData = question;
                     showQuestion(question);
                 }
             });
@@ -938,6 +1104,7 @@
 
         function showQuestion(question) {
             currentQuestionIndex = question.currentQuestion || currentQuestionIndex;
+            currentQuestionData = question;
             
             console.log(`📝 Player: Showing question ${currentQuestionIndex + 1}`, question);
             
@@ -1023,6 +1190,61 @@
                     }
                 }
             }, 1000);
+        }
+
+        // === NUOVA FUNZIONE: MOSTRA RISULTATO DOMANDA ===
+        function showQuestionResult() {
+            if (!currentQuestionData || selectedAnswer === null) return;
+            
+            const isCorrect = selectedAnswer === currentQuestionData.correct;
+            const answerTime = 30 - timeLeft;
+            const basePoints = currentQuestionData.points || 10;
+            const speedBonus = (answerTime <= 5) ? (6 - answerTime) : 0;
+            const totalPoints = isCorrect ? (basePoints + speedBonus) : 0;
+            
+            console.log(`🎯 Risultato: ${isCorrect ? 'CORRETTO' : 'SBAGLIATO'}, Punti: ${totalPoints}`);
+            
+            // Prepara il contenuto del risultato
+            let resultHTML = '';
+            
+            if (isCorrect) {
+                resultHTML = `
+                    <div class="result-icon">🎉</div>
+                    <div class="result-title correct-title">CORRECT!</div>
+                    <div class="result-message">Brilliant answer! You nailed it!</div>
+                    <div class="points-earned correct-points">
+                        +${totalPoints} POINTS
+                        ${speedBonus > 0 ? `<div style="font-size: 1rem; margin-top: 5px;">⚡ +${speedBonus} speed bonus!</div>` : ''}
+                    </div>
+                `;
+                elements.resultCard.className = 'tv-card correct-result';
+                
+                // Effetti per risposta corretta
+                audio.playSFX('applauseSound');
+                createConfetti();
+                
+            } else {
+                resultHTML = `
+                    <div class="result-icon">💨</div>
+                    <div class="result-title wrong-title">WRONG!</div>
+                    <div class="result-message">Better luck next time! The correct answer was: <strong>${currentQuestionData.answers[currentQuestionData.correct]}</strong></div>
+                    <div class="points-earned wrong-points">
+                        0 POINTS
+                    </div>
+                `;
+                elements.resultCard.className = 'tv-card wrong-result';
+                
+                // Effetti per risposta sbagliata
+                audio.playSFX('fartSound');
+            }
+            
+            elements.resultContainer.innerHTML = resultHTML;
+            showScreen('questionResultScreen');
+            
+            // Passa alla prossima domanda dopo 3 secondi
+            setTimeout(() => {
+                showScreen('waitingScreen');
+            }, 3000);
         }
 
         function showLeaderboard(leaderboard) {
