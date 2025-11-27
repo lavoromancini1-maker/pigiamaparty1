@@ -5,231 +5,229 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pigiama Party - Game Master</title>
     
-    <!-- Font Elegante -->
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <!-- Font Drammatici -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
     
     <style>
-        /* === STILE OSCAR NIGHT / MILLIONAIRE === */
+        /* === STILE GAME SHOW TELEVISIVO === */
         :root {
-            --bg-primary: #0a0a14;
-            --bg-secondary: #1a1a2e;
-            --gold-primary: #ffd700;
-            --gold-secondary: #ffed4e;
-            --gold-glow: rgba(255, 215, 0, 0.3);
-            --accent-blue: #4a90e2;
-            --accent-purple: #9b59b6;
-            --text-primary: #ffffff;
-            --text-secondary: #b8b8cc;
-            --glass-bg: rgba(255, 255, 255, 0.08);
-            --glass-border: rgba(255, 255, 255, 0.12);
-            --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-            --success: #2ecc71;
-            --warning: #f39c12;
-            --danger: #e74c3c;
-            --border-radius: 16px;
-            --border-radius-large: 24px;
+            --bg-primary: #0f0c29;
+            --bg-secondary: #24243e;
+            --accent-gold: #FFD700;
+            --accent-blue: #00B4DB;
+            --accent-purple: #8A2BE2;
+            --accent-red: #FF416C;
+            --text-primary: #FFFFFF;
+            --text-secondary: #B0B0CC;
+            --glass-bg: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.2);
+            --neon-glow: 0 0 20px rgba(255, 215, 0, 0.7);
+            --neon-glow-blue: 0 0 20px rgba(0, 180, 219, 0.7);
+            --shadow-deep: 0 10px 40px rgba(0, 0, 0, 0.6);
+            --border-radius: 12px;
+            --border-radius-large: 20px;
         }
 
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            font-family: 'Montserrat', sans-serif;
         }
 
         body {
-            background: linear-gradient(135deg, #0a0a14 0%, #1a1a2e 50%, #2d1b69 100%);
+            background: linear-gradient(135deg, #0f0c29 0%, #24243e 50%, #302b63 100%);
             color: var(--text-primary);
             min-height: 100vh;
             overflow-x: hidden;
             position: relative;
-            padding: 20px;
         }
 
-        /* Effetto stelle di sfondo */
-        body::before {
-            content: '';
+        /* SFONDO ANIMATO CON EFFETTI TV */
+        .tv-background {
             position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            overflow: hidden;
+        }
+
+        .scanlines {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0, 0, 0, 0.1) 0px,
+                rgba(0, 0, 0, 0.1) 1px,
+                transparent 1px,
+                transparent 2px
+            );
+            animation: scanlines 0.1s linear infinite;
+        }
+
+        .light-beams {
+            position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
             background: 
-                radial-gradient(circle at 20% 80%, rgba(255, 215, 0, 0.1) 0%, transparent 50%),
-                radial-gradient(circle at 80% 20%, rgba(74, 144, 226, 0.1) 0%, transparent 50%),
-                radial-gradient(circle at 40% 40%, rgba(155, 89, 182, 0.05) 0%, transparent 50%);
-            pointer-events: none;
-            z-index: -1;
+                radial-gradient(circle at 20% 80%, rgba(255, 215, 0, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(0, 180, 219, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(138, 43, 226, 0.2) 0%, transparent 50%);
+            animation: lightMove 8s ease-in-out infinite;
         }
 
-        /* Effetto particelle dorate */
-        .gold-particles {
-            position: fixed;
-            top: 0;
-            left: 0;
+        .particles {
+            position: absolute;
             width: 100%;
             height: 100%;
-            pointer-events: none;
-            z-index: -1;
-            opacity: 0.3;
         }
 
+        .particle {
+            position: absolute;
+            background: var(--accent-gold);
+            border-radius: 50%;
+            animation: float 6s infinite ease-in-out;
+        }
+
+        /* CONTAINER PRINCIPALE */
         .container {
             max-width: 1200px;
             margin: 0 auto;
-            padding: 40px 20px;
+            padding: 30px 20px;
+            position: relative;
+            z-index: 1;
         }
 
-        /* Header con stile Oscar */
+        /* HEADER DRAMMATICO */
         .header {
             text-align: center;
-            margin-bottom: 50px;
-            opacity: 0;
-            animation: fadeInUp 1s ease-out 0.2s forwards;
-        }
-
-        .logo {
-            font-size: 4rem;
-            font-weight: 700;
-            font-family: 'Playfair Display', serif;
-            background: linear-gradient(135deg, var(--gold-primary), var(--gold-secondary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin-bottom: 16px;
-            text-shadow: 0 0 30px var(--gold-glow);
+            margin-bottom: 40px;
             position: relative;
         }
 
-        .logo::after {
-            content: '🏆';
-            position: absolute;
-            top: -10px;
-            right: -40px;
-            font-size: 2rem;
-            filter: drop-shadow(0 0 10px var(--gold-glow));
+        .main-title {
+            font-size: 4rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--accent-gold), var(--accent-blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+            text-shadow: var(--neon-glow);
+            letter-spacing: 2px;
+            position: relative;
+            animation: titleGlow 2s ease-in-out infinite alternate;
         }
 
         .subtitle {
-            font-size: 1.3rem;
+            font-size: 1.4rem;
             color: var(--text-secondary);
-            font-weight: 300;
-            letter-spacing: 2px;
+            font-weight: 500;
+            letter-spacing: 3px;
             text-transform: uppercase;
-            opacity: 0;
-            animation: fadeInUp 1s ease-out 0.4s forwards;
         }
 
-        /* Schermate */
+        /* SCREENS */
         .screen {
-            animation: screenEnter 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-        }
-
-        @keyframes screenEnter {
-            0% { 
-                opacity: 0; 
-                transform: translateY(50px) scale(0.95);
-                filter: blur(10px);
-            }
-            100% { 
-                opacity: 1; 
-                transform: translateY(0) scale(1);
-                filter: blur(0);
-            }
+            animation: screenSlide 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
         }
 
         .hidden {
             display: none !important;
         }
 
-        /* Card principale con effetto glass */
-        .main-card {
-            background: var(--glass-bg);
-            backdrop-filter: blur(20px) saturate(180%);
-            border: 1px solid var(--glass-border);
+        /* CARD PRINCIPALI STILE TV SHOW */
+        .tv-card {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.05));
+            backdrop-filter: blur(20px);
+            border: 2px solid var(--glass-border);
             border-radius: var(--border-radius-large);
             padding: 40px;
             margin-bottom: 30px;
-            box-shadow: var(--glass-shadow);
+            box-shadow: var(--shadow-deep);
             position: relative;
             overflow: hidden;
-            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            transition: all 0.4s ease;
         }
 
-        .main-card::before {
+        .tv-card::before {
             content: '';
             position: absolute;
             top: 0;
             left: -100%;
             width: 100%;
             height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
             transition: left 0.6s ease;
         }
 
-        .main-card:hover::before {
+        .tv-card:hover::before {
             left: 100%;
         }
 
-        .main-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
-            border-color: rgba(255, 215, 0, 0.3);
+        .tv-card:hover {
+            border-color: var(--accent-gold);
+            box-shadow: 0 15px 50px rgba(255, 215, 0, 0.3);
         }
 
-        /* Game Code stile Oscar */
+        /* GAME CODE STILE TELEVISIVO */
         .game-code-section {
             text-align: center;
             margin-bottom: 40px;
+            position: relative;
         }
 
         .game-code-label {
-            font-size: 1.1rem;
+            font-size: 1.3rem;
             color: var(--text-secondary);
             margin-bottom: 20px;
-            font-weight: 500;
-            letter-spacing: 1px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 2px;
         }
 
         .game-code {
-            font-size: 4rem;
-            font-weight: 700;
-            font-family: 'Playfair Display', serif;
-            background: linear-gradient(135deg, var(--gold-primary), var(--gold-secondary));
+            font-size: 5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--accent-gold), var(--accent-blue));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            padding: 25px 50px;
-            border: 2px solid rgba(255, 215, 0, 0.3);
+            padding: 30px 60px;
+            border: 3px solid var(--accent-gold);
             border-radius: var(--border-radius-large);
             display: inline-block;
             margin: 10px 0;
-            box-shadow: 0 0 30px var(--gold-glow);
+            box-shadow: var(--neon-glow);
+            animation: codePulse 2s ease-in-out infinite;
+            font-family: 'Montserrat', sans-serif;
             position: relative;
-            transition: all 0.3s ease;
         }
 
-        .game-code:hover {
-            transform: scale(1.05);
-            box-shadow: 0 0 50px var(--gold-glow);
-        }
-
-        /* Player List */
+        /* PLAYER LIST STILE GAME SHOW */
         .players-section {
             margin: 40px 0;
         }
 
         .section-title {
-            font-size: 1.5rem;
-            font-weight: 600;
+            font-size: 1.6rem;
+            font-weight: 700;
             color: var(--text-primary);
             margin-bottom: 25px;
             display: flex;
             align-items: center;
-            gap: 12px;
-            font-family: 'Playfair Display', serif;
+            gap: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
         .player-list {
@@ -239,10 +237,10 @@
         }
 
         .player-item {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 15px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: var(--border-radius);
             padding: 20px;
             display: flex;
             align-items: center;
@@ -259,7 +257,7 @@
             left: -100%;
             width: 100%;
             height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.1), transparent);
+            background: linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.2), transparent);
             transition: left 0.6s ease;
         }
 
@@ -268,49 +266,51 @@
         }
 
         .player-item:hover {
-            background: rgba(255, 255, 255, 0.08);
             transform: translateX(10px);
-            border-color: rgba(255, 215, 0, 0.2);
+            border-color: var(--accent-gold);
         }
 
         .player-icon {
-            font-size: 1.3rem;
-            width: 40px;
-            height: 40px;
+            font-size: 1.4rem;
+            width: 45px;
+            height: 45px;
             display: flex;
             align-items: center;
             justify-content: center;
-            background: rgba(255, 215, 0, 0.1);
+            background: linear-gradient(135deg, var(--accent-gold), var(--accent-blue));
             border-radius: 50%;
+            color: #000;
+            font-weight: bold;
         }
 
         .player-name {
             flex: 1;
-            font-weight: 500;
-            font-size: 1.1rem;
+            font-weight: 600;
+            font-size: 1.2rem;
         }
 
-        /* Bottoni stile Oscar */
-        .btn-primary {
-            background: linear-gradient(135deg, var(--gold-primary), var(--gold-secondary));
+        /* BOTTONI STILE GAME SHOW */
+        .game-btn {
+            background: linear-gradient(135deg, var(--accent-gold), #FFA500);
             color: #000;
             border: none;
-            padding: 18px 40px;
+            padding: 20px 45px;
             border-radius: 50px;
-            font-size: 1.2rem;
-            font-weight: 600;
+            font-size: 1.3rem;
+            font-weight: 700;
             cursor: pointer;
             transition: all 0.3s ease;
             display: inline-flex;
             align-items: center;
-            gap: 12px;
-            box-shadow: 0 5px 20px rgba(255, 215, 0, 0.3);
+            gap: 15px;
+            box-shadow: 0 5px 25px rgba(255, 215, 0, 0.4);
             position: relative;
             overflow: hidden;
-            font-family: 'Playfair Display', serif;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
-        .btn-primary::before {
+        .game-btn::before {
             content: '';
             position: absolute;
             top: 0;
@@ -321,53 +321,37 @@
             transition: left 0.6s ease;
         }
 
-        .btn-primary:hover::before {
+        .game-btn:hover::before {
             left: 100%;
         }
 
-        .btn-primary:hover:not(:disabled) {
+        .game-btn:hover:not(:disabled) {
             transform: translateY(-3px) scale(1.05);
-            box-shadow: 0 10px 30px rgba(255, 215, 0, 0.5);
+            box-shadow: 0 10px 35px rgba(255, 215, 0, 0.6);
         }
 
-        .btn-primary:active:not(:disabled) {
+        .game-btn:active:not(:disabled) {
             transform: translateY(-1px) scale(1.02);
         }
 
-        .btn-primary:disabled {
+        .game-btn:disabled {
             opacity: 0.5;
             cursor: not-allowed;
             transform: none;
             box-shadow: none;
         }
 
-        /* Question Card con effetto glass avanzato */
+        /* QUESTION CARD STILE MILLIONAIRE */
         .question-card {
-            background: var(--glass-bg);
-            backdrop-filter: blur(25px) saturate(200%);
-            border: 1px solid var(--glass-border);
+            background: linear-gradient(135deg, rgba(0, 180, 219, 0.2), rgba(138, 43, 226, 0.1));
+            backdrop-filter: blur(25px);
+            border: 3px solid var(--accent-blue);
             border-radius: var(--border-radius-large);
             padding: 50px;
             margin-bottom: 30px;
-            box-shadow: var(--glass-shadow);
+            box-shadow: var(--neon-glow-blue);
             position: relative;
             overflow: hidden;
-        }
-
-        .question-card::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(255,215,0,0.1) 0%, transparent 70%);
-            opacity: 0;
-            transition: opacity 0.6s ease;
-        }
-
-        .question-card:hover::before {
-            opacity: 1;
         }
 
         .question-header {
@@ -378,24 +362,24 @@
         }
 
         .question-counter {
-            font-size: 1.1rem;
+            font-size: 1.3rem;
             color: var(--text-secondary);
-            font-weight: 500;
+            font-weight: 600;
+            text-transform: uppercase;
             letter-spacing: 1px;
         }
 
         .question-text {
-            font-size: 2rem;
-            font-weight: 600;
+            font-size: 2.2rem;
+            font-weight: 700;
             line-height: 1.4;
             margin-bottom: 40px;
             color: var(--text-primary);
-            font-family: 'Playfair Display', serif;
             text-align: center;
-            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
         }
 
-        /* Timer stile drammatico */
+        /* TIMER DRAMMATICO */
         .timer-container {
             text-align: center;
             margin: 40px 0;
@@ -403,48 +387,25 @@
         }
 
         .timer {
-            font-size: 5rem;
-            font-weight: 700;
-            background: linear-gradient(135deg, var(--gold-primary), var(--gold-secondary));
+            font-size: 6rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--accent-gold), var(--accent-red));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
             transition: all 0.3s ease;
-            font-family: 'Playfair Display', serif;
-            text-shadow: 0 0 30px var(--gold-glow);
+            font-family: 'Montserrat', sans-serif;
+            text-shadow: 0 0 30px rgba(255, 215, 0, 0.5);
             position: relative;
-        }
-
-        .timer::after {
-            content: '';
-            position: absolute;
-            bottom: -10px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 100px;
-            height: 3px;
-            background: linear-gradient(90deg, transparent, var(--gold-primary), transparent);
+            animation: timerPulse 1s ease-in-out infinite;
         }
 
         .timer.warning {
-            background: linear-gradient(135deg, #ff6b6b, #ffa500);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            animation: pulse 0.5s infinite alternate, shake 0.3s ease-in-out infinite;
+            background: linear-gradient(135deg, #FF416C, #FF4B2B);
+            animation: timerDanger 0.5s ease-in-out infinite;
         }
 
-        @keyframes pulse {
-            from { opacity: 1; text-shadow: 0 0 30px rgba(255, 107, 107, 0.5); }
-            to { opacity: 0.8; text-shadow: 0 0 50px rgba(255, 107, 107, 0.8); }
-        }
-
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-2px); }
-            75% { transform: translateX(2px); }
-        }
-
-        /* Answers Grid con effetto glass liquid */
+        /* ANSWERS GRID STILE GAME SHOW */
         .answers-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -453,16 +414,16 @@
         }
 
         .answer-option {
-            background: rgba(255, 255, 255, 0.05);
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
             backdrop-filter: blur(15px);
-            border: 2px solid rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: var(--border-radius);
             padding: 30px;
             color: var(--text-primary);
-            font-size: 1.2rem;
-            font-weight: 500;
+            font-size: 1.3rem;
+            font-weight: 600;
             cursor: pointer;
-            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            transition: all 0.4s ease;
             text-align: center;
             position: relative;
             overflow: hidden;
@@ -475,7 +436,7 @@
             left: -100%;
             width: 100%;
             height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
             transition: left 0.6s ease;
         }
 
@@ -484,27 +445,21 @@
         }
 
         .answer-option:hover {
-            background: rgba(255, 255, 255, 0.1);
-            border-color: rgba(255, 215, 0, 0.3);
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.2), rgba(255, 165, 0, 0.1));
+            border-color: var(--accent-gold);
             transform: translateY(-5px) scale(1.02);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            box-shadow: var(--neon-glow);
         }
 
         .answer-option.correct {
-            background: rgba(46, 204, 113, 0.2);
-            border-color: var(--success);
-            color: var(--success);
-            box-shadow: 0 0 30px rgba(46, 204, 113, 0.3);
-            animation: correctGlow 0.6s ease;
+            background: linear-gradient(135deg, #00b09b, #96c93d);
+            border-color: #00b09b;
+            color: #fff;
+            box-shadow: 0 0 30px rgba(0, 176, 155, 0.6);
+            animation: correctFlash 0.6s ease;
         }
 
-        @keyframes correctGlow {
-            0% { box-shadow: 0 0 0 rgba(46, 204, 113, 0); }
-            50% { box-shadow: 0 0 40px rgba(46, 204, 113, 0.6); }
-            100% { box-shadow: 0 0 30px rgba(46, 204, 113, 0.3); }
-        }
-
-        /* Progress Bar elegante */
+        /* PROGRESS BAR ANIMATA */
         .progress-section {
             margin: 30px 0;
         }
@@ -513,45 +468,39 @@
             display: flex;
             justify-content: space-between;
             margin-bottom: 15px;
-            font-size: 1rem;
+            font-size: 1.1rem;
             color: var(--text-secondary);
-            font-weight: 500;
+            font-weight: 600;
         }
 
         .progress-bar {
             width: 100%;
-            height: 8px;
+            height: 12px;
             background: rgba(255, 255, 255, 0.1);
-            border-radius: 4px;
+            border-radius: 6px;
             overflow: hidden;
             position: relative;
         }
 
-        .progress-bar::before {
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-gold), var(--accent-blue));
+            transition: width 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            position: relative;
+        }
+
+        .progress-fill::after {
             content: '';
             position: absolute;
             top: 0;
-            left: 0;
+            left: -100%;
             width: 100%;
             height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-            animation: shimmer 2s infinite;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            animation: progressShine 2s infinite;
         }
 
-        @keyframes shimmer {
-            0% { transform: translateX(-100%); }
-            100% { transform: translateX(100%); }
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, var(--gold-primary), var(--gold-secondary));
-            transition: width 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-            position: relative;
-            z-index: 2;
-        }
-
-        /* Quick Actions */
+        /* QUICK ACTIONS */
         .quick-actions {
             display: flex;
             gap: 20px;
@@ -559,108 +508,51 @@
             justify-content: center;
         }
 
-        .btn-secondary {
-            background: rgba(255, 255, 255, 0.08);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.15);
+        .action-btn {
+            background: linear-gradient(135deg, var(--accent-purple), var(--accent-blue));
+            border: 2px solid var(--accent-purple);
             color: var(--text-primary);
             padding: 15px 30px;
             border-radius: 25px;
             font-size: 1rem;
-            font-weight: 500;
+            font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
             position: relative;
             overflow: hidden;
+            text-transform: uppercase;
         }
 
-        .btn-secondary::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
-            transition: left 0.6s ease;
-        }
-
-        .btn-secondary:hover::before {
-            left: 100%;
-        }
-
-        .btn-secondary:hover:not(:disabled) {
-            background: rgba(255, 255, 255, 0.12);
+        .action-btn:hover:not(:disabled) {
             transform: translateY(-2px);
-            border-color: rgba(255, 215, 0, 0.3);
+            box-shadow: 0 5px 20px rgba(138, 43, 226, 0.4);
         }
 
-        .btn-secondary:disabled {
+        .action-btn:disabled {
             opacity: 0.4;
             cursor: not-allowed;
         }
 
-        /* Answers List */
-        .answers-list {
-            list-style: none;
-            margin-top: 25px;
-        }
-
-        .answer-item {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 15px;
-            padding: 18px 25px;
-            margin-bottom: 12px;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            transition: all 0.3s ease;
-        }
-
-        .answer-item:hover {
-            background: rgba(255, 255, 255, 0.08);
-            transform: translateX(5px);
-        }
-
-        .answer-item.hidden-answer {
-            opacity: 0.7;
-            filter: blur(1px);
-        }
-
-        /* Leaderboard stile Oscar */
+        /* LEADERBOARD STILE PODIO TV */
         .leaderboard-card {
-            background: var(--glass-bg);
-            backdrop-filter: blur(25px) saturate(200%);
-            border: 1px solid var(--glass-border);
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.15), rgba(0, 180, 219, 0.1));
+            backdrop-filter: blur(25px);
+            border: 3px solid var(--accent-gold);
             border-radius: var(--border-radius-large);
             padding: 50px;
             text-align: center;
-            box-shadow: var(--glass-shadow);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .leaderboard-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: radial-gradient(circle at top right, rgba(255,215,0,0.1), transparent 50%);
+            box-shadow: var(--neon-glow);
         }
 
         .leaderboard-title {
-            font-size: 3rem;
-            font-weight: 700;
-            font-family: 'Playfair Display', serif;
-            background: linear-gradient(135deg, var(--gold-primary), var(--gold-secondary));
+            font-size: 3.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--accent-gold), var(--accent-blue));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+            background-clip: text;
             margin-bottom: 50px;
-            text-shadow: 0 0 30px var(--gold-glow);
+            text-shadow: var(--neon-glow);
         }
 
         .podium {
@@ -673,188 +565,121 @@
         }
 
         .podium-item {
-            background: var(--glass-bg);
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.1));
             backdrop-filter: blur(20px);
-            border: 1px solid var(--glass-border);
-            border-radius: 20px;
+            border: 2px solid var(--glass-border);
+            border-radius: var(--border-radius-large);
             padding: 35px 25px;
             text-align: center;
-            min-width: 160px;
+            min-width: 180px;
             animation: podiumRise 1s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
             position: relative;
             overflow: hidden;
-            box-shadow: var(--glass-shadow);
-        }
-
-        @keyframes podiumRise {
-            0% { 
-                transform: translateY(100px) scale(0.8); 
-                opacity: 0; 
-            }
-            100% { 
-                transform: translateY(0) scale(1); 
-                opacity: 1; 
-            }
+            box-shadow: var(--shadow-deep);
         }
 
         .podium-1 {
-            background: linear-gradient(135deg, #ffd700, #ffed4e);
+            background: linear-gradient(135deg, #FFD700, #FFEC8B);
+            border-color: #FFD700;
             color: #000;
-            height: 200px;
-            box-shadow: 0 10px 40px rgba(255, 215, 0, 0.4);
-            border: none;
+            height: 220px;
+            box-shadow: 0 10px 40px rgba(255, 215, 0, 0.5);
         }
 
         .podium-2 {
-            background: linear-gradient(135deg, #c0c0c0, #e8e8e8);
+            background: linear-gradient(135deg, #C0C0C0, #E8E8E8);
+            border-color: #C0C0C0;
             color: #000;
-            height: 170px;
-            box-shadow: 0 8px 30px rgba(192, 192, 192, 0.3);
-            border: none;
+            height: 180px;
+            box-shadow: 0 8px 30px rgba(192, 192, 192, 0.4);
         }
 
         .podium-3 {
-            background: linear-gradient(135deg, #cd7f32, #e6b800);
+            background: linear-gradient(135deg, #CD7F32, #E6B800);
+            border-color: #CD7F32;
             color: #000;
-            height: 140px;
-            box-shadow: 0 8px 30px rgba(205, 127, 50, 0.3);
-            border: none;
+            height: 150px;
+            box-shadow: 0 8px 30px rgba(205, 127, 50, 0.4);
         }
 
-        /* Audio Controls */
-        .audio-controls {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 1000;
-            display: flex;
-            gap: 12px;
+        /* ANIMAZIONI */
+        @keyframes scanlines {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(2px); }
         }
 
-        .audio-btn {
-            background: rgba(255, 255, 255, 0.08);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            color: var(--text-primary);
-            padding: 10px 18px;
-            border-radius: 20px;
-            font-size: 0.9rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
+        @keyframes lightMove {
+            0%, 100% { transform: scale(1) rotate(0deg); }
+            50% { transform: scale(1.1) rotate(180deg); }
         }
 
-        .audio-btn:hover {
-            background: rgba(255, 255, 255, 0.12);
-            border-color: rgba(255, 215, 0, 0.3);
+        @keyframes float {
+            0%, 100% { transform: translateY(0) translateX(0); }
+            25% { transform: translateY(-20px) translateX(10px); }
+            50% { transform: translateY(-10px) translateX(-10px); }
+            75% { transform: translateY(-15px) translateX(15px); }
         }
 
-        /* Activation Overlay */
-        .audio-activation {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(10, 10, 20, 0.98);
-            backdrop-filter: blur(20px);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 10000;
+        @keyframes titleGlow {
+            0% { text-shadow: 0 0 20px rgba(255, 215, 0, 0.5); }
+            100% { text-shadow: 0 0 40px rgba(255, 215, 0, 0.8), 0 0 60px rgba(255, 215, 0, 0.6); }
         }
 
-        .activation-card {
-            background: var(--glass-bg);
-            backdrop-filter: blur(30px);
-            border: 1px solid var(--glass-border);
-            border-radius: var(--border-radius-large);
-            padding: 60px 50px;
-            text-align: center;
-            max-width: 600px;
-            margin: 20px;
-            box-shadow: var(--glass-shadow);
-            position: relative;
-            overflow: hidden;
+        @keyframes codePulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 20px rgba(255, 215, 0, 0.5); }
+            50% { transform: scale(1.02); box-shadow: 0 0 40px rgba(255, 215, 0, 0.8); }
         }
 
-        .activation-card::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(255,215,0,0.1) 0%, transparent 70%);
-            animation: rotate 10s linear infinite;
+        @keyframes timerPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
         }
 
-        @keyframes rotate {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        @keyframes timerDanger {
+            0%, 100% { 
+                transform: scale(1);
+                text-shadow: 0 0 30px rgba(255, 65, 108, 0.5);
+            }
+            50% { 
+                transform: scale(1.1);
+                text-shadow: 0 0 50px rgba(255, 65, 108, 0.8);
+            }
         }
 
-        .activation-title {
-            font-size: 2.5rem;
-            font-weight: 700;
-            margin-bottom: 25px;
-            background: linear-gradient(135deg, var(--gold-primary), var(--gold-secondary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            font-family: 'Playfair Display', serif;
-            position: relative;
-            z-index: 2;
+        @keyframes correctFlash {
+            0% { transform: scale(1); box-shadow: 0 0 0 rgba(0, 176, 155, 0); }
+            50% { transform: scale(1.1); box-shadow: 0 0 50px rgba(0, 176, 155, 0.8); }
+            100% { transform: scale(1); box-shadow: 0 0 30px rgba(0, 176, 155, 0.6); }
         }
 
-        .activation-btn {
-            background: linear-gradient(135deg, var(--gold-primary), var(--gold-secondary));
-            color: #000;
-            border: none;
-            padding: 20px 40px;
-            border-radius: 50px;
-            font-size: 1.3rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin-top: 25px;
-            box-shadow: 0 5px 20px rgba(255, 215, 0, 0.3);
-            position: relative;
-            z-index: 2;
-            font-family: 'Playfair Display', serif;
+        @keyframes progressShine {
+            0% { left: -100%; }
+            100% { left: 100%; }
         }
 
-        .activation-btn:hover {
-            transform: translateY(-2px) scale(1.05);
-            box-shadow: 0 10px 30px rgba(255, 215, 0, 0.5);
+        @keyframes podiumRise {
+            0% { transform: translateY(100px) scale(0.8); opacity: 0; }
+            100% { transform: translateY(0) scale(1); opacity: 1; }
         }
 
-        /* Version */
-        .version {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: rgba(255, 255, 255, 0.08);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            color: var(--text-secondary);
-            padding: 8px 16px;
-            border-radius: 15px;
-            font-size: 0.8rem;
-            font-weight: 500;
+        @keyframes screenSlide {
+            0% { opacity: 0; transform: translateX(50px); filter: blur(10px); }
+            100% { opacity: 1; transform: translateX(0); filter: blur(0); }
         }
 
-        /* Responsive */
+        /* RESPONSIVE */
         @media (max-width: 768px) {
             .container {
                 padding: 20px 15px;
             }
             
-            .logo {
+            .main-title {
                 font-size: 2.8rem;
             }
             
             .game-code {
-                font-size: 3rem;
-                padding: 20px 30px;
+                font-size: 3.5rem;
+                padding: 20px 40px;
             }
             
             .answers-grid {
@@ -868,119 +693,67 @@
             }
             
             .podium-item {
-                height: 140px !important;
+                height: 150px !important;
                 min-width: 250px;
             }
             
-            .main-card, .question-card, .leaderboard-card {
+            .tv-card, .question-card, .leaderboard-card {
                 padding: 30px 20px;
             }
             
             .question-text {
-                font-size: 1.6rem;
+                font-size: 1.8rem;
             }
             
             .timer {
                 font-size: 4rem;
             }
         }
-
-        /* Animazioni */
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(40px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        /* Effetti speciali per interazioni */
-        .click-effect {
-            position: absolute;
-            width: 20px;
-            height: 20px;
-            background: radial-gradient(circle, var(--gold-primary), transparent);
-            border-radius: 50%;
-            pointer-events: none;
-            animation: clickRipple 0.6s ease-out;
-        }
-
-        @keyframes clickRipple {
-            0% {
-                transform: scale(0);
-                opacity: 1;
-            }
-            100% {
-                transform: scale(4);
-                opacity: 0;
-            }
-        }
     </style>
 </head>
 <body>
-    <!-- EFFETTO PARTICELLE DORATE -->
-    <div class="gold-particles"></div>
-
-    <!-- OVERLAY ATTIVAZIONE AUDIO -->
-    <div id="audioActivation" class="audio-activation">
-        <div class="activation-card">
-            <div class="activation-title">🎵 Audio Activation</div>
-            <p style="margin-bottom: 30px; color: var(--text-secondary); line-height: 1.6; font-size: 1.1rem; position: relative; z-index: 2;">
-                Enable audio for the complete Oscar Night gaming experience with cinematic music and dramatic sound effects.
-            </p>
-            <button class="activation-btn" id="activateAudio">🎮 Enable Audio Experience</button>
-            <p style="margin-top: 25px; font-size: 0.9rem; color: var(--text-secondary); position: relative; z-index: 2;">
-                Required for full cinematic immersion
-            </p>
-        </div>
+    <!-- SFONDO ANIMATO TV SHOW -->
+    <div class="tv-background">
+        <div class="scanlines"></div>
+        <div class="light-beams"></div>
+        <div class="particles" id="particlesContainer"></div>
     </div>
 
-    <!-- CONTROLLI AUDIO -->
-    <div class="audio-controls">
-        <button class="audio-btn" id="musicToggle">🔇 Music</button>
-        <button class="audio-btn" id="sfxToggle">🔇 SFX</button>
-    </div>
-
-    <div class="version">Oscar Night Edition</div>
-    
     <div class="container">
         <!-- HEADER -->
         <div class="header">
-            <h1 class="logo">🎭 Pigiama Party</h1>
-            <div class="subtitle">Oscar Night Game Master</div>
+            <h1 class="main-title">🎮 PIGIAMA PARTY</h1>
+            <div class="subtitle">THE ULTIMATE GAME SHOW EXPERIENCE</div>
         </div>
 
         <!-- SCHERMATA LOBBY -->
         <div id="lobbyScreen" class="screen">
-            <div class="main-card">
+            <div class="tv-card">
                 <div class="game-code-section">
-                    <div class="game-code-label">Your Exclusive Game Code</div>
+                    <div class="game-code-label">GAME CODE</div>
                     <div class="game-code" id="gameCode">GAME123</div>
                     <p style="color: var(--text-secondary); margin-top: 20px; font-size: 1.1rem;">
-                        Share this golden code with players to join the Oscar Night experience
+                        Share this code with players to join the ultimate game show!
                     </p>
                 </div>
 
                 <div class="players-section">
                     <div class="section-title">
-                        <span>🌟</span>
-                        Celebrity Guests
+                        <span>🎯</span>
+                        CONTESTANTS
                     </div>
                     <ul class="player-list" id="playerList">
                         <li class="player-item">
                             <span class="player-icon">⏳</span>
-                            <span class="player-name">Waiting for stars to arrive...</span>
+                            <span class="player-name">Waiting for contestants...</span>
                         </li>
                     </ul>
                 </div>
 
                 <div style="text-align: center; margin-top: 50px;">
-                    <button class="btn-primary" id="startBtn" disabled>
-                        <span>🎬</span>
-                        Start Oscar Night
+                    <button class="game-btn" id="startBtn" disabled>
+                        <span>🚀</span>
+                        START GAME SHOW
                     </button>
                 </div>
             </div>
@@ -990,21 +763,21 @@
         <div id="gameScreen" class="screen hidden">
             <div class="question-card">
                 <div class="question-header">
-                    <div class="question-counter" id="questionCounter">Question 1/3</div>
+                    <div class="question-counter" id="questionCounter">QUESTION 1/10</div>
                 </div>
                 
                 <div class="question-text" id="questionText">
-                    The Oscar-winning question will appear here...
+                    The ultimate game show question will appear here...
                 </div>
 
                 <div class="timer-container">
-                    <div class="timer" id="timer">20</div>
+                    <div class="timer" id="timer">30</div>
                 </div>
 
                 <!-- Progress Bar -->
                 <div class="progress-section">
                     <div class="progress-info">
-                        <span>Celebrity Responses</span>
+                        <span>CONTESTANT ANSWERS</span>
                         <span id="answersProgress">0/0</span>
                     </div>
                     <div class="progress-bar">
@@ -1014,8 +787,8 @@
 
                 <!-- Quick Actions -->
                 <div class="quick-actions">
-                    <button class="btn-secondary" id="skipTimerBtn" disabled>⏩ Skip Timer</button>
-                    <button class="btn-secondary" id="showAnswerBtn" disabled>🎯 Reveal Answer</button>
+                    <button class="action-btn" id="skipTimerBtn" disabled>⏩ SKIP TIMER</button>
+                    <button class="action-btn" id="showAnswerBtn" disabled>🎯 REVEAL ANSWER</button>
                 </div>
 
                 <!-- Answers Grid -->
@@ -1024,23 +797,23 @@
                 </div>
 
                 <div style="text-align: center; margin-top: 40px;">
-                    <button class="btn-primary" id="nextBtn">
-                        <span>🌟</span>
-                        Next Award
+                    <button class="game-btn" id="nextBtn">
+                        <span>➡️</span>
+                        NEXT QUESTION
                     </button>
                 </div>
             </div>
 
             <!-- Answers List -->
-            <div class="main-card">
+            <div class="tv-card">
                 <div class="section-title">
-                    <span>🎭</span>
-                    Celebrity Responses
+                    <span>📊</span>
+                    CONTESTANT RESPONSES
                 </div>
                 <ul class="answers-list" id="answersList">
-                    <li class="answer-item">
-                        <span>⏳</span>
-                        <span>Waiting for celebrity responses...</span>
+                    <li class="player-item">
+                        <span class="player-icon">⏳</span>
+                        <span class="player-name">Waiting for responses...</span>
                     </li>
                 </ul>
             </div>
@@ -1049,7 +822,7 @@
         <!-- SCHERMATA CLASSIFICA -->
         <div id="leaderboardScreen" class="screen hidden">
             <div class="leaderboard-card">
-                <div class="leaderboard-title">🏆 Oscar Winners</div>
+                <div class="leaderboard-title">🏆 FINAL RESULTS</div>
                 
                 <!-- Podio -->
                 <div class="podium" id="podium">
@@ -1059,8 +832,8 @@
                 <!-- Classifica Completa -->
                 <div style="margin-top: 60px;">
                     <div class="section-title" style="justify-content: center;">
-                        <span>📊</span>
-                        Complete Winners List
+                        <span>📈</span>
+                        FINAL STANDINGS
                     </div>
                     <ul class="player-list" id="finalLeaderboard" style="max-width: 600px; margin: 0 auto;">
                         <!-- Leaderboard will be generated here -->
@@ -1068,9 +841,9 @@
                 </div>
 
                 <div style="text-align: center; margin-top: 50px;">
-                    <button class="btn-primary" id="restartBtn">
+                    <button class="game-btn" id="restartBtn">
                         <span>🔄</span>
-                        New Oscar Night
+                        NEW GAME SHOW
                     </button>
                 </div>
             </div>
@@ -1109,8 +882,41 @@
 
     <!-- IL RESTANTE CODICE JAVASCRIPT RIMANE INVARIATO -->
     <script>
+        // === CREA PARTICELLE ANIMATE ===
+        function createParticles() {
+            const container = document.getElementById('particlesContainer');
+            const particleCount = 30;
+            
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                
+                // Dimensioni casuali
+                const size = Math.random() * 4 + 1;
+                particle.style.width = size + 'px';
+                particle.style.height = size + 'px';
+                
+                // Posizione casuale
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = Math.random() * 100 + '%';
+                
+                // Colore casuale
+                const colors = ['#FFD700', '#00B4DB', '#8A2BE2', '#FF416C'];
+                particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+                
+                // Animazione personalizzata
+                particle.style.animationDelay = Math.random() * 6 + 's';
+                particle.style.animationDuration = (Math.random() * 4 + 4) + 's';
+                
+                container.appendChild(particle);
+            }
+        }
+
+        // === INIZIALIZZA PARTICELLE ===
+        createParticles();
+
         // === FORZA REFRESH CACHE ===
-        console.log('🎭 HOST Oscar Night Edition - Caricato: ' + new Date().toLocaleString());
+        console.log('🎮 HOST Game Show Edition - Caricato: ' + new Date().toLocaleString());
         
         // === SISTEMA AUDIO ===
         const audio = {
@@ -1145,17 +951,6 @@
                     this.audioActivated = true;
                     this.musicEnabled = true;
                     this.sfxEnabled = true;
-                    
-                    document.getElementById('musicToggle').textContent = '🔊 Music';
-                    document.getElementById('sfxToggle').textContent = '🔊 SFX';
-                    
-                    const activationOverlay = document.getElementById('audioActivation');
-                    activationOverlay.style.opacity = '0';
-                    activationOverlay.style.transition = 'opacity 0.5s ease';
-                    
-                    setTimeout(() => {
-                        activationOverlay.style.display = 'none';
-                    }, 500);
                     
                     setTimeout(() => {
                         this.playMusic('menuMusic');
@@ -1205,31 +1000,6 @@
                 } catch (error) {
                     console.error('❌ Errore SFX:', error);
                 }
-            },
-            
-            toggleMusic() {
-                if (!this.audioActivated) return;
-                this.musicEnabled = !this.musicEnabled;
-                document.getElementById('musicToggle').textContent = 
-                    this.musicEnabled ? '🔊 Music' : '🔇 Music';
-                if (!this.musicEnabled) {
-                    this.stopAllMusic();
-                } else {
-                    if (document.getElementById('lobbyScreen').classList.contains('hidden') === false) {
-                        this.playMusic('menuMusic');
-                    } else if (document.getElementById('gameScreen').classList.contains('hidden') === false) {
-                        this.playMusic('gameMusic');
-                    } else if (document.getElementById('leaderboardScreen').classList.contains('hidden') === false) {
-                        this.playMusic('victoryMusic');
-                    }
-                }
-            },
-            
-            toggleSFX() {
-                if (!this.audioActivated) return;
-                this.sfxEnabled = !this.sfxEnabled;
-                document.getElementById('sfxToggle').textContent = 
-                    this.sfxEnabled ? '🔊 SFX' : '🔇 SFX';
             }
         };
 
@@ -1272,7 +1042,7 @@
 
         // === VARIABILI DI STATO ===
         let currentQuestion = 0;
-        let timeLeft = 20;
+        let timeLeft = 30;
         let timer;
         let connectedPlayers = [];
         let playerAnswers = [];
@@ -1305,18 +1075,18 @@
 
         // === INIZIALIZZAZIONE ===
         function initGame() {
-            gameCode = 'GAME' + Math.floor(1000 + Math.random() * 9000);
+            gameCode = 'SHOW' + Math.floor(1000 + Math.random() * 9000);
             elements.gameCode.textContent = gameCode;
             
             playerScores = {};
             
-            console.log('🎭 Host Oscar Night creato con codice:', gameCode);
+            console.log('🎮 Host Game Show creato con codice:', gameCode);
             
             database.ref('games/' + gameCode).set({
                 status: 'waiting',
                 host: true,
                 createdAt: Date.now(),
-                version: 'Oscar-Night-2.0'
+                version: 'Game-Show-2.0'
             });
 
             database.ref('games/' + gameCode + '/players').on('value', (snapshot) => {
@@ -1342,38 +1112,23 @@
                 updateAnswersList();
             });
 
-            // Aggiungi effetto click su tutti i bottoni
-            document.querySelectorAll('button').forEach(button => {
-                button.addEventListener('click', function(e) {
-                    if (audio.sfxEnabled && audio.audioActivated) {
-                        audio.playSFX('clickSound');
-                    }
-                    
-                    // Effetto visivo click
-                    const clickEffect = document.createElement('div');
-                    clickEffect.className = 'click-effect';
-                    clickEffect.style.left = (e.clientX - 10) + 'px';
-                    clickEffect.style.top = (e.clientY - 10) + 'px';
-                    document.body.appendChild(clickEffect);
-                    
-                    setTimeout(() => {
-                        clickEffect.remove();
-                    }, 600);
-                });
-            });
+            // Auto-attiva audio dopo breve ritardo
+            setTimeout(() => {
+                audio.activateAudio();
+            }, 1000);
         }
 
         function updatePlayerList() {
             elements.playerList.innerHTML = '';
             
             if (connectedPlayers.length === 0) {
-                elements.playerList.innerHTML = '<li class="player-item"><span class="player-icon">⏳</span><span class="player-name">Waiting for stars to arrive...</span></li>';
+                elements.playerList.innerHTML = '<li class="player-item"><span class="player-icon">⏳</span><span class="player-name">Waiting for contestants...</span></li>';
                 elements.startBtn.disabled = true;
             } else {
-                connectedPlayers.forEach(player => {
+                connectedPlayers.forEach((player, index) => {
                     const li = document.createElement('li');
                     li.className = 'player-item';
-                    li.innerHTML = `<span class="player-icon">🌟</span><span class="player-name">${player.name}</span>`;
+                    li.innerHTML = `<span class="player-icon">${index + 1}</span><span class="player-name">${player.name}</span>`;
                     elements.playerList.appendChild(li);
                 });
                 elements.startBtn.disabled = false;
@@ -1416,23 +1171,23 @@
             elements.answersList.innerHTML = '';
             
             if (playerAnswers.length === 0) {
-                elements.answersList.innerHTML = '<li class="answer-item"><span>⏳</span><span>Waiting for celebrity responses...</span></li>';
+                elements.answersList.innerHTML = '<li class="player-item"><span class="player-icon">⏳</span><span class="player-name">Waiting for responses...</span></li>';
             } else {
                 const currentAnswers = playerAnswers.filter(a => a.questionIndex === currentQuestion);
                 
                 if (!answersRevealed) {
                     currentAnswers.forEach(answer => {
                         const li = document.createElement('li');
-                        li.className = 'answer-item hidden-answer';
-                        li.innerHTML = `<span>🎭</span><span>${answer.playerName}: Response submitted</span>`;
+                        li.className = 'player-item';
+                        li.innerHTML = `<span class="player-icon">🎯</span><span class="player-name">${answer.playerName}: Response submitted</span>`;
                         elements.answersList.appendChild(li);
                     });
                     
                     if (currentAnswers.length > 0) {
                         const summary = document.createElement('li');
-                        summary.className = 'answer-item';
-                        summary.style.background = 'rgba(255, 215, 0, 0.1)';
-                        summary.innerHTML = `<span>📊</span><span>${currentAnswers.length}/${connectedPlayers.length} celebrities responded</span>`;
+                        summary.className = 'player-item';
+                        summary.style.background = 'rgba(255, 215, 0, 0.2)';
+                        summary.innerHTML = `<span class="player-icon">📊</span><span class="player-name">${currentAnswers.length}/${connectedPlayers.length} contestants responded</span>`;
                         elements.answersList.appendChild(summary);
                     }
                 } else {
@@ -1441,7 +1196,7 @@
                         const pointsData = calculatePoints(answer, question);
                         
                         const li = document.createElement('li');
-                        li.className = 'answer-item';
+                        li.className = 'player-item';
                         
                         const isCorrect = answer.answerIndex === question.correct;
                         const icon = isCorrect ? '🏆' : '❌';
@@ -1460,7 +1215,7 @@
                             }
                         }
                         
-                        li.innerHTML = `${icon} <span>${answer.playerName}: Option ${answer.answerIndex + 1}${pointsText}</span>`;
+                        li.innerHTML = `<span class="player-icon">${icon}</span><span class="player-name">${answer.playerName}: Option ${answer.answerIndex + 1}${pointsText}</span>`;
                         elements.answersList.appendChild(li);
                     });
                 }
@@ -1471,7 +1226,7 @@
                     clearInterval(timer);
                     showCorrectAnswer();
                     elements.nextBtn.disabled = false;
-                    elements.timer.textContent = "🎉 ALL STARS RESPONDED!";
+                    elements.timer.textContent = "🎉 ALL RESPONSES IN!";
                 }
             }
         }
@@ -1507,9 +1262,9 @@
             playerAnswers = [];
             answersRevealed = false;
             
-            console.log(`🔄 Caricando domanda Oscar ${index + 1}`);
+            console.log(`🔄 Caricando domanda ${index + 1}`);
             
-            elements.questionCounter.textContent = `Award ${index + 1}/${questions.length}`;
+            elements.questionCounter.textContent = `QUESTION ${index + 1}/${questions.length}`;
             elements.questionText.textContent = question.question;
             
             elements.answersGrid.innerHTML = '';
@@ -1533,7 +1288,7 @@
         }
 
         function startTimer() {
-            timeLeft = 20;
+            timeLeft = 30;
             elements.timer.textContent = timeLeft;
             elements.timer.classList.remove('warning');
             elements.nextBtn.disabled = true;
@@ -1543,9 +1298,9 @@
                 timeLeft--;
                 elements.timer.textContent = timeLeft;
                 
-                if (timeLeft <= 5) {
+                if (timeLeft <= 10) {
                     elements.timer.classList.add('warning');
-                    if (timeLeft === 3 || timeLeft === 2 || timeLeft === 1) {
+                    if (timeLeft <= 5) {
                         audio.playSFX('timerSound');
                     }
                 }
@@ -1555,7 +1310,7 @@
                     clearInterval(timer);
                     showCorrectAnswer();
                     elements.nextBtn.disabled = false;
-                    elements.timer.textContent = "🎉 ALL STARS RESPONDED!";
+                    elements.timer.textContent = "🎉 ALL RESPONSES IN!";
                     return;
                 }
                 
@@ -1614,10 +1369,10 @@
                 const podiumItem = document.createElement('div');
                 podiumItem.className = `podium-item podium-${index + 1}`;
                 podiumItem.innerHTML = `
-                    <div style="font-size: 2.5rem; margin-bottom: 15px;">${getMedalIcon(index + 1)}</div>
-                    <div style="font-weight: bold; font-size: 1.4rem;">${player.name}</div>
-                    <div style="font-size: 1.8rem; margin-top: 15px; font-weight: 700;">${player.score}p</div>
-                    ${player.speedBonuses > 0 ? `<div style="font-size: 0.9rem; margin-top: 8px; opacity: 0.9;">⚡ ${player.speedBonuses}p bonus</div>` : ''}
+                    <div style="font-size: 3rem; margin-bottom: 15px;">${getMedalIcon(index + 1)}</div>
+                    <div style="font-weight: bold; font-size: 1.5rem; margin-bottom: 10px;">${player.name}</div>
+                    <div style="font-size: 2rem; font-weight: 800; margin-bottom: 5px;">${player.score}p</div>
+                    ${player.speedBonuses > 0 ? `<div style="font-size: 1rem; opacity: 0.9;">⚡ ${player.speedBonuses}p bonus</div>` : ''}
                 `;
                 elements.podium.appendChild(podiumItem);
             });
@@ -1629,7 +1384,7 @@
                 li.innerHTML = `
                     <span class="player-icon">${getMedalIcon(player.rank)}</span>
                     <span class="player-name">${player.name}</span>
-                    <span style="font-weight: 700; color: var(--gold-primary);">${player.score}p</span>
+                    <span style="font-weight: 700; color: var(--accent-gold); font-size: 1.3rem;">${player.score}p</span>
                 `;
                 elements.finalLeaderboard.appendChild(li);
             });
@@ -1669,14 +1424,17 @@
 
         // === EVENT LISTENERS ===
         elements.startBtn.addEventListener('click', function() {
+            audio.playSFX('clickSound');
             startGame();
         });
         
         elements.nextBtn.addEventListener('click', function() {
+            audio.playSFX('clickSound');
             nextQuestion();
         });
 
         elements.skipTimerBtn.addEventListener('click', function() {
+            audio.playSFX('clickSound');
             clearInterval(timer);
             showCorrectAnswer();
             elements.nextBtn.disabled = false;
@@ -1684,32 +1442,21 @@
         });
 
         elements.showAnswerBtn.addEventListener('click', function() {
+            audio.playSFX('clickSound');
             showCorrectAnswer();
         });
 
         elements.restartBtn.addEventListener('click', function() {
+            audio.playSFX('clickSound');
             location.reload();
-        });
-
-        document.getElementById('musicToggle').addEventListener('click', function() {
-            audio.toggleMusic();
-        });
-        
-        document.getElementById('sfxToggle').addEventListener('click', function() {
-            audio.toggleSFX();
-        });
-
-        document.getElementById('activateAudio').addEventListener('click', function() {
-            console.log('🎵 Pulsante Attiva Audio cliccato');
-            audio.activateAudio();
         });
 
         // === AVVIA IL GIOCO ===
         initGame();
         
         setTimeout(() => {
-            console.log('🔄 HOST Oscar Night Edition attivo');
-            document.title = "Pigiama Party - Oscar Night Game Master";
+            console.log('🔄 HOST Game Show Edition attivo');
+            document.title = "Pigiama Party - Game Master";
         }, 100);
     </script>
 </body>
