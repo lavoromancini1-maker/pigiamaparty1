@@ -41,6 +41,29 @@
             min-height: 100vh;
             overflow-x: hidden;
             position: relative;
+            transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        /* === TEMI DINAMICI === */
+        body.theme-space {
+            background: linear-gradient(135deg, #000428 0%, #004e92 100%);
+            --accent-gold: #4FC3F7;
+            --accent-blue: #E040FB;
+            --accent-purple: #7B1FA2;
+        }
+
+        body.theme-neon {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            --accent-gold: #00FFFF;
+            --accent-blue: #FF00FF;
+            --accent-purple: #FF6B6B;
+        }
+
+        body.theme-royal {
+            background: linear-gradient(135deg, #3a1c71 0%, #d76d77 50%, #ffaf7b 100%);
+            --accent-gold: #FFE082;
+            --accent-blue: #80DEEA;
+            --accent-purple: #CE93D8;
         }
 
         /* SFONDO ANIMATO CON EFFETTI TV */
@@ -87,6 +110,7 @@
             position: absolute;
             width: 100%;
             height: 100%;
+            pointer-events: none;
         }
 
         .particle {
@@ -94,6 +118,19 @@
             background: var(--accent-gold);
             border-radius: 50%;
             animation: float 6s infinite ease-in-out;
+            pointer-events: none;
+        }
+
+        /* PARTICELLE CELEBRAZIONE */
+        .celebration-particle {
+            position: fixed;
+            width: 8px;
+            height: 8px;
+            background: var(--accent-gold);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 1000;
+            animation: celebrate 1.5s ease-out forwards;
         }
 
         /* CONTAINER PRINCIPALE */
@@ -300,6 +337,44 @@
             transform: scale(1);
         }
 
+        /* CONTROLLI TEMI */
+        .theme-controls {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1000;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            max-width: 300px;
+        }
+
+        .theme-btn {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: var(--text-primary);
+            padding: 8px 12px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            flex: 1;
+            min-width: 60px;
+            text-align: center;
+        }
+
+        .theme-btn:hover {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: var(--accent-gold);
+        }
+
+        .theme-btn.active {
+            background: var(--accent-gold);
+            color: #000;
+            border-color: var(--accent-gold);
+        }
+
         /* VERSION */
         .version {
             position: fixed;
@@ -357,6 +432,24 @@
                 transform: scale(4);
                 opacity: 0;
             }
+        }
+
+        /* NUOVE ANIMAZIONI */
+        @keyframes celebrate {
+            0% {
+                transform: translate(0, 0) scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: translate(var(--tx, 0), var(--ty, -100px)) scale(0);
+                opacity: 0;
+            }
+        }
+
+        @keyframes themeTransition {
+            0% { filter: brightness(1) blur(0px); }
+            50% { filter: brightness(1.2) blur(5px); }
+            100% { filter: brightness(1) blur(0px); }
         }
 
         /* DELAY ANIMAZIONI PER LE CARD */
@@ -420,6 +513,14 @@
             .mode-description {
                 font-size: 1.1rem;
             }
+
+            .theme-controls {
+                top: 80px;
+                left: 50%;
+                transform: translateX(-50%);
+                justify-content: center;
+                max-width: 90%;
+            }
         }
 
         /* EFFETTO SPECIALE COUNTDOWN */
@@ -430,11 +531,40 @@
             transform: translate(-50%, -50%);
             font-size: 10rem;
             font-weight: 800;
-            color: var(--accent-gold);
+            background: linear-gradient(135deg, var(--accent-gold), var(--accent-blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
             text-shadow: var(--neon-glow);
             opacity: 0;
             z-index: 1000;
             pointer-events: none;
+            transition: all 0.3s ease;
+        }
+
+        /* PULSANTE AUDIO */
+        .audio-control {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+
+        .audio-btn {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: var(--text-primary);
+            padding: 10px 18px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .audio-btn:hover {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(255, 215, 0, 0.3);
         }
     </style>
 </head>
@@ -444,6 +574,19 @@
         <div class="scanlines"></div>
         <div class="light-beams"></div>
         <div class="particles" id="particlesContainer"></div>
+    </div>
+
+    <!-- CONTROLLI TEMI -->
+    <div class="theme-controls">
+        <button class="theme-btn active" data-theme="default">🎮 Default</button>
+        <button class="theme-btn" data-theme="space">🚀 Space</button>
+        <button class="theme-btn" data-theme="neon">🌈 Neon</button>
+        <button class="theme-btn" data-theme="royal">👑 Royal</button>
+    </div>
+
+    <!-- CONTROLLO AUDIO -->
+    <div class="audio-control">
+        <button class="audio-btn" id="musicToggle">🔇 Music</button>
     </div>
 
     <div class="container">
@@ -484,7 +627,18 @@
     <!-- COUNTDOWN EFFECT (hidden) -->
     <div class="countdown-effect" id="countdownEffect">3</div>
 
-    <div class="version">Game Show Edition</div>
+    <div class="version">Game Show Edition v2.0</div>
+
+    <!-- ELEMENTI AUDIO -->
+    <audio id="menuMusic" loop preload="auto">
+        <source src="audio/menu.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="clickSound" preload="auto">
+        <source src="audio/Click.wav" type="audio/wav">
+    </audio>
+    <audio id="transitionSound" preload="auto">
+        <source src="audio/transition.wav" type="audio/wav">
+    </audio>
 
     <script>
         // === CREA PARTICELLE ANIMATE ===
@@ -505,8 +659,8 @@
                 particle.style.left = Math.random() * 100 + '%';
                 particle.style.top = Math.random() * 100 + '%';
                 
-                // Colore casuale
-                const colors = ['#FFD700', '#00B4DB', '#8A2BE2', '#FF416C'];
+                // Colore casuale basato sul tema
+                const colors = ['var(--accent-gold)', 'var(--accent-blue)', 'var(--accent-purple)', '#FF416C'];
                 particle.style.background = colors[Math.floor(Math.random() * colors.length)];
                 
                 // Animazione personalizzata
@@ -515,6 +669,157 @@
                 
                 container.appendChild(particle);
             }
+        }
+
+        // === PARTICELLE DI CELEBRAZIONE ===
+        function createCelebrationParticles(x, y, count = 20) {
+            for (let i = 0; i < count; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'celebration-particle';
+                
+                // Posizione iniziale
+                particle.style.left = x + 'px';
+                particle.style.top = y + 'px';
+                
+                // Direzione casuale
+                const angle = Math.random() * Math.PI * 2;
+                const distance = 50 + Math.random() * 100;
+                const tx = Math.cos(angle) * distance;
+                const ty = Math.sin(angle) * distance;
+                
+                particle.style.setProperty('--tx', tx + 'px');
+                particle.style.setProperty('--ty', ty + 'px');
+                
+                // Colore casuale
+                const colors = ['var(--accent-gold)', 'var(--accent-blue)', 'var(--accent-purple)', '#FF416C', '#00FF00'];
+                particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+                
+                // Dimensione casuale
+                const size = 3 + Math.random() * 8;
+                particle.style.width = size + 'px';
+                particle.style.height = size + 'px';
+                
+                document.body.appendChild(particle);
+                
+                // Rimuovi dopo l'animazione
+                setTimeout(() => {
+                    if (particle.parentNode) {
+                        particle.parentNode.removeChild(particle);
+                    }
+                }, 1500);
+            }
+        }
+
+        // === SISTEMA AUDIO ===
+        const audio = {
+            menuMusic: document.getElementById('menuMusic'),
+            clickSound: document.getElementById('clickSound'),
+            transitionSound: document.getElementById('transitionSound'),
+            
+            musicEnabled: false,
+            audioActivated: false,
+            
+            async activateAudio() {
+                console.log('🎵 Attivazione audio...');
+                
+                try {
+                    this.clickSound.volume = 0.01;
+                    await this.clickSound.play();
+                    this.clickSound.pause();
+                    this.clickSound.currentTime = 0;
+                    
+                    this.audioActivated = true;
+                    this.musicEnabled = true;
+                    
+                    document.getElementById('musicToggle').textContent = '🔊 Music';
+                    
+                    setTimeout(() => {
+                        this.playMusic('menuMusic');
+                    }, 100);
+                    
+                    console.log('🎵 Audio attivato!');
+                    
+                } catch (error) {
+                    console.error('❌ Errore attivazione audio:', error);
+                    this.audioActivated = true;
+                    this.musicEnabled = true;
+                }
+            },
+            
+            async playMusic(type) {
+                if (!this.musicEnabled || !this.audioActivated) return;
+                
+                try {
+                    const music = this[type];
+                    music.currentTime = 0;
+                    music.volume = 0.3;
+                    await music.play();
+                    console.log('🎵 Musica avviata:', type);
+                } catch (error) {
+                    console.error('❌ Errore musica:', error);
+                }
+            },
+            
+            stopMusic() {
+                this.menuMusic.pause();
+                this.menuMusic.currentTime = 0;
+            },
+            
+            async playSFX(type) {
+                if (!this.audioActivated) return;
+                
+                try {
+                    const sfx = this[type];
+                    sfx.currentTime = 0;
+                    sfx.volume = 0.6;
+                    await sfx.play();
+                    console.log('🔊 SFX:', type);
+                } catch (error) {
+                    console.error('❌ Errore SFX:', error);
+                }
+            },
+            
+            toggleMusic() {
+                if (!this.audioActivated) return;
+                this.musicEnabled = !this.musicEnabled;
+                document.getElementById('musicToggle').textContent = 
+                    this.musicEnabled ? '🔊 Music' : '🔇 Music';
+                if (!this.musicEnabled) {
+                    this.stopMusic();
+                } else {
+                    this.playMusic('menuMusic');
+                }
+            }
+        };
+
+        // === CAMBIO TEMA DINAMICO ===
+        function changeTheme(themeName) {
+            const body = document.body;
+            const themeButtons = document.querySelectorAll('.theme-btn');
+            
+            // Rimuovi tutte le classi tema
+            body.className = body.className.replace(/theme-\w+/g, '');
+            
+            // Aggiungi nuovo tema
+            if (themeName !== 'default') {
+                body.classList.add('theme-' + themeName);
+            }
+            
+            // Aggiorna pulsanti attivi
+            themeButtons.forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.theme === themeName);
+            });
+            
+            // Effetto transizione
+            body.style.animation = 'themeTransition 0.8s ease';
+            setTimeout(() => {
+                body.style.animation = '';
+            }, 800);
+
+            // Ricrea particelle con nuovi colori
+            const particlesContainer = document.getElementById('particlesContainer');
+            particlesContainer.innerHTML = '';
+            createParticles();
         }
 
         // === EFFETTO DRAMMATICO DI NAVIGAZIONE ===
@@ -526,6 +831,9 @@
             cards.forEach(card => {
                 card.style.pointerEvents = 'none';
             });
+            
+            // Effetto audio
+            audio.playSFX('transitionSound');
             
             // Effetto countdown
             let count = 3;
@@ -546,6 +854,9 @@
                     countdownEffect.textContent = 'GO!';
                     countdownEffect.style.transform = 'translate(-50%, -50%) scale(1.5)';
                     
+                    // Crea particelle di celebrazione
+                    createCelebrationParticles(window.innerWidth / 2, window.innerHeight / 2, 30);
+                    
                     // Naviga dopo l'ultimo effetto
                     setTimeout(() => {
                         window.location.href = url;
@@ -557,6 +868,9 @@
         // === EFFETTI INTERATTIVI AVANZATI ===
         document.querySelectorAll('.mode-card').forEach((card, index) => {
             card.addEventListener('click', function(e) {
+                // Effetto audio
+                audio.playSFX('clickSound');
+                
                 // Effetto ripple
                 const ripple = document.createElement('div');
                 ripple.style.cssText = `
@@ -605,19 +919,26 @@
             `;
             document.head.appendChild(style);
 
-            console.log('🎮 Game Show Home Page loaded');
-            
-            // Auto-play audio di sottofondo dopo un breve ritardo
+            // Attiva audio automaticamente
             setTimeout(() => {
-                try {
-                    const audio = new Audio();
-                    audio.volume = 0.1;
-                    // Qui potresti aggiungere un audio di sottofondo se vuoi
-                } catch (error) {
-                    console.log('Audio non supportato o non necessario');
-                }
+                audio.activateAudio();
             }, 1000);
+
+            console.log('🎮 Game Show Home Page v2.0 loaded');
         }
+
+        // === EVENT LISTENERS ===
+        document.querySelectorAll('.theme-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                audio.playSFX('clickSound');
+                changeTheme(this.dataset.theme);
+            });
+        });
+
+        document.getElementById('musicToggle').addEventListener('click', function() {
+            audio.playSFX('clickSound');
+            audio.toggleMusic();
+        });
 
         // AVVIA TUTTO
         init();
