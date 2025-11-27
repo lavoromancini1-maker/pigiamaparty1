@@ -4,15 +4,285 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pigiama Party - Player</title>
-    
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
-    
-    <link rel="stylesheet" href="styles/style.css">
-    
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&display=swap" rel="stylesheet">
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
     
-    </head>
+    <style>
+        :root {
+            --pink: #ff00c8;
+            --cyan: #00eaff;
+            --purple: #7b2cff;
+            --gold: #ffd700;
+            --silver: #c0c0c0;
+            --bronze: #cd7f32;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #000 0%, #0e0030 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            background: linear-gradient(90deg, var(--pink), var(--cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin: 20px 0;
+            font-size: 2rem;
+        }
+
+        .game-code {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--cyan);
+            margin: 20px 0;
+            padding: 15px;
+            border: 2px solid var(--cyan);
+            border-radius: 10px;
+            display: inline-block;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            margin: 10px;
+            border: none;
+            border-radius: 20px;
+            background: linear-gradient(90deg, var(--pink), var(--purple));
+            color: white;
+            font-size: 1.1rem;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(255, 0, 128, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(-1px);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .input-field {
+            padding: 12px 15px;
+            margin: 10px 0;
+            border: 2px solid var(--cyan);
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 1rem;
+            width: 100%;
+            max-width: 300px;
+        }
+
+        .input-field::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .question-container {
+            margin: 20px 0;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            border: 2px solid var(--pink);
+        }
+
+        .question-text {
+            font-size: 1.3rem;
+            margin: 15px 0;
+            line-height: 1.4;
+        }
+
+        .timer {
+            font-size: 2.5rem;
+            color: var(--cyan);
+            margin: 15px 0;
+            transition: all 0.3s ease;
+        }
+
+        .answers-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .answer-btn {
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid var(--cyan);
+            border-radius: 10px;
+            color: white;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .answer-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .waiting-message {
+            font-size: 1.2rem;
+            margin: 30px 0;
+            color: var(--cyan);
+        }
+
+        .leaderboard-container {
+            margin: 20px 0;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            border: 2px solid var(--gold);
+        }
+
+        .leaderboard-list {
+            list-style: none;
+            margin: 20px 0;
+        }
+
+        .leaderboard-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            margin: 8px 0;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            border: 1px solid var(--cyan);
+        }
+
+        .rank {
+            font-weight: bold;
+            width: 40px;
+            text-align: center;
+        }
+
+        .name {
+            flex: 1;
+            text-align: left;
+            padding: 0 15px;
+        }
+
+        .score {
+            font-weight: bold;
+            color: var(--cyan);
+        }
+
+        /* ANIMAZIONI SCHERMATE */
+        .screen {
+            animation: screenEnter 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        @keyframes screenEnter {
+            0% { 
+                opacity: 0; 
+                transform: translateY(30px) scale(0.95);
+            }
+            100% { 
+                opacity: 1; 
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* EFFETTI TIMER */
+        .timer.warning {
+            color: #ff4444;
+            text-shadow: 0 0 20px #ff4444;
+            animation: pulse 0.5s infinite alternate;
+        }
+
+        @keyframes pulse {
+            from { transform: scale(1); }
+            to { transform: scale(1.1); }
+        }
+
+        /* EFFETTO RISPOSTA CORRETTA */
+        .answer-option.correct {
+            background: rgba(0, 255, 100, 0.2);
+            border-color: #00ff88;
+            animation: correctGlow 0.6s ease;
+        }
+
+        @keyframes correctGlow {
+            0% { box-shadow: 0 0 0px #00ff88; }
+            50% { box-shadow: 0 0 30px #00ff88; }
+            100% { box-shadow: 0 0 0px #00ff88; }
+        }
+
+        /* EFFETTO RISPOSTA SELEZIONATA */
+        .answer-btn.selected {
+            background: rgba(255, 215, 0, 0.2);
+            border-color: var(--gold);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 215, 0, 0.3);
+        }
+
+        /* VERSION INFO */
+        .version {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 5px 10px;
+            border-radius: 10px;
+            font-size: 0.8rem;
+            opacity: 0.7;
+        }
+
+        /* AUDIO CONTROLS */
+        .audio-controls {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            z-index: 1000;
+        }
+
+        .audio-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--cyan);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.3s ease;
+        }
+
+        .audio-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+    </style>
+</head>
 <body>
     <!-- CONTROLLO AUDIO PLAYER -->
     <div class="audio-controls">
@@ -98,19 +368,19 @@
 
     <!-- ELEMENTI AUDIO - SOLO SUONI (NO MUSICA) -->
     <audio id="clickSound" preload="auto">
-        <source src="audio/Click.wav" type="audio/wav">
+        <source src="audio/click.mp3" type="audio/mpeg">
     </audio>
     <audio id="correctSound" preload="auto">
         <source src="audio/correct.mp3" type="audio/mpeg">
     </audio>
     <audio id="wrongSound" preload="auto">
-        <source src="audio/Wrong.wav" type="audio/wav">
+        <source src="audio/wrong.mp3" type="audio/mpeg">
     </audio>
     <audio id="transitionSound" preload="auto">
-        <source src="audio/transition.wav" type="audio/wav">
+        <source src="audio/transition.mp3" type="audio/mpeg">
     </audio>
     <audio id="timerSound" preload="auto">
-        <source src="audio/timer.wav" type="audio/wav">
+        <source src="audio/timer.mp3" type="audio/mpeg">
     </audio>
     <audio id="submitSound" preload="auto">
         <source src="audio/start.mp3" type="audio/mpeg">
