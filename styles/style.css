@@ -1,89 +1,116 @@
+/* ==================================== */
+/* 🍏 VARIABILI (Colori Neutri/Eleganti) */
+/* ==================================== */
 :root {
-    --primary: #6a11cb;
-    --secondary: #2575fc;
-    --accent: #ff416c;
-    --light: #f8f9fa;
-    --dark: #212529;
-    --success: #28a745;
-    --warning: #ffc107;
-    --danger: #dc3545;
+    /* Neutri per sfondo e testo */
+    --background-light: #f5f5f7; /* Sfondo principale (molto chiaro) */
+    --card-background: #ffffff; /* Sfondo degli elementi/card */
+    --text-primary: #1d1d1f; /* Testo scuro/primario */
+    --text-secondary: #86868b; /* Testo secondario/grigio */
+
+    /* Colori Accento (Apple Blue/Minimal) */
+    --accent: #007aff; /* Blu Apple per i bottoni principali */
+    --success: #34c759;
+    --warning: #ffcc00;
+    --danger: #ff3b30;
+
+    /* Ombre morbide */
+    --shadow-soft: 0 4px 12px rgba(0, 0, 0, 0.08);
+    --shadow-deep: 0 10px 30px rgba(0, 0, 0, 0.1);
 }
 
+/* ==================================== */
+/* 📝 RESET E FONT */
+/* ==================================== */
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: 'Orbitron', 'Segoe UI', sans-serif;
+    /* Useremo un font pulito. Ricorda di importare 'Inter' nell'HTML! */
+    font-family: 'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
 body {
-    background: linear-gradient(135deg, var(--primary), var(--secondary));
-    color: var(--light);
+    /* Sfondo piatto e pulito */
+    background: var(--background-light);
+    color: var(--text-primary);
     min-height: 100vh;
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 20px;
+    padding: 40px 20px; /* Aumentiamo lo spazio */
 }
 
+/* ==================================== */
+/* 📐 LAYOUT E HEADER */
+/* ==================================== */
 .container {
     width: 100%;
-    max-width: 1200px;
+    max-width: 1100px; /* Leggermente più stretto per eleganza */
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 30px;
 }
 
 header {
     text-align: center;
     padding: 20px;
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 15px;
-    backdrop-filter: blur(10px);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    background: var(--card-background);
+    /* Bordi arrotondati in stile Apple */
+    border-radius: 20px; 
+    box-shadow: var(--shadow-soft);
     margin-bottom: 20px;
 }
 
 h1 {
     font-size: 2.5rem;
-    margin-bottom: 10px;
-    background: linear-gradient(to right, #fff, #e0e0e0);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    font-weight: 700; /* Più audace per il titolo */
+    color: var(--text-primary);
+    margin-bottom: 5px;
 }
 
 .game-area {
     display: flex;
-    gap: 20px;
+    gap: 30px;
+}
+
+/* ==================================== */
+/* 📦 CARD E CONTENITORI (Quiz, Leaderboard) */
+/* ==================================== */
+.quiz-container,
+.leaderboard,
+.login-screen,
+.results-screen {
+    background: var(--card-background);
+    /* Ombra più profonda per farli sembrare fluttuanti */
+    box-shadow: var(--shadow-deep);
+    border-radius: 20px;
+    padding: 30px; /* Aumentato il padding */
+    transition: all 0.3s ease;
 }
 
 .quiz-container {
     flex: 3;
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 15px;
-    padding: 25px;
-    backdrop-filter: blur(10px);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
 }
 
 .leaderboard {
     flex: 1;
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 15px;
-    padding: 20px;
-    backdrop-filter: blur(10px);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-    max-height: 500px;
+    padding: 25px;
+    max-height: 600px;
     overflow-y: auto;
 }
 
 .leaderboard h2 {
-    text-align: center;
+    color: var(--text-primary);
+    font-size: 1.3rem;
+    text-align: left;
     margin-bottom: 15px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
     padding-bottom: 10px;
+    font-weight: 600;
 }
 
+/* Stile della lista giocatori */
 .player-list {
     list-style: none;
 }
@@ -91,82 +118,102 @@ h1 {
 .player-item {
     display: flex;
     justify-content: space-between;
-    padding: 10px;
+    padding: 12px;
     margin-bottom: 8px;
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 8px;
-    transition: transform 0.2s;
+    background: var(--background-light); /* Sfondo leggermente grigio */
+    border-radius: 10px;
+    transition: all 0.2s ease-out;
+    font-size: 1rem;
 }
 
 .player-item:hover {
-    transform: translateX(5px);
+    background: #ebebf0;
+    transform: translateY(-2px);
 }
 
 .player-item.current {
-    background: rgba(255, 255, 255, 0.2);
-    border-left: 4px solid var(--accent);
+    background: var(--accent); /* Colore primario per l'elemento corrente */
+    color: white;
 }
 
-.question-container {
-    margin-bottom: 25px;
+.player-name {
+    font-weight: 500;
+}
+
+.player-score {
+    font-weight: 600;
+    color: var(--text-primary); /* Ritorna al colore scuro per coerenza */
+}
+.player-item.current .player-score {
+    color: white; /* Eccezione per l'elemento corrente */
+}
+
+/* ==================================== */
+/* ❓ DOMANDE E RISPOSTE */
+/* ==================================== */
+.question-text {
+    font-size: 1.6rem;
+    font-weight: 500;
+    margin-bottom: 30px;
+    line-height: 1.5;
 }
 
 .question-counter {
     font-size: 0.9rem;
-    opacity: 0.8;
-    margin-bottom: 10px;
-}
-
-.question-text {
-    font-size: 1.4rem;
-    margin-bottom: 20px;
-    line-height: 1.4;
-}
-
-.media-container {
-    margin: 20px 0;
-    display: flex;
-    justify-content: center;
+    color: var(--text-secondary);
+    margin-bottom: 15px;
 }
 
 .media-container img, .media-container video, .media-container audio {
     max-width: 100%;
-    border-radius: 10px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    border-radius: 15px;
+    /* Ombra discreta */
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .answers-container {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 15px;
-    margin-bottom: 25px;
+    gap: 20px; /* Aumentato lo spazio tra i bottoni */
+    margin-bottom: 30px;
 }
 
 .answer-btn {
-    background: rgba(255, 255, 255, 0.1);
-    border: none;
-    border-radius: 10px;
-    padding: 15px;
-    color: var(--light);
+    background: var(--background-light);
+    border: 1px solid rgba(0, 0, 0, 0.05); /* Bordo sottile */
+    border-radius: 15px;
+    padding: 18px; /* Aumentato il padding */
+    color: var(--text-primary);
     font-size: 1rem;
+    font-weight: 500;
     cursor: pointer;
-    transition: all 0.3s;
-    text-align: left;
+    transition: all 0.2s ease-in-out;
+    text-align: center; /* Centrato per pulizia */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05); /* Ombra leggera */
 }
 
 .answer-btn:hover {
-    background: rgba(255, 255, 255, 0.2);
-    transform: translateY(-3px);
+    background: #e0e0e3;
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-soft);
 }
 
+/* Stato Risposta */
 .answer-btn.correct {
     background: var(--success);
+    color: white;
+    box-shadow: 0 4px 12px rgba(52, 199, 89, 0.4); /* Ombra colorata */
 }
 
 .answer-btn.incorrect {
     background: var(--danger);
+    color: white;
+    box-shadow: 0 4px 12px rgba(255, 59, 48, 0.4);
 }
 
+/* ==================================== */
+/* ⏱ CONTROLLI E TIMER */
+/* ==================================== */
 .controls {
     display: flex;
     justify-content: space-between;
@@ -174,87 +221,81 @@ h1 {
 }
 
 .timer {
-    font-size: 1.2rem;
-    font-weight: bold;
-    background: rgba(0, 0, 0, 0.3);
-    padding: 8px 15px;
-    border-radius: 20px;
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: var(--accent);
+    background: var(--background-light);
+    padding: 10px 20px;
+    border-radius: 15px;
 }
 
 .btn {
     background: var(--accent);
     color: white;
     border: none;
-    padding: 12px 25px;
+    padding: 15px 30px;
     border-radius: 30px;
     font-size: 1rem;
     cursor: pointer;
-    transition: all 0.3s;
-    font-weight: bold;
+    transition: all 0.2s ease-in-out;
+    font-weight: 600;
+    box-shadow: 0 4px 8px rgba(0, 122, 255, 0.3); /* Ombra Blu */
 }
 
 .btn:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(0, 122, 255, 0.4);
 }
 
 .btn:disabled {
-    background: rgba(255, 255, 255, 0.2);
+    background: #dddddd;
+    color: var(--text-secondary);
     cursor: not-allowed;
     transform: none;
     box-shadow: none;
 }
 
+/* ==================================== */
+/* 🔒 LOGIN E INPUT */
+/* ==================================== */
+
 .login-screen, .results-screen {
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 15px;
-    padding: 40px;
-    backdrop-filter: blur(10px);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-    text-align: center;
-    max-width: 600px;
-    margin: 0 auto;
+    max-width: 500px;
+    margin-top: 50px;
 }
 
 .login-form {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
+    gap: 25px;
     margin-top: 30px;
 }
 
-.form-group {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    text-align: left;
-}
-
 input {
-    padding: 12px 15px;
-    border-radius: 8px;
-    border: none;
-    background: rgba(255, 255, 255, 0.9);
+    padding: 14px 15px;
+    border-radius: 10px;
+    border: 1px solid #ccc;
+    background: var(--card-background);
     font-size: 1rem;
+    color: var(--text-primary);
+    transition: border-color 0.2s;
 }
 
-.hidden {
-    display: none;
+input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px rgba(0, 122, 255, 0.2);
 }
 
-.player-name {
-    font-weight: bold;
-    margin-right: 10px;
-}
-
-.player-score {
-    font-weight: bold;
-    color: var(--accent);
-}
-
+/* ==================================== */
+/* 📱 MEDIA QUERIES (Mobile) */
+/* ==================================== */
 @media (max-width: 768px) {
+    body {
+        padding: 20px 10px;
+    }
+
     .game-area {
         flex-direction: column;
+        gap: 20px;
     }
     
     .answers-container {
@@ -265,4 +306,7 @@ input {
         font-size: 2rem;
     }
 
+    .quiz-container, .leaderboard {
+        padding: 20px;
+    }
 }
