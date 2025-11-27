@@ -5,127 +5,178 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pigiama Party - Home</title>
     
-    <!-- FONT ORIGINALE -->
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <!-- Font Apple-like -->
+    <link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
     <style>
-        /* === STILE ORIGINALE PIGIAMA PARTY === */
+        /* === STILE APPLE FUTURISTICO === */
         :root {
-            --pink: #ff00c8;
-            --cyan: #00eaff;
-            --purple: #7b2cff;
-            --gold: #ffd700;
-            --silver: #c0c0c0;
-            --bronze: #cd7f32;
+            --bg-primary: #000000;
+            --bg-secondary: #1d1d1f;
+            --bg-card: rgba(255, 255, 255, 0.05);
+            --bg-card-hover: rgba(255, 255, 255, 0.08);
+            --text-primary: #ffffff;
+            --text-secondary: #a1a1a6;
+            --accent-blue: #007aff;
+            --accent-purple: #5856d6;
+            --accent-pink: #ff2d55;
+            --gradient-primary: linear-gradient(135deg, #007aff, #5856d6);
+            --gradient-accent: linear-gradient(135deg, #ff2d55, #ff9500);
+            --shadow-soft: 0 8px 30px rgba(0, 0, 0, 0.12);
+            --shadow-deep: 0 20px 60px rgba(0, 0, 0, 0.3);
+            --border-radius: 20px;
+            --border-radius-large: 30px;
         }
 
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Orbitron', sans-serif;
+            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
         }
 
         body {
-            background: linear-gradient(135deg, #000 0%, #0e0030 100%);
-            color: white;
-            padding: 20px;
-            text-align: center;
-            overflow-x: hidden;
+            background: var(--bg-primary);
+            color: var(--text-primary);
             min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Effetto particellare di sfondo */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.03) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 45, 85, 0.03) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(0, 122, 255, 0.02) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
         }
 
         .container {
-            max-width: 1000px;
+            max-width: 1200px;
             margin: 0 auto;
-            padding: 40px 20px;
+            padding: 80px 20px;
+            position: relative;
+        }
+
+        /* Header con animazione */
+        .header {
+            text-align: center;
+            margin-bottom: 80px;
+            opacity: 0;
+            animation: fadeInUp 1s ease-out 0.2s forwards;
         }
 
         .logo {
-            background: linear-gradient(90deg, var(--pink), var(--cyan));
+            font-size: 4.5rem;
+            font-weight: 700;
+            background: var(--gradient-primary);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            font-size: 4rem;
-            font-weight: 900;
-            margin-bottom: 10px;
+            background-clip: text;
+            margin-bottom: 16px;
+            letter-spacing: -0.02em;
         }
 
         .tagline {
-            color: var(--cyan);
-            font-size: 1.5rem;
-            margin-bottom: 50px;
-            font-weight: 500;
+            font-size: 1.4rem;
+            color: var(--text-secondary);
+            font-weight: 400;
+            letter-spacing: -0.01em;
+            opacity: 0;
+            animation: fadeInUp 1s ease-out 0.4s forwards;
         }
 
+        /* Grid delle card */
         .mode-selector {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
             gap: 30px;
             margin-top: 40px;
         }
 
+        /* Card in stile Apple */
         .mode-card {
-            background: rgba(255, 255, 255, 0.1);
-            border: 2px solid transparent;
-            border-radius: 20px;
-            padding: 30px;
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: var(--border-radius-large);
+            padding: 40px 30px;
             text-align: center;
             cursor: pointer;
-            transition: all 0.3s ease;
-            backdrop-filter: blur(10px);
+            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            position: relative;
+            overflow: hidden;
+            opacity: 0;
+            transform: translateY(30px);
+            animation: fadeInUp 0.8s ease-out forwards;
+        }
+
+        .mode-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.03), transparent);
+            transition: left 0.6s ease;
+        }
+
+        .mode-card:hover::before {
+            left: 100%;
         }
 
         .mode-card:hover {
-            transform: translateY(-10px);
-            border-color: var(--cyan);
-            box-shadow: 0 15px 40px rgba(0, 234, 255, 0.3);
-            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-8px) scale(1.02);
+            background: var(--bg-card-hover);
+            border-color: rgba(255, 255, 255, 0.12);
+            box-shadow: var(--shadow-deep);
         }
 
+        .mode-card:active {
+            transform: translateY(-4px) scale(1.01);
+            transition: all 0.1s ease;
+        }
+
+        /* Icone delle card */
         .mode-icon {
             font-size: 4rem;
-            margin-bottom: 20px;
+            margin-bottom: 24px;
+            filter: grayscale(0.3);
+            transition: all 0.3s ease;
+            display: inline-block;
         }
 
+        .mode-card:hover .mode-icon {
+            filter: grayscale(0);
+            transform: scale(1.1);
+        }
+
+        /* Titoli delle card */
         .mode-title {
-            font-size: 1.8rem;
-            font-weight: bold;
-            color: var(--pink);
-            margin-bottom: 15px;
+            font-size: 1.6rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 16px;
+            letter-spacing: -0.01em;
         }
 
+        /* Descrizioni */
         .mode-description {
-            color: rgba(255, 255, 255, 0.8);
+            color: var(--text-secondary);
             line-height: 1.6;
             font-size: 1rem;
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .logo {
-                font-size: 2.5rem;
-            }
-            
-            .tagline {
-                font-size: 1.2rem;
-            }
-            
-            .mode-selector {
-                grid-template-columns: 1fr;
-                gap: 20px;
-            }
-            
-            .mode-card {
-                padding: 20px;
-            }
-            
-            .mode-icon {
-                font-size: 3rem;
-            }
-            
-            .mode-title {
-                font-size: 1.5rem;
-            }
+            font-weight: 400;
+            max-width: 280px;
+            margin: 0 auto;
         }
 
         /* Animazioni */
@@ -140,69 +191,179 @@
             }
         }
 
-        .mode-card {
-            animation: fadeInUp 0.6s ease-out;
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
         }
 
-        .mode-card:nth-child(1) { animation-delay: 0.1s; }
-        .mode-card:nth-child(2) { animation-delay: 0.2s; }
-        .mode-card:nth-child(3) { animation-delay: 0.3s; }
+        /* Delay animazioni per le card */
+        .mode-card:nth-child(1) { animation-delay: 0.3s; }
+        .mode-card:nth-child(2) { animation-delay: 0.5s; }
+        .mode-card:nth-child(3) { animation-delay: 0.7s; }
 
+        /* Versione */
         .version {
             position: fixed;
-            bottom: 10px;
-            right: 10px;
-            background: rgba(255, 255, 255, 0.1);
-            padding: 5px 10px;
-            border-radius: 10px;
+            bottom: 20px;
+            right: 20px;
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: var(--text-secondary);
+            padding: 8px 16px;
+            border-radius: 12px;
             font-size: 0.8rem;
-            opacity: 0.7;
+            font-weight: 500;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: 40px 20px;
+            }
+            
+            .logo {
+                font-size: 3rem;
+            }
+            
+            .tagline {
+                font-size: 1.1rem;
+            }
+            
+            .mode-selector {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .mode-card {
+                padding: 30px 20px;
+            }
+            
+            .mode-icon {
+                font-size: 3rem;
+            }
+            
+            .mode-title {
+                font-size: 1.4rem;
+            }
+        }
+
+        /* Effetti speciali per ogni card */
+        .mode-card:nth-child(1) {
+            border-top: 2px solid var(--accent-blue);
+        }
+        
+        .mode-card:nth-child(2) {
+            border-top: 2px solid var(--accent-purple);
+        }
+        
+        .mode-card:nth-child(3) {
+            border-top: 2px solid var(--accent-pink);
+        }
+
+        /* Pulsante effetto */
+        .mode-card::after {
+            content: '→';
+            position: absolute;
+            bottom: 20px;
+            right: 25px;
+            color: var(--text-secondary);
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+            opacity: 0;
+        }
+
+        .mode-card:hover::after {
+            opacity: 1;
+            transform: translateX(5px);
         }
     </style>
 </head>
 <body>
     
     <div class="container">
-        <h1 class="logo">🎮 PIGIAMA PARTY</h1>
-        <div class="tagline">THE ULTIMATE TRIVIA EXPERIENCE</div>
+        <div class="header">
+            <h1 class="logo">🎮 Pigiama Party</h1>
+            <div class="tagline">The Ultimate Interactive Trivia Experience</div>
+        </div>
         
         <div class="mode-selector">
             
             <div class="mode-card" onclick="location.href='host.html'">
                 <div class="mode-icon">🖥️</div>
-                <div class="mode-title">GAME MASTER</div>
-                <div class="mode-description">Host the game on your big screen. Control the flow, manage players, and create an unforgettable experience.</div>
+                <div class="mode-title">Game Master</div>
+                <div class="mode-description">Host and control the game experience on your main display with advanced tools and real-time analytics.</div>
             </div>
             
             <div class="mode-card" onclick="location.href='player.html'">
                 <div class="mode-icon">📱</div>
-                <div class="mode-title">PLAYER</div>
-                <div class="mode-description">Join the game from your phone. Answer questions, compete with friends, and climb the leaderboard.</div>
+                <div class="mode-title">Player</div>
+                <div class="mode-description">Join the game from any device, compete with friends, and climb the dynamic leaderboard in real-time.</div>
             </div>
             
             <div class="mode-card" onclick="location.href='spectator.html'">
                 <div class="mode-icon">👀</div>
-                <div class="mode-title">SPECTATOR</div>
-                <div class="mode-description">Watch the action live. Follow the game progress and see all the answers in real-time.</div>
+                <div class="mode-title">Spectator</div>
+                <div class="mode-description">Watch the action unfold with live insights, statistics, and full visibility of all game activity.</div>
             </div>
             
         </div>
     </div>
 
-    <div class="version">v2.5</div>
+    <div class="version">VisionOS 2.0</div>
 
     <script>
-        // Effetto click sui card
-        document.querySelectorAll('.mode-card').forEach(card => {
+        // Effetti interattivi avanzati
+        document.querySelectorAll('.mode-card').forEach((card, index) => {
             card.addEventListener('click', function() {
-                this.style.transform = 'scale(0.95)';
+                // Effetto ripple
+                const ripple = document.createElement('div');
+                ripple.style.cssText = `
+                    position: absolute;
+                    border-radius: 50%;
+                    background: rgba(255, 255, 255, 0.3);
+                    transform: scale(0);
+                    animation: ripple 0.6s linear;
+                    pointer-events: none;
+                `;
+                
+                const rect = this.getBoundingClientRect();
+                const size = Math.max(rect.width, rect.height);
+                const x = event.clientX - rect.left - size/2;
+                const y = event.clientY - rect.top - size/2;
+                
+                ripple.style.width = ripple.style.height = size + 'px';
+                ripple.style.left = x + 'px';
+                ripple.style.top = y + 'px';
+                
+                this.appendChild(ripple);
+                
                 setTimeout(() => {
-                    this.style.transform = '';
-                }, 150);
+                    ripple.remove();
+                    // Navigazione ritardata per vedere l'effetto
+                    setTimeout(() => {
+                        window.location.href = this.getAttribute('onclick').match(/'([^']+)'/)[1];
+                    }, 200);
+                }, 600);
             });
+            
+            // Animazione di entrata scalata
+            card.style.animationDelay = (0.3 + index * 0.2) + 's';
         });
 
-        console.log('🎮 Home Page loaded successfully');
+        // Aggiungi stile per l'effetto ripple
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes ripple {
+                to {
+                    transform: scale(2);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+
+        console.log('🎮 Apple-style Home Page loaded');
     </script>
 
 </body>
