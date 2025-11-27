@@ -560,6 +560,17 @@
                 }
             });
 
+                     // Ascolta la classifica finale
+database.ref('games/' + gameCode + '/leaderboard').on('value', (snapshot) => {
+    const leaderboard = snapshot.val();
+    if (leaderboard) {
+        console.log('🏆 Classifica ricevuta:', leaderboard);
+        showLeaderboard(leaderboard);
+    }
+});
+
+            showScreen('waitingScreen');
+
             showScreen('waitingScreen');
         }
 
@@ -666,37 +677,44 @@ function showQuestion(question) {
         }
 
         function showLeaderboard(leaderboard) {
-            audio.playSFX('transitionSound');
-            
-            // Aggiorna classifica
-            elements.leaderboardList.innerHTML = '';
-            
-            leaderboard.forEach((player, index) => {
-                const li = document.createElement('li');
-                li.className = 'leaderboard-item';
-                
-                // Aggiungi icone per i primi 3
-                let rankIcon = '';
-                if (index === 0) rankIcon = '🥇 ';
-                else if (index === 1) rankIcon = '🥈 ';
-                else if (index === 2) rankIcon = '🥉 ';
-                
-                li.innerHTML = `
-                    <span class="rank">${rankIcon}${index + 1}°</span>
-                    <span class="name">${player.name}</span>
-                    <span class="score">${player.score || 0}p</span>
-                `;
-                elements.leaderboardList.appendChild(li);
-                
-                // Aggiorna punteggio del giocatore corrente
-                if (player.name === playerName) {
-                    playerScore = player.score || 0;
-                    elements.playerScore.textContent = `${playerScore} punti`;
-                }
-            });
-            
-            showScreen('leaderboardScreen');
+    if (!leaderboard || leaderboard.length === 0) {
+        console.log('❌ Classifica vuota o non valida');
+        return;
+    }
+    
+    audio.playSFX('transitionSound');
+    
+    console.log('📊 Mostrando classifica:', leaderboard);
+    
+    // Aggiorna classifica
+    elements.leaderboardList.innerHTML = '';
+    
+    leaderboard.forEach((player, index) => {
+        const li = document.createElement('li');
+        li.className = 'leaderboard-item';
+        
+        // Aggiungi icone per i primi 3
+        let rankIcon = '';
+        if (index === 0) rankIcon = '🥇 ';
+        else if (index === 1) rankIcon = '🥈 ';
+        else if (index === 2) rankIcon = '🥉 ';
+        
+        li.innerHTML = `
+            <span class="rank">${rankIcon}${index + 1}°</span>
+            <span class="name">${player.name}</span>
+            <span class="score">${player.score || 0}p</span>
+        `;
+        elements.leaderboardList.appendChild(li);
+        
+        // Aggiorna punteggio del giocatore corrente
+        if (player.name === playerName) {
+            playerScore = player.score || 0;
+            elements.playerScore.textContent = `${playerScore} punti`;
         }
+    });
+    
+    showScreen('leaderboardScreen');
+}
 
         // === EVENT LISTENERS ===
         elements.joinBtn.addEventListener('click', joinGame);
@@ -732,5 +750,6 @@ function showQuestion(question) {
     </script>
 </body>
 </html>
+
 
 
