@@ -364,6 +364,12 @@
             box-shadow: 0 5px 20px rgba(255, 215, 0, 0.4);
         }
 
+        .answer-btn.auto-submitted {
+            background: linear-gradient(135deg, rgba(0, 255, 136, 0.2), rgba(0, 180, 219, 0.1));
+            border-color: var(--accent-green);
+            animation: pulseGlow 1s ease-in-out;
+        }
+
         /* MESSAGGI DI ATTESA */
         .waiting-message {
             font-size: 1.3rem;
@@ -626,6 +632,12 @@
             100% { transform: translateY(500px) rotate(360deg); opacity: 0; }
         }
 
+        @keyframes pulseGlow {
+            0% { box-shadow: 0 0 0px rgba(0, 255, 136, 0.5); }
+            50% { box-shadow: 0 0 20px rgba(0, 255, 136, 0.8); }
+            100% { box-shadow: 0 0 0px rgba(0, 255, 136, 0.5); }
+        }
+
         /* RESPONSIVE */
         @media (max-width: 768px) {
             .container {
@@ -687,6 +699,15 @@
             opacity: 0;
             z-index: 1000;
             pointer-events: none;
+        }
+
+        /* MESSAGGIO ATTESA HOST */
+        .waiting-host-message {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            margin-top: 20px;
+            font-style: italic;
+            text-align: center;
         }
     </style>
 </head>
@@ -761,17 +782,14 @@
                 <div class="question-text" id="questionText">The game show question will appear here...</div>
                 
                 <div class="timer-container">
-                    <div class="timer" id="timer">30</div>
+                    <div class="timer" id="timer">20</div>
                 </div>
                 
                 <div class="answers-container" id="answersContainer">
                     <!-- Le risposte appariranno qui -->
                 </div>
                 
-                <button class="game-btn" id="submitBtn" disabled>
-                    <span>🚀</span>
-                    SUBMIT ANSWER
-                </button>
+                <!-- RIMOSSO IL PULSANTE SUBMIT -->
             </div>
         </div>
 
@@ -801,6 +819,9 @@
             <div class="tv-card" id="resultCard">
                 <div class="result-container" id="resultContainer">
                     <!-- Il risultato verrà mostrato qui -->
+                </div>
+                <div class="waiting-host-message" id="waitingHostMessage">
+                    Waiting for host to start next question...
                 </div>
             </div>
         </div>
@@ -988,10 +1009,11 @@
         let playerName = '';
         let currentQuestionIndex = -1;
         let selectedAnswer = null;
-        let timeLeft = 30;
+        let timeLeft = 20; // ⏰ RIDOTTO DA 30 A 20 SECONDI
         let timer;
         let playerScore = 0;
         let currentQuestionData = null;
+        let hasSubmitted = false;
 
         // === ELEMENTI DOM ===
         const elements = {
@@ -1011,12 +1033,12 @@
             questionText: document.getElementById('questionText'),
             timer: document.getElementById('timer'),
             answersContainer: document.getElementById('answersContainer'),
-            submitBtn: document.getElementById('submitBtn'),
             selectedAnswerText: document.getElementById('selectedAnswerText'),
             leaderboardList: document.getElementById('leaderboardList'),
             playerScore: document.getElementById('playerScore'),
             resultContainer: document.getElementById('resultContainer'),
-            resultCard: document.getElementById('resultCard')
+            resultCard: document.getElementById('resultCard'),
+            waitingHostMessage: document.getElementById('waitingHostMessage')
         };
 
         // === FUNZIONI PRINCIPALI ===
@@ -1067,6 +1089,7 @@
                         currentQuestionIndex = game.currentQuestion || 0;
                         console.log(`🎮 Player: Nuova domanda ${currentQuestionIndex + 1}`);
                         selectedAnswer = null; // RESET RISPOSTA
+                        hasSubmitted = false; // RESET INVIO
                         showQuestionScreen();
                     }
                 } else if (game.status === 'ended') {
@@ -1112,8 +1135,7 @@
             console.log(`📝 Player: Mostrando domanda ${currentQuestionIndex + 1}`, question);
             
             selectedAnswer = null;
-            elements.submitBtn.disabled = true;
-            elements.submitBtn.textContent = 'SUBMIT ANSWER';
+            hasSubmitted = false;
             
             elements.questionText.textContent = question.question;
             elements.questionNumber.textContent = `QUESTION ${currentQuestionIndex + 1}`;
@@ -1132,27 +1154,32 @@
         }
 
         function selectAnswer(index, answerText) {
+            if (hasSubmitted) return; // IMPEDISCE CAMBI RISPOSTA DOPO INVIO
+            
             audio.playSFX('clickSound');
             
             document.querySelectorAll('.answer-btn').forEach(btn => {
                 btn.classList.remove('selected');
             });
             
-            document.querySelectorAll('.answer-btn')[index].classList.add('selected');
-            selectedAnswer = index;
-            elements.submitBtn.disabled = false;
+            const selectedButton = document.querySelectorAll('.answer-btn')[index];
+            selectedButton.classList.add('selected');
+            selectedButton.classList.add('auto-submitted');
             
+            selectedAnswer = index;
             elements.selectedAnswerText.textContent = answerText;
+            
+            // 🚀 INVIO AUTOMATICO - RIMOSSO PULSANTE SUBMIT
+            submitAnswer();
         }
 
         function submitAnswer() {
-            if (selectedAnswer === null) return;
+            if (selectedAnswer === null || hasSubmitted) return;
             
             audio.playSFX('submitSound');
-            elements.submitBtn.disabled = true;
-            elements.submitBtn.textContent = '✓ SUBMITTED';
+            hasSubmitted = true;
             
-            const answerTime = 30 - timeLeft;
+            const answerTime = 20 - timeLeft; // ⏰ MODIFICATO PER 20 SECONDI
             console.log(`⏱️ Answer time: ${answerTime}s (bonus: ${answerTime <= 5 ? 'YES' : 'NO'})`);
             
             database.ref('games/' + gameCode + '/answers').push({
@@ -1168,7 +1195,7 @@
         }
 
         function startTimer() {
-            timeLeft = 30;
+            timeLeft = 20; // ⏰ RIDOTTO DA 30 A 20 SECONDI
             elements.timer.textContent = timeLeft;
             elements.timer.classList.remove('warning');
             
@@ -1186,9 +1213,9 @@
                 
                 if (timeLeft <= 0) {
                     clearInterval(timer);
-                    if (selectedAnswer !== null) {
+                    if (selectedAnswer !== null && !hasSubmitted) {
                         submitAnswer();
-                    } else {
+                    } else if (!hasSubmitted) {
                         showScreen('answerSubmittedScreen');
                     }
                 }
@@ -1203,7 +1230,7 @@
             }
             
             const isCorrect = selectedAnswer === currentQuestionData.correct;
-            const answerTime = 30 - (timeLeft > 0 ? timeLeft : 0);
+            const answerTime = 20 - (timeLeft > 0 ? timeLeft : 0); // ⏰ MODIFICATO PER 20 SECONDI
             const basePoints = currentQuestionData.points || 10;
             const speedBonus = (answerTime <= 5) ? (6 - answerTime) : 0;
             const totalPoints = isCorrect ? (basePoints + speedBonus) : 0;
@@ -1249,10 +1276,8 @@
             elements.resultContainer.innerHTML = resultHTML;
             showScreen('questionResultScreen');
             
-            // TORNA ALLA SCHERMATA DI ATTESA DOPO 3 SECONDI
-            setTimeout(() => {
-                showScreen('waitingScreen');
-            }, 3000);
+            // 🎯 RIMOSSO IL TIMEOUT AUTOMATICO - RIMANE FINCHE' HOST NON DA IL VIA
+            // La schermata rimane finché l'host non avvia la prossima domanda
         }
 
         function showLeaderboard(leaderboard) {
@@ -1294,7 +1319,6 @@
 
         // === EVENT LISTENERS ===
         elements.joinBtn.addEventListener('click', joinGame);
-        elements.submitBtn.addEventListener('click', submitAnswer);
 
         document.addEventListener('click', function initAudio() {
             if (!audio.audioActivated) {
