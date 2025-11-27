@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pigiama Party - Host v2.4</title>
+    <title>Pigiama Party - Host v2.5</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&display=swap" rel="stylesheet">
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
@@ -444,7 +444,7 @@
         <button class="audio-btn" id="sfxToggle">🔇 Suoni OFF</button>
     </div>
 
-    <div class="version">v2.4 - Audio Fix</div>
+    <div class="version">v2.5 - Bug Fix</div>
     
     <div class="container">
         <h1>🎮 PIGIAMA PARTY - HOST</h1>
@@ -558,9 +558,9 @@
 
     <script>
         // === FORZA REFRESH CACHE ===
-        console.log('🔥 HOST v2.4 - Audio Fix - Caricato: ' + new Date().toLocaleString());
+        console.log('🔥 HOST v2.5 - Bug Fix - Caricato: ' + new Date().toLocaleString());
         
-        // === SISTEMA AUDIO MIGLIORATO ===
+        // === SISTEMA AUDIO SEMPLIFICATO ===
         const audio = {
             // Musica
             menuMusic: document.getElementById('menuMusic'),
@@ -579,24 +579,17 @@
             musicEnabled: false,
             sfxEnabled: false,
             audioActivated: false,
-            audioContext: null,
             
             // Metodi
             async activateAudio() {
                 console.log('🎵 Tentativo di attivazione audio...');
                 
                 try {
-                    // PRIMA riproduci un suono breve per sbloccare l'audio
-                    await this.playUnlockSound();
-                    
-                    // POI inizializza il contesto audio
-                    const AudioContext = window.AudioContext || window.webkitAudioContext;
-                    this.audioContext = new AudioContext();
-                    
-                    // Connetti tutti gli elementi audio al contesto
-                    this.connectAudioElements();
-                    
-                    await this.audioContext.resume();
+                    // Sblocca l'audio
+                    this.clickSound.volume = 0.01;
+                    await this.clickSound.play();
+                    this.clickSound.pause();
+                    this.clickSound.currentTime = 0;
                     
                     this.audioActivated = true;
                     this.musicEnabled = true;
@@ -606,7 +599,7 @@
                     document.getElementById('musicToggle').textContent = '🔊 Musica ON';
                     document.getElementById('sfxToggle').textContent = '🔊 Suoni ON';
                     
-                    // Nascondi overlay con animazione
+                    // Nascondi overlay
                     const activationOverlay = document.getElementById('audioActivation');
                     activationOverlay.style.opacity = '0';
                     activationOverlay.style.transition = 'opacity 0.5s ease';
@@ -615,7 +608,7 @@
                         activationOverlay.style.display = 'none';
                     }, 500);
                     
-                    // Avvia musica menu DOPO un breve delay
+                    // Avvia musica menu
                     setTimeout(() => {
                         this.playMusic('menuMusic');
                     }, 100);
@@ -624,72 +617,14 @@
                     
                 } catch (error) {
                     console.error('❌ Errore nell\'attivazione audio:', error);
-                    this.fallbackAudioActivation();
+                    this.audioActivated = true;
+                    this.musicEnabled = true;
+                    this.sfxEnabled = true;
                 }
-            },
-            
-            async playUnlockSound() {
-                return new Promise((resolve) => {
-                    try {
-                        // Crea un suono breve per sbloccare l'audio
-                        const unlockSound = new Audio();
-                        unlockSound.src = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==';
-                        unlockSound.volume = 0.001; // Quasi silenzioso
-                        
-                        const playPromise = unlockSound.play();
-                        if (playPromise !== undefined) {
-                            playPromise.then(() => {
-                                unlockSound.pause();
-                                resolve();
-                            }).catch(() => {
-                                resolve(); // Fallback silenzioso
-                            });
-                        } else {
-                            resolve();
-                        }
-                    } catch (e) {
-                        resolve(); // Fallback silenzioso
-                    }
-                });
-            },
-            
-            connectAudioElements() {
-                // Collega tutti gli elementi audio al contesto audio
-                const audioElements = [
-                    this.menuMusic, this.gameMusic, this.victoryMusic,
-                    this.clickSound, this.correctSound, this.wrongSound,
-                    this.transitionSound, this.timerSound, this.startSound
-                ];
-                
-                audioElements.forEach(element => {
-                    if (this.audioContext) {
-                        const source = this.audioContext.createMediaElementSource(element);
-                        source.connect(this.audioContext.destination);
-                    }
-                });
-            },
-            
-            fallbackAudioActivation() {
-                console.log('🔄 Tentativo fallback attivazione audio...');
-                this.audioActivated = true;
-                this.musicEnabled = true;
-                this.sfxEnabled = true;
-                
-                // Aggiorna UI
-                document.getElementById('musicToggle').textContent = '🔊 Musica ON';
-                document.getElementById('sfxToggle').textContent = '🔊 Suoni ON';
-                
-                // Nascondi overlay
-                document.getElementById('audioActivation').style.display = 'none';
-                
-                console.log('🎵 Audio attivato con fallback!');
             },
             
             async playMusic(type) {
-                if (!this.musicEnabled || !this.audioActivated) {
-                    console.log('🎵 Musica disabilitata o audio non attivato');
-                    return;
-                }
+                if (!this.musicEnabled || !this.audioActivated) return;
                 
                 try {
                     // Ferma tutta la musica
@@ -698,39 +633,11 @@
                     // Reset e play nuova musica
                     const music = this[type];
                     music.currentTime = 0;
-                    music.volume = 0.3; // Volume più basso per la musica di sottofondo
-                    
-                    const playPromise = music.play();
-                    if (playPromise !== undefined) {
-                        await playPromise;
-                        console.log('🎵 Musica avviata:', type);
-                    }
+                    music.volume = 0.3;
+                    await music.play();
+                    console.log('🎵 Musica avviata:', type);
                 } catch (error) {
                     console.error('❌ Errore nella riproduzione della musica:', error);
-                    // Prova a riprodurre con volume 0 e poi aumentare
-                    this.retryMusicPlayback(type);
-                }
-            },
-            
-            async retryMusicPlayback(type) {
-                try {
-                    const music = this[type];
-                    music.volume = 0;
-                    await music.play();
-                    
-                    // Aumenta gradualmente il volume
-                    let volume = 0;
-                    const fadeIn = setInterval(() => {
-                        volume += 0.05;
-                        music.volume = volume;
-                        if (volume >= 0.3) {
-                            clearInterval(fadeIn);
-                        }
-                    }, 100);
-                    
-                    console.log('🎵 Musica avviata con fade-in:', type);
-                } catch (error) {
-                    console.error('❌ Errore anche nel retry della musica:', error);
                 }
             },
             
@@ -742,31 +649,21 @@
             },
             
             async playSFX(type) {
-                if (!this.sfxEnabled || !this.audioActivated) {
-                    console.log('🔇 SFX disabilitati o audio non attivato');
-                    return;
-                }
+                if (!this.sfxEnabled || !this.audioActivated) return;
                 
                 try {
                     const sfx = this[type];
                     sfx.currentTime = 0;
                     sfx.volume = 0.6;
-                    
-                    const playPromise = sfx.play();
-                    if (playPromise !== undefined) {
-                        await playPromise;
-                        console.log('🔊 SFX riprodotto:', type);
-                    }
+                    await sfx.play();
+                    console.log('🔊 SFX riprodotto:', type);
                 } catch (error) {
                     console.error('❌ Errore nella riproduzione SFX:', error);
                 }
             },
             
             toggleMusic() {
-                if (!this.audioActivated) {
-                    console.log('🔇 Audio non ancora attivato');
-                    return;
-                }
+                if (!this.audioActivated) return;
                 
                 this.musicEnabled = !this.musicEnabled;
                 document.getElementById('musicToggle').textContent = 
@@ -774,9 +671,7 @@
                 
                 if (!this.musicEnabled) {
                     this.stopAllMusic();
-                    console.log('🔇 Musica disattivata');
                 } else {
-                    // Riproduci musica corrente in base alla schermata
                     if (document.getElementById('lobbyScreen').classList.contains('hidden') === false) {
                         this.playMusic('menuMusic');
                     } else if (document.getElementById('gameScreen').classList.contains('hidden') === false) {
@@ -784,21 +679,14 @@
                     } else if (document.getElementById('leaderboardScreen').classList.contains('hidden') === false) {
                         this.playMusic('victoryMusic');
                     }
-                    console.log('🔊 Musica attivata');
                 }
             },
             
             toggleSFX() {
-                if (!this.audioActivated) {
-                    console.log('🔇 Audio non ancora attivato');
-                    return;
-                }
-                
+                if (!this.audioActivated) return;
                 this.sfxEnabled = !this.sfxEnabled;
                 document.getElementById('sfxToggle').textContent = 
                     this.sfxEnabled ? '🔊 Suoni ON' : '🔇 Suoni OFF';
-                
-                console.log(this.sfxEnabled ? '🔊 Suoni attivati' : '🔇 Suoni disattivati');
             }
         };
 
@@ -882,14 +770,14 @@
             // Reset punteggi
             playerScores = {};
             
-            console.log('🎮 Host v2.4 creato con codice:', gameCode);
+            console.log('🎮 Host v2.5 creato con codice:', gameCode);
             
             // Inizializza il gioco su Firebase
             database.ref('games/' + gameCode).set({
                 status: 'waiting',
                 host: true,
                 createdAt: Date.now(),
-                version: '2.4'
+                version: '2.5'
             });
 
             // Ascolta i player che si connettono
@@ -937,10 +825,11 @@
             }
         }
 
-        // === FUNZIONI NUOVE PER LE STATISTICHE ===
+        // === FUNZIONI CORRETTE PER LE STATISTICHE ===
         function checkAllPlayersAnswered() {
             const currentQuestionAnswers = playerAnswers.filter(a => a.questionIndex === currentQuestion);
-            return currentQuestionAnswers.length >= connectedPlayers.length;
+            console.log(`📊 Controllo risposte: ${currentQuestionAnswers.length}/${connectedPlayers.length} per domanda ${currentQuestion}`);
+            return currentQuestionAnswers.length >= connectedPlayers.length && connectedPlayers.length > 0;
         }
 
         function updateAnswersProgress() {
@@ -966,7 +855,7 @@
                 
                 // Bonus velocità (massimo 5 punti, decresce con il tempo)
                 if (answer.answerTime <= 5) {
-                    speedBonus = 6 - answer.answerTime; // 5 punti se risponde in 1s, 4 in 2s, etc.
+                    speedBonus = 6 - answer.answerTime;
                     points += speedBonus;
                 }
             }
@@ -1035,8 +924,9 @@
                 // Aggiorna le statistiche
                 updateAnswersProgress();
                 
-                // Se tutti hanno risposto e le risposte non sono ancora rivelate, mostra subito la risposta corretta
+                // CORREZIONE CRITICA: Controllo risposte complete durante il timer
                 if (checkAllPlayersAnswered() && timeLeft > 0 && !answersRevealed) {
+                    console.log('🎉 Tutti hanno risposto! Fermando timer...');
                     clearInterval(timer);
                     showCorrectAnswer();
                     elements.nextBtn.disabled = false;
@@ -1045,7 +935,7 @@
             }
         }
 
-        // === FUNZIONI DEL GIOCO ===
+        // === FUNZIONI DEL GIOCO CORRETTE ===
         function startGame() {
             audio.playSFX('startSound');
             audio.playMusic('gameMusic');
@@ -1076,8 +966,11 @@
             currentQuestion = index;
             const question = questions[index];
             
-            // RESETTA LO STATO DELLE RISPOSTE RIVELATE
+            // CORREZIONE CRITICA: Reset completo per ogni domanda
+            playerAnswers = []; // Reset risposte per la nuova domanda
             answersRevealed = false;
+            
+            console.log(`🔄 Caricando domanda ${index + 1}, reset risposte`);
             
             // Aggiorna UI
             elements.questionCounter.textContent = `DOMANDA ${index + 1}/${questions.length}`;
@@ -1085,7 +978,7 @@
             
             // Pulisci risposte precedenti
             elements.answersGrid.innerHTML = '';
-            database.ref('games/' + gameCode + '/answers').remove();
+            database.ref('games/' + gameCode + '/answers').remove(); // Pulisce Firebase
             
             // Reset statistiche
             updateAnswersProgress();
@@ -1121,13 +1014,15 @@
                 // Effetto timer che scade
                 if (timeLeft <= 5) {
                     elements.timer.classList.add('warning');
-                    if (timeLeft <= 3) {
+                    // CORREZIONE: Timer audio solo negli ultimi 3 secondi e non a ogni secondo
+                    if (timeLeft === 3 || timeLeft === 2 || timeLeft === 1) {
                         audio.playSFX('timerSound');
                     }
                 }
                 
-                // Controlla se tutti hanno risposto
-                if (checkAllPlayersAnswered()) {
+                // Controlla se tutti hanno risposto (doppio controllo)
+                if (checkAllPlayersAnswered() && timeLeft > 0 && !answersRevealed) {
+                    console.log('⏰ Timer fermato - tutti hanno risposto');
                     clearInterval(timer);
                     showCorrectAnswer();
                     elements.nextBtn.disabled = false;
@@ -1164,7 +1059,7 @@
             loadQuestion(currentQuestion + 1);
         }
 
-        // === NUOVA FUNZIONE PER LA CLASSIFICA ===
+        // === FUNZIONE PER LA CLASSIFICA ===
         function showLeaderboard() {
             audio.playMusic('victoryMusic');
             
@@ -1290,7 +1185,6 @@
         });
         
         document.getElementById('sfxToggle').addEventListener('click', function() {
-            // Non playare SFX qui perché stiamo disabilitando i suoni
             audio.toggleSFX();
         });
 
@@ -1305,8 +1199,8 @@
         
         // === FORZA REFRESH VISUALE ===
         setTimeout(() => {
-            console.log('🔄 Controllo versione: HOST v2.4 attivo');
-            document.title = "Pigiama Party - Host v2.4";
+            console.log('🔄 Controllo versione: HOST v2.5 attivo');
+            document.title = "Pigiama Party - Host v2.5";
         }, 100);
     </script>
 </body>
