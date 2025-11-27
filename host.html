@@ -1060,56 +1060,65 @@
         }
 
         // === FUNZIONE PER LA CLASSIFICA ===
-        function showLeaderboard() {
-            audio.playMusic('victoryMusic');
-            
-            // Animazione transizione
-            elements.gameScreen.classList.add('hidden');
-            setTimeout(() => {
-                elements.leaderboardScreen.classList.remove('hidden');
-            }, 300);
-            
-            // Ordina i player per punteggio
-            const sortedPlayers = Object.entries(playerScores)
-                .sort(([,a], [,b]) => b.total - a.total)
-                .map(([name, data], index) => ({
-                    name,
-                    ...data,
-                    rank: index + 1
-                }));
-            
-            // Crea il podio (primi 3)
-            elements.podium.innerHTML = '';
-            const top3 = sortedPlayers.slice(0, 3);
-            
-            top3.forEach((player, index) => {
-                const podiumItem = document.createElement('div');
-                podiumItem.className = `podium-item podium-${index + 1}`;
-                podiumItem.innerHTML = `
-                    <div style="font-size: 2rem; margin-bottom: 10px;">${getMedalIcon(index + 1)}</div>
-                    <div style="font-weight: bold; font-size: 1.2rem;">${player.name}</div>
-                    <div style="font-size: 1.5rem; margin-top: 10px;">${player.total}p</div>
-                    ${player.speedBonuses > 0 ? `<div style="font-size: 0.8rem; margin-top: 5px;">⚡ ${player.speedBonuses}p bonus</div>` : ''}
-                `;
-                elements.podium.appendChild(podiumItem);
-            });
-            
-            // Crea la classifica completa
-            elements.finalLeaderboard.innerHTML = '';
-            sortedPlayers.forEach((player, index) => {
-                const li = document.createElement('li');
-                li.className = 'leaderboard-item';
-                li.innerHTML = `
-                    <div class="leaderboard-rank rank-${player.rank}">#${player.rank}</div>
-                    <div class="leaderboard-name">${player.name}</div>
-                    <div class="leaderboard-score">
-                        ${player.total}p
-                        ${player.speedBonuses > 0 ? `<span class="speed-bonus">⚡+${player.speedBonuses}</span>` : ''}
-                    </div>
-                `;
-                elements.finalLeaderboard.appendChild(li);
-            });
-        }
+function showLeaderboard() {
+    audio.playMusic('victoryMusic');
+    
+    // Animazione transizione
+    elements.gameScreen.classList.add('hidden');
+    setTimeout(() => {
+        elements.leaderboardScreen.classList.remove('hidden');
+    }, 300);
+    
+    // Ordina i player per punteggio
+    const sortedPlayers = Object.entries(playerScores)
+        .sort(([,a], [,b]) => b.total - a.total)
+        .map(([name, data], index) => ({
+            name,
+            score: data.total,  // CAMBIA: usa 'score' invece di 'total'
+            correctAnswers: data.correctAnswers,
+            speedBonuses: data.speedBonuses,
+            rank: index + 1
+        }));
+    
+    // === AGGIUNGI QUESTA RIGA CRITICA ===
+    // Invia la classifica a Firebase per i player
+    database.ref('games/' + gameCode).update({
+        leaderboard: sortedPlayers,
+        status: 'ended'
+    });
+    
+    // Crea il podio (primi 3)
+    elements.podium.innerHTML = '';
+    const top3 = sortedPlayers.slice(0, 3);
+    
+    top3.forEach((player, index) => {
+        const podiumItem = document.createElement('div');
+        podiumItem.className = `podium-item podium-${index + 1}`;
+        podiumItem.innerHTML = `
+            <div style="font-size: 2rem; margin-bottom: 10px;">${getMedalIcon(index + 1)}</div>
+            <div style="font-weight: bold; font-size: 1.2rem;">${player.name}</div>
+            <div style="font-size: 1.5rem; margin-top: 10px;">${player.score}p</div>  <!-- CAMBIA: total → score -->
+            ${player.speedBonuses > 0 ? `<div style="font-size: 0.8rem; margin-top: 5px;">⚡ ${player.speedBonuses}p bonus</div>` : ''}
+        `;
+        elements.podium.appendChild(podiumItem);
+    });
+    
+    // Crea la classifica completa
+    elements.finalLeaderboard.innerHTML = '';
+    sortedPlayers.forEach((player, index) => {
+        const li = document.createElement('li');
+        li.className = 'leaderboard-item';
+        li.innerHTML = `
+            <div class="leaderboard-rank rank-${player.rank}">#${player.rank}</div>
+            <div class="leaderboard-name">${player.name}</div>
+            <div class="leaderboard-score">
+                ${player.score}p  <!-- CAMBIA: total → score -->
+                ${player.speedBonuses > 0 ? `<span class="speed-bonus">⚡+${player.speedBonuses}</span>` : ''}
+            </div>
+        `;
+        elements.finalLeaderboard.appendChild(li);
+    });
+}
 
         function getMedalIcon(rank) {
             switch(rank) {
@@ -1143,9 +1152,6 @@
             
             showLeaderboard();
             
-            database.ref('games/' + gameCode).update({
-                status: 'ended'
-            });
         }
 
         // === EVENT LISTENERS ===
@@ -1205,3 +1211,4 @@
     </script>
 </body>
 </html>
+
