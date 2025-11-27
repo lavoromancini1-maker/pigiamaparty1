@@ -1322,22 +1322,44 @@
             }, 1000);
         }
 
+        function revealAnswersToPlayers() {
+    console.log('🎯 Rivelando risposte a tutti i player...');
+    
+    // Comunica a tutti i player che le risposte sono state rivelate
+    database.ref('games/' + gameCode).update({
+        answersRevealed: true,
+        currentQuestion: currentQuestion
+    });
+    
+    // Dopo 3 secondi, passa alla prossima domanda
+    setTimeout(() => {
+        database.ref('games/' + gameCode + '/answersRevealed').remove();
+        nextQuestion();
+    }, 3000);
+}
+
         function showCorrectAnswer() {
-            const question = questions[currentQuestion];
-            const answerElements = elements.answersGrid.querySelectorAll('.answer-option');
-            answerElements[question.correct].classList.add('correct');
-            
-            audio.playSFX('correctSound');
-            
-            answersRevealed = true;
-            updateAnswersList();
-        }
+    const question = questions[currentQuestion];
+    const answerElements = elements.answersGrid.querySelectorAll('.answer-option');
+    answerElements[question.correct].classList.add('correct');
+    
+    audio.playSFX('correctSound');
+    
+    answersRevealed = true;
+    updateAnswersList();
+    
+    // 🎯 AGGIUNGI QUESTA RIGA: Comunica ai player di mostrare i risultati
+    revealAnswersToPlayers();
+}
 
         function nextQuestion() {
-            audio.playSFX('transitionSound');
-            answersRevealed = false;
-            loadQuestion(currentQuestion + 1);
-        }
+    // 🎯 AGGIUNGI: Rimuovi lo stato di risposte rivelate
+    database.ref('games/' + gameCode + '/answersRevealed').remove();
+    
+    audio.playSFX('transitionSound');
+    answersRevealed = false;
+    loadQuestion(currentQuestion + 1);
+}
 
         function showLeaderboard() {
             audio.playMusic('victoryMusic');
@@ -1461,3 +1483,4 @@
     </script>
 </body>
 </html>
+
