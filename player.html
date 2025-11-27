@@ -626,25 +626,29 @@ function showQuestion(question) {
         }
 
         function submitAnswer() {
-            if (selectedAnswer === null) return;
-            
-            audio.playSFX('submitSound');
-            elements.submitBtn.disabled = true;
-            elements.submitBtn.textContent = '✓ INVIA';
-            
-            // Invia risposta a Firebase
-            database.ref('games/' + gameCode + '/answers').push({
-                playerName: playerName,
-                answerIndex: selectedAnswer,
-                questionIndex: currentQuestionIndex,
-                answerTime: timeLeft
-            });
+    if (selectedAnswer === null) return;
+    
+    audio.playSFX('submitSound');
+    elements.submitBtn.disabled = true;
+    elements.submitBtn.textContent = '✓ INVIA';
+    
+    // CORREZIONE: Calcola il tempo rimanente per il bonus velocità
+    const answerTime = 20 - timeLeft; // Tempo impiegato = tempo totale - tempo rimanente
+    console.log(`⏱️ Tempo risposta: ${answerTime}s (bonus: ${answerTime <= 5 ? 'SI' : 'NO'})`);
+    
+    // Invia risposta a Firebase
+    database.ref('games/' + gameCode + '/answers').push({
+        playerName: playerName,
+        answerIndex: selectedAnswer,
+        questionIndex: currentQuestionIndex,
+        answerTime: answerTime  // CORREZIONE: usa answerTime invece di timeLeft
+    });
 
-            // Mostra schermata di conferma
-            setTimeout(() => {
-                showScreen('answerSubmittedScreen');
-            }, 500);
-        }
+    // Mostra schermata di conferma
+    setTimeout(() => {
+        showScreen('answerSubmittedScreen');
+    }, 500);
+}
 
         function startTimer() {
             timeLeft = 20;
@@ -750,6 +754,7 @@ function showQuestion(question) {
     </script>
 </body>
 </html>
+
 
 
 
