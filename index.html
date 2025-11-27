@@ -3,139 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PIGIAMA PARTY</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --pink: #ff00c8;
-            --purple: #7b2cff;
-            --cyan: #00eaff;
-            --bg1: #02030f;
-            --glass: rgba(255,255,255,0.08);
-            --blur: blur(18px);
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Orbitron', sans-serif;
-        }
-
-        body {
-            background: radial-gradient(circle at 20% 20%, #0c0018, #000);
-            color: white;
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
-        }
-
-        .container {
-            text-align: center;
-            padding: 40px;
-        }
-
-        .logo {
-            font-size: 4rem;
-            background: linear-gradient(90deg, var(--pink), var(--secondary), var(--cyan));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            filter: drop-shadow(0 0 12px var(--pink));
-            margin-bottom: 10px;
-        }
-
-        .tagline { opacity:0.8; letter-spacing:2px; margin-bottom:40px; }
-        
-        .mode-selector {
-            display: flex;
-            gap: 30px;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-
-        .mode-card {
-            background: var(--glass);
-            border: 1px solid rgba(255,255,255,0.2);
-            border-radius: 22px;
-            padding: 35px;
-            width: 280px;
-            cursor: pointer;
-            transition:0.3s;
-            backdrop-filter:var(--blur);
-        }
-
-        .mode-card:hover {
-            transform:translateY(-10px) scale(1.03);
-            border-color:var(--cyan);
-            box-shadow:0 0 25px rgba(0,255,255,0.3);
-        }
-
-        .mode-title { font-size:1.4rem; color:var(--cyan); margin-bottom:10px; };
-
-        .mode-description {
-            opacity: 0.7;
-            line-height: 1.4;
-        }
-
-        .particles {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: -1;
-        }
-
-        .particle {
-            position: absolute;
-            background: var(--accent);
-            border-radius: 50%;
-            opacity: 0.3;
-            animation: float 6s infinite ease-in-out;
-        }
-
-        @keyframes float {
-            0%, 100% { transform: translateY(0) rotate(0deg); }
-            50% { transform: translateY(-20px) rotate(180deg); }
-        }
-
-        /* ==================== MOBILE FIXES ==================== */
-        html, body {
-            overflow: auto;
-            -webkit-overflow-scrolling: touch;
-            height: 100%;
-        }
-
-        .container {
-            min-height: 100vh;
-            overflow-y: auto;
-        }
-
-        * {
-            touch-action: pan-y;
-            -webkit-touch-callout: none;
-            -webkit-user-select: none;
-            user-select: text;
-        }
-
-        .mode-card {
-            -webkit-tap-highlight-color: transparent;
-        }
-    </style>
-</head>
+    <title>Game Night Quiz</title> 
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="styles/style.css">
+    
+    </head>
 <body>
-    <div class="particles" id="particles"></div>
     
     <div class="container">
-        <div class="logo">Pigiama Party</div>
+        <h1 class="logo">Pigiama Party</h1> 
         <div class="tagline">THE ULTIMATE TRIVIA EXPERIENCE</div>
         
         <div class="mode-selector">
+            
             <div class="mode-card" onclick="location.href='host.html'">
-                <div class="mode-icon">🎮</div>
+                <div class="mode-icon">🖥️</div>
                 <div class="mode-title">GAME MASTER</div>
                 <div class="mode-description">Host the game on your big screen. Control the flow, manage players, and create an unforgettable experience.</div>
             </div>
@@ -147,33 +31,13 @@
             </div>
             
             <div class="mode-card" onclick="location.href='spectator.html'">
-                <div class="mode-icon">👁️</div>
+                <div class="mode-icon">👀</div>
                 <div class="mode-title">SPECTATOR</div>
                 <div class="mode-description">Watch the action live. Follow the game progress and see all the answers in real-time.</div>
             </div>
+            
         </div>
     </div>
 
-    <script>
-        // Create background particles
-        function createParticles() {
-            const container = document.getElementById('particles');
-            for (let i = 0; i < 20; i++) {
-                const particle = document.createElement('div');
-                particle.className = 'particle';
-                particle.style.width = `${Math.random() * 6 + 2}px`;
-                particle.style.height = particle.style.width;
-                particle.style.left = `${Math.random() * 100}%`;
-                particle.style.top = `${Math.random() * 100}%`;
-                particle.style.animationDelay = `${Math.random() * 5}s`;
-                particle.style.animationDuration = `${Math.random() * 8 + 4}s`;
-                container.appendChild(particle);
-            }
-        }
-
-        createParticles();
-    </script>
-</body>
+    </body>
 </html>
-
-
