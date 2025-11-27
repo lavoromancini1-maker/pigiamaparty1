@@ -389,7 +389,7 @@
         .timer {
             font-size: 6rem;
             font-weight: 800;
-            background: linear-gradient(135deg, var(--accent-gold), var(--accent-red));
+            background: linear-gradient(135deg, var(--accent-gold), var(--accent-blue));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
@@ -709,6 +709,111 @@
                 font-size: 4rem;
             }
         }
+
+        /* AUDIO CONTROLS */
+        .audio-controls {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            display: flex;
+            gap: 12px;
+        }
+
+        .audio-btn {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: var(--text-primary);
+            padding: 10px 18px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .audio-btn:hover {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(255, 215, 0, 0.3);
+        }
+
+        /* Activation Overlay */
+        .audio-activation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(10, 10, 20, 0.98);
+            backdrop-filter: blur(20px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+        }
+
+        .activation-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(30px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--border-radius-large);
+            padding: 60px 50px;
+            text-align: center;
+            max-width: 600px;
+            margin: 20px;
+            box-shadow: var(--shadow-deep);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .activation-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 25px;
+            background: linear-gradient(135deg, var(--accent-gold), var(--accent-blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-family: 'Montserrat', sans-serif;
+            position: relative;
+            z-index: 2;
+        }
+
+        .activation-btn {
+            background: linear-gradient(135deg, var(--accent-gold), var(--accent-blue));
+            color: #000;
+            border: none;
+            padding: 20px 40px;
+            border-radius: 50px;
+            font-size: 1.3rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 25px;
+            box-shadow: 0 5px 20px rgba(255, 215, 0, 0.3);
+            position: relative;
+            z-index: 2;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        .activation-btn:hover {
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 10px 30px rgba(255, 215, 0, 0.5);
+        }
+
+        /* Version */
+        .version {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: var(--text-secondary);
+            padding: 8px 16px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
     </style>
 </head>
 <body>
@@ -719,6 +824,28 @@
         <div class="particles" id="particlesContainer"></div>
     </div>
 
+    <!-- OVERLAY ATTIVAZIONE AUDIO -->
+    <div id="audioActivation" class="audio-activation">
+        <div class="activation-card">
+            <div class="activation-title">🎵 Audio Activation</div>
+            <p style="margin-bottom: 30px; color: var(--text-secondary); line-height: 1.6; font-size: 1.1rem;">
+                Enable audio for the complete Game Show experience with background music and sound effects.
+            </p>
+            <button class="activation-btn" id="activateAudio">🎮 Enable Audio</button>
+            <p style="margin-top: 20px; font-size: 0.9rem; color: var(--text-secondary);">
+                Required for full immersion
+            </p>
+        </div>
+    </div>
+
+    <!-- CONTROLLI AUDIO -->
+    <div class="audio-controls">
+        <button class="audio-btn" id="musicToggle">🔇 Music</button>
+        <button class="audio-btn" id="sfxToggle">🔇 SFX</button>
+    </div>
+
+    <div class="version">Game Show Edition</div>
+    
     <div class="container">
         <!-- HEADER -->
         <div class="header">
@@ -731,7 +858,7 @@
             <div class="tv-card">
                 <div class="game-code-section">
                     <div class="game-code-label">GAME CODE</div>
-                    <div class="game-code" id="gameCode">GAME123</div>
+                    <div class="game-code" id="gameCode">SHOW123</div>
                     <p style="color: var(--text-secondary); margin-top: 20px; font-size: 1.1rem;">
                         Share this code with players to join the ultimate game show!
                     </p>
@@ -771,7 +898,7 @@
                 </div>
 
                 <div class="timer-container">
-                    <div class="timer" id="timer">30</div>
+                    <div class="timer" id="timer">20</div>
                 </div>
 
                 <!-- Progress Bar -->
@@ -880,665 +1007,659 @@
         <source src="audio/start.mp3" type="audio/mpeg">
     </audio>
 
-    <!-- IL RESTANTE CODICE JAVASCRIPT RIMANE INVARIATO -->
-    <!-- SOSTITUISCI L'INTERO SCRIPT NELL'HOST.HTML CON QUESTO: -->
-
-<script>
-    // === CREA PARTICELLE ANIMATE ===
-    function createParticles() {
-        const container = document.getElementById('particlesContainer');
-        const particleCount = 30;
-        
-        for (let i = 0; i < particleCount; i++) {
-            const particle = document.createElement('div');
-            particle.className = 'particle';
+    <script>
+        // === CREA PARTICELLE ANIMATE ===
+        function createParticles() {
+            const container = document.getElementById('particlesContainer');
+            const particleCount = 30;
             
-            const size = Math.random() * 4 + 1;
-            particle.style.width = size + 'px';
-            particle.style.height = size + 'px';
-            particle.style.left = Math.random() * 100 + '%';
-            particle.style.top = Math.random() * 100 + '%';
-            
-            const colors = ['#FFD700', '#00B4DB', '#8A2BE2', '#FF416C'];
-            particle.style.background = colors[Math.floor(Math.random() * colors.length)];
-            
-            particle.style.animationDelay = Math.random() * 6 + 's';
-            particle.style.animationDuration = (Math.random() * 4 + 4) + 's';
-            
-            container.appendChild(particle);
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                
+                const size = Math.random() * 4 + 1;
+                particle.style.width = size + 'px';
+                particle.style.height = size + 'px';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = Math.random() * 100 + '%';
+                
+                const colors = ['#FFD700', '#00B4DB', '#8A2BE2', '#FF416C'];
+                particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+                
+                particle.style.animationDelay = Math.random() * 6 + 's';
+                particle.style.animationDuration = (Math.random() * 4 + 4) + 's';
+                
+                container.appendChild(particle);
+            }
         }
-    }
 
-    // === INIZIALIZZA PARTICELLE ===
-    createParticles();
+        // === INIZIALIZZA PARTICELLE ===
+        createParticles();
 
-    // === FORZA REFRESH CACHE ===
-    console.log('🎮 HOST Game Show Edition - Caricato: ' + new Date().toLocaleString());
-    
-    // === SISTEMA AUDIO ===
-    const audio = {
-        menuMusic: document.getElementById('menuMusic'),
-        gameMusic: document.getElementById('gameMusic'),
-        victoryMusic: document.getElementById('victoryMusic'),
+        // === FORZA REFRESH CACHE ===
+        console.log('🎮 HOST Game Show Edition - Caricato: ' + new Date().toLocaleString());
         
-        clickSound: document.getElementById('clickSound'),
-        correctSound: document.getElementById('correctSound'),
-        wrongSound: document.getElementById('wrongSound'),
-        transitionSound: document.getElementById('transitionSound'),
-        timerSound: document.getElementById('timerSound'),
-        startSound: document.getElementById('startSound'),
-        
-        musicEnabled: false,
-        sfxEnabled: false,
-        audioActivated: false,
-        
-        async activateAudio() {
-            console.log('🎵 Attivazione audio...');
+        // === SISTEMA AUDIO ===
+        const audio = {
+            menuMusic: document.getElementById('menuMusic'),
+            gameMusic: document.getElementById('gameMusic'),
+            victoryMusic: document.getElementById('victoryMusic'),
             
-            try {
-                this.clickSound.volume = 0.01;
-                await this.clickSound.play();
-                this.clickSound.pause();
-                this.clickSound.currentTime = 0;
-                
-                this.audioActivated = true;
-                this.musicEnabled = true;
-                this.sfxEnabled = true;
-                
-                document.getElementById('musicToggle').textContent = '🔊 Music';
-                document.getElementById('sfxToggle').textContent = '🔊 SFX';
-                
-                const activationOverlay = document.getElementById('audioActivation');
-                activationOverlay.style.opacity = '0';
-                activationOverlay.style.transition = 'opacity 0.5s ease';
-                
-                setTimeout(() => {
-                    activationOverlay.style.display = 'none';
-                }, 500);
-                
-                setTimeout(() => {
-                    this.playMusic('menuMusic');
-                }, 100);
-                
-                console.log('🎵 Audio attivato!');
-                
-            } catch (error) {
-                console.error('❌ Errore attivazione audio:', error);
-                this.audioActivated = true;
-                this.musicEnabled = true;
-                this.sfxEnabled = true;
-            }
-        },
-        
-        async playMusic(type) {
-            if (!this.musicEnabled || !this.audioActivated) return;
+            clickSound: document.getElementById('clickSound'),
+            correctSound: document.getElementById('correctSound'),
+            wrongSound: document.getElementById('wrongSound'),
+            transitionSound: document.getElementById('transitionSound'),
+            timerSound: document.getElementById('timerSound'),
+            startSound: document.getElementById('startSound'),
             
-            try {
-                this.stopAllMusic();
-                const music = this[type];
-                music.currentTime = 0;
-                music.volume = 0.3;
-                await music.play();
-                console.log('🎵 Musica avviata:', type);
-            } catch (error) {
-                console.error('❌ Errore musica:', error);
-            }
-        },
-        
-        stopAllMusic() {
-            [this.menuMusic, this.gameMusic, this.victoryMusic].forEach(music => {
-                music.pause();
-                music.currentTime = 0;
-            });
-        },
-        
-        async playSFX(type) {
-            if (!this.sfxEnabled || !this.audioActivated) return;
+            musicEnabled: false,
+            sfxEnabled: false,
+            audioActivated: false,
             
-            try {
-                const sfx = this[type];
-                sfx.currentTime = 0;
-                sfx.volume = 0.6;
-                await sfx.play();
-                console.log('🔊 SFX:', type);
-            } catch (error) {
-                console.error('❌ Errore SFX:', error);
-            }
-        },
-        
-        toggleMusic() {
-            if (!this.audioActivated) return;
-            this.musicEnabled = !this.musicEnabled;
-            document.getElementById('musicToggle').textContent = 
-                this.musicEnabled ? '🔊 Music' : '🔇 Music';
-            if (!this.musicEnabled) {
-                this.stopAllMusic();
-            } else {
-                if (document.getElementById('lobbyScreen').classList.contains('hidden') === false) {
-                    this.playMusic('menuMusic');
-                } else if (document.getElementById('gameScreen').classList.contains('hidden') === false) {
-                    this.playMusic('gameMusic');
-                } else if (document.getElementById('leaderboardScreen').classList.contains('hidden') === false) {
-                    this.playMusic('victoryMusic');
+            async activateAudio() {
+                console.log('🎵 Attivazione audio...');
+                
+                try {
+                    this.clickSound.volume = 0.01;
+                    await this.clickSound.play();
+                    this.clickSound.pause();
+                    this.clickSound.currentTime = 0;
+                    
+                    this.audioActivated = true;
+                    this.musicEnabled = true;
+                    this.sfxEnabled = true;
+                    
+                    document.getElementById('musicToggle').textContent = '🔊 Music';
+                    document.getElementById('sfxToggle').textContent = '🔊 SFX';
+                    
+                    const activationOverlay = document.getElementById('audioActivation');
+                    activationOverlay.style.opacity = '0';
+                    activationOverlay.style.transition = 'opacity 0.5s ease';
+                    
+                    setTimeout(() => {
+                        activationOverlay.style.display = 'none';
+                    }, 500);
+                    
+                    setTimeout(() => {
+                        this.playMusic('menuMusic');
+                    }, 100);
+                    
+                    console.log('🎵 Audio attivato!');
+                    
+                } catch (error) {
+                    console.error('❌ Errore attivazione audio:', error);
+                    this.audioActivated = true;
+                    this.musicEnabled = true;
+                    this.sfxEnabled = true;
                 }
-            }
-        },
-        
-        toggleSFX() {
-            if (!this.audioActivated) return;
-            this.sfxEnabled = !this.sfxEnabled;
-            document.getElementById('sfxToggle').textContent = 
-                this.sfxEnabled ? '🔊 SFX' : '🔇 SFX';
-        }
-    };
-
-    // === CONFIGURA FIREBASE ===
-    const firebaseConfig = {
-        apiKey: "AIzaSyC-RrLKSwfM-S5r1gD_RWdjWElWhkgp1vI",
-        authDomain: "pigiamaparty2-b8d66.firebaseapp.com",
-        databaseURL: "https://pigiamaparty2-b8d66-default-rtdb.europe-west1.firebasedatabase.app",
-        projectId: "pigiamaparty2-b8d66",
-        storageBucket: "pigiamaparty2-b8d66.firebasestorage.app",
-        messagingSenderId: "300420666102",
-        appId: "1:300420666102:web:4170ec1ba37673b88652d7"
-    };
-
-    // Inizializza Firebase
-    firebase.initializeApp(firebaseConfig);
-    const database = firebase.database();
-
-    // === DOMANDE DEL GIOCO ===
-    const questions = [
-        {
-            question: "Qual è la capitale dell'Australia?",
-            answers: ["Sydney", "Melbourne", "Canberra", "Perth"],
-            correct: 2,
-            points: 10
-        },
-        {
-            question: "In quale anno è caduto il muro di Berlino?",
-            answers: ["1987", "1989", "1991", "1985"],
-            correct: 1,
-            points: 15
-        },
-        {
-            question: "Chi ha scritto 'Il nome della rosa'?",
-            answers: ["Italo Calvino", "Umberto Eco", "Luigi Pirandello", "Alessandro Manzoni"],
-            correct: 1,
-            points: 10
-        }
-    ];
-
-    // === VARIABILI DI STATO ===
-    let currentQuestion = 0;
-    let timeLeft = 20; // ⏰ RIDOTTO DA 30 A 20 SECONDI
-    let timer;
-    let connectedPlayers = [];
-    let playerAnswers = [];
-    let gameCode = '';
-    let answersRevealed = false;
-    let playerScores = {};
-
-    // === ELEMENTI DOM ===
-    const elements = {
-        lobbyScreen: document.getElementById('lobbyScreen'),
-        gameScreen: document.getElementById('gameScreen'),
-        leaderboardScreen: document.getElementById('leaderboardScreen'),
-        gameCode: document.getElementById('gameCode'),
-        playerList: document.getElementById('playerList'),
-        startBtn: document.getElementById('startBtn'),
-        questionCounter: document.getElementById('questionCounter'),
-        questionText: document.getElementById('questionText'),
-        timer: document.getElementById('timer'),
-        answersGrid: document.getElementById('answersGrid'),
-        nextBtn: document.getElementById('nextBtn'),
-        answersList: document.getElementById('answersList'),
-        answersProgress: document.getElementById('answersProgress'),
-        progressFill: document.getElementById('progressFill'),
-        skipTimerBtn: document.getElementById('skipTimerBtn'),
-        showAnswerBtn: document.getElementById('showAnswerBtn'),
-        finalLeaderboard: document.getElementById('finalLeaderboard'),
-        podium: document.getElementById('podium'),
-        restartBtn: document.getElementById('restartBtn')
-    };
-
-    // === INIZIALIZZAZIONE ===
-    function initGame() {
-        gameCode = 'SHOW' + Math.floor(1000 + Math.random() * 9000);
-        elements.gameCode.textContent = gameCode;
-        
-        playerScores = {};
-        
-        console.log('🎮 Host Game Show creato con codice:', gameCode);
-        
-        database.ref('games/' + gameCode).set({
-            status: 'waiting',
-            host: true,
-            createdAt: Date.now(),
-            version: 'Game-Show-2.0'
-        });
-
-        database.ref('games/' + gameCode + '/players').on('value', (snapshot) => {
-            const players = snapshot.val() || {};
-            connectedPlayers = Object.values(players);
+            },
             
-            connectedPlayers.forEach(player => {
-                if (!playerScores[player.name]) {
-                    playerScores[player.name] = {
-                        total: 0,
-                        correctAnswers: 0,
-                        speedBonuses: 0
-                    };
+            async playMusic(type) {
+                if (!this.musicEnabled || !this.audioActivated) return;
+                
+                try {
+                    this.stopAllMusic();
+                    const music = this[type];
+                    music.currentTime = 0;
+                    music.volume = 0.3;
+                    await music.play();
+                    console.log('🎵 Musica avviata:', type);
+                } catch (error) {
+                    console.error('❌ Errore musica:', error);
                 }
-            });
+            },
             
-            updatePlayerList();
-        });
-
-        database.ref('games/' + gameCode + '/answers').on('value', (snapshot) => {
-            const answers = snapshot.val() || {};
-            playerAnswers = Object.values(answers);
-            updateAnswersList();
-        });
-
-        // Auto-attiva audio dopo breve ritardo
-        setTimeout(() => {
-            audio.activateAudio();
-        }, 1000);
-    }
-
-    function updatePlayerList() {
-        elements.playerList.innerHTML = '';
-        
-        if (connectedPlayers.length === 0) {
-            elements.playerList.innerHTML = '<li class="player-item"><span class="player-icon">⏳</span><span class="player-name">Waiting for contestants...</span></li>';
-            elements.startBtn.disabled = true;
-        } else {
-            connectedPlayers.forEach((player, index) => {
-                const li = document.createElement('li');
-                li.className = 'player-item';
-                li.innerHTML = `<span class="player-icon">${index + 1}</span><span class="player-name">${player.name}</span>`;
-                elements.playerList.appendChild(li);
-            });
-            elements.startBtn.disabled = false;
-        }
-    }
-
-    function checkAllPlayersAnswered() {
-        const currentQuestionAnswers = playerAnswers.filter(a => a.questionIndex === currentQuestion);
-        return currentQuestionAnswers.length >= connectedPlayers.length && connectedPlayers.length > 0;
-    }
-
-    function updateAnswersProgress() {
-        const currentAnswers = playerAnswers.filter(a => a.questionIndex === currentQuestion);
-        const progress = connectedPlayers.length > 0 ? (currentAnswers.length / connectedPlayers.length) * 100 : 0;
-        
-        elements.answersProgress.textContent = `${currentAnswers.length}/${connectedPlayers.length}`;
-        elements.progressFill.style.width = progress + '%';
-        
-        elements.skipTimerBtn.disabled = currentAnswers.length === 0;
-        elements.showAnswerBtn.disabled = currentAnswers.length === 0;
-    }
-
-    function calculatePoints(answer, question) {
-        let points = 0;
-        let speedBonus = 0;
-        
-        if (answer.answerIndex === question.correct) {
-            points += question.points || 10;
-            
-            // ⏰ BONUS VELOCITÀ: se risponde entro 5 secondi (su 20 totali)
-            if (answer.answerTime <= 5) {
-                speedBonus = 6 - answer.answerTime;  // 5, 4, 3, 2, 1 punti bonus
-                points += speedBonus;
-            }
-        }
-        
-        return { points, speedBonus };
-    }
-
-    function updateAnswersList() {
-        elements.answersList.innerHTML = '';
-        
-        if (playerAnswers.length === 0) {
-            elements.answersList.innerHTML = '<li class="player-item"><span class="player-icon">⏳</span><span class="player-name">Waiting for responses...</span></li>';
-        } else {
-            const currentAnswers = playerAnswers.filter(a => a.questionIndex === currentQuestion);
-            
-            if (!answersRevealed) {
-                currentAnswers.forEach(answer => {
-                    const li = document.createElement('li');
-                    li.className = 'player-item';
-                    li.innerHTML = `<span class="player-icon">🎯</span><span class="player-name">${answer.playerName}: Response submitted</span>`;
-                    elements.answersList.appendChild(li);
+            stopAllMusic() {
+                [this.menuMusic, this.gameMusic, this.victoryMusic].forEach(music => {
+                    music.pause();
+                    music.currentTime = 0;
                 });
+            },
+            
+            async playSFX(type) {
+                if (!this.sfxEnabled || !this.audioActivated) return;
                 
-                if (currentAnswers.length > 0) {
-                    const summary = document.createElement('li');
-                    summary.className = 'player-item';
-                    summary.style.background = 'rgba(255, 215, 0, 0.2)';
-                    summary.innerHTML = `<span class="player-icon">📊</span><span class="player-name">${currentAnswers.length}/${connectedPlayers.length} contestants responded</span>`;
-                    elements.answersList.appendChild(summary);
+                try {
+                    const sfx = this[type];
+                    sfx.currentTime = 0;
+                    sfx.volume = 0.6;
+                    await sfx.play();
+                    console.log('🔊 SFX:', type);
+                } catch (error) {
+                    console.error('❌ Errore SFX:', error);
                 }
-            } else {
-                const question = questions[currentQuestion];
-                currentAnswers.forEach(answer => {
-                    const pointsData = calculatePoints(answer, question);
-                    
-                    const li = document.createElement('li');
-                    li.className = 'player-item';
-                    
-                    const isCorrect = answer.answerIndex === question.correct;
-                    const icon = isCorrect ? '🏆' : '❌';
-                    
-                    let pointsText = '';
-                    if (isCorrect) {
-                        pointsText = ` (+${pointsData.points}${pointsData.speedBonus > 0 ? ` ⚡+${pointsData.speedBonus}` : ''})`;
-                        
-                        if (!playerScores[answer.playerName]) {
-                            playerScores[answer.playerName] = { total: 0, correctAnswers: 0, speedBonuses: 0 };
-                        }
-                        playerScores[answer.playerName].total += pointsData.points;
-                        playerScores[answer.playerName].correctAnswers += 1;
-                        if (pointsData.speedBonus > 0) {
-                            playerScores[answer.playerName].speedBonuses += pointsData.speedBonus;
-                        }
+            },
+            
+            toggleMusic() {
+                if (!this.audioActivated) return;
+                this.musicEnabled = !this.musicEnabled;
+                document.getElementById('musicToggle').textContent = 
+                    this.musicEnabled ? '🔊 Music' : '🔇 Music';
+                if (!this.musicEnabled) {
+                    this.stopAllMusic();
+                } else {
+                    if (document.getElementById('lobbyScreen').classList.contains('hidden') === false) {
+                        this.playMusic('menuMusic');
+                    } else if (document.getElementById('gameScreen').classList.contains('hidden') === false) {
+                        this.playMusic('gameMusic');
+                    } else if (document.getElementById('leaderboardScreen').classList.contains('hidden') === false) {
+                        this.playMusic('victoryMusic');
                     }
-                    
-                    li.innerHTML = `<span class="player-icon">${icon}</span><span class="player-name">${answer.playerName}: Option ${answer.answerIndex + 1}${pointsText}</span>`;
-                    elements.answersList.appendChild(li);
-                });
+                }
+            },
+            
+            toggleSFX() {
+                if (!this.audioActivated) return;
+                this.sfxEnabled = !this.sfxEnabled;
+                document.getElementById('sfxToggle').textContent = 
+                    this.sfxEnabled ? '🔊 SFX' : '🔇 SFX';
             }
+        };
+
+        // === CONFIGURA FIREBASE ===
+        const firebaseConfig = {
+            apiKey: "AIzaSyC-RrLKSwfM-S5r1gD_RWdjWElWhkgp1vI",
+            authDomain: "pigiamaparty2-b8d66.firebaseapp.com",
+            databaseURL: "https://pigiamaparty2-b8d66-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "pigiamaparty2-b8d66",
+            storageBucket: "pigiamaparty2-b8d66.firebasestorage.app",
+            messagingSenderId: "300420666102",
+            appId: "1:300420666102:web:4170ec1ba37673b88652d7"
+        };
+
+        // Inizializza Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // === DOMANDE DEL GIOCO ===
+        const questions = [
+            {
+                question: "Qual è la capitale dell'Australia?",
+                answers: ["Sydney", "Melbourne", "Canberra", "Perth"],
+                correct: 2,
+                points: 10
+            },
+            {
+                question: "In quale anno è caduto il muro di Berlino?",
+                answers: ["1987", "1989", "1991", "1985"],
+                correct: 1,
+                points: 15
+            },
+            {
+                question: "Chi ha scritto 'Il nome della rosa'?",
+                answers: ["Italo Calvino", "Umberto Eco", "Luigi Pirandello", "Alessandro Manzoni"],
+                correct: 1,
+                points: 10
+            }
+        ];
+
+        // === VARIABILI DI STATO ===
+        let currentQuestion = 0;
+        let timeLeft = 20;
+        let timer;
+        let connectedPlayers = [];
+        let playerAnswers = [];
+        let gameCode = '';
+        let answersRevealed = false;
+        let playerScores = {};
+
+        // === ELEMENTI DOM ===
+        const elements = {
+            lobbyScreen: document.getElementById('lobbyScreen'),
+            gameScreen: document.getElementById('gameScreen'),
+            leaderboardScreen: document.getElementById('leaderboardScreen'),
+            gameCode: document.getElementById('gameCode'),
+            playerList: document.getElementById('playerList'),
+            startBtn: document.getElementById('startBtn'),
+            questionCounter: document.getElementById('questionCounter'),
+            questionText: document.getElementById('questionText'),
+            timer: document.getElementById('timer'),
+            answersGrid: document.getElementById('answersGrid'),
+            nextBtn: document.getElementById('nextBtn'),
+            answersList: document.getElementById('answersList'),
+            answersProgress: document.getElementById('answersProgress'),
+            progressFill: document.getElementById('progressFill'),
+            skipTimerBtn: document.getElementById('skipTimerBtn'),
+            showAnswerBtn: document.getElementById('showAnswerBtn'),
+            finalLeaderboard: document.getElementById('finalLeaderboard'),
+            podium: document.getElementById('podium'),
+            restartBtn: document.getElementById('restartBtn')
+        };
+
+        // === INIZIALIZZAZIONE ===
+        function initGame() {
+            gameCode = 'SHOW' + Math.floor(1000 + Math.random() * 9000);
+            elements.gameCode.textContent = gameCode;
+            
+            playerScores = {};
+            
+            console.log('🎮 Host Game Show creato con codice:', gameCode);
+            
+            database.ref('games/' + gameCode).set({
+                status: 'waiting',
+                host: true,
+                createdAt: Date.now(),
+                version: 'Game-Show-2.0'
+            });
+
+            database.ref('games/' + gameCode + '/players').on('value', (snapshot) => {
+                const players = snapshot.val() || {};
+                connectedPlayers = Object.values(players);
+                
+                connectedPlayers.forEach(player => {
+                    if (!playerScores[player.name]) {
+                        playerScores[player.name] = {
+                            total: 0,
+                            correctAnswers: 0,
+                            speedBonuses: 0
+                        };
+                    }
+                });
+                
+                updatePlayerList();
+            });
+
+            database.ref('games/' + gameCode + '/answers').on('value', (snapshot) => {
+                const answers = snapshot.val() || {};
+                playerAnswers = Object.values(answers);
+                updateAnswersList();
+            });
+
+            // Auto-attiva audio dopo breve ritardo
+            setTimeout(() => {
+                audio.activateAudio();
+            }, 1000);
+        }
+
+        function updatePlayerList() {
+            elements.playerList.innerHTML = '';
+            
+            if (connectedPlayers.length === 0) {
+                elements.playerList.innerHTML = '<li class="player-item"><span class="player-icon">⏳</span><span class="player-name">Waiting for contestants...</span></li>';
+                elements.startBtn.disabled = true;
+            } else {
+                connectedPlayers.forEach((player, index) => {
+                    const li = document.createElement('li');
+                    li.className = 'player-item';
+                    li.innerHTML = `<span class="player-icon">${index + 1}</span><span class="player-name">${player.name}</span>`;
+                    elements.playerList.appendChild(li);
+                });
+                elements.startBtn.disabled = false;
+            }
+        }
+
+        function checkAllPlayersAnswered() {
+            const currentQuestionAnswers = playerAnswers.filter(a => a.questionIndex === currentQuestion);
+            return currentQuestionAnswers.length >= connectedPlayers.length && connectedPlayers.length > 0;
+        }
+
+        function updateAnswersProgress() {
+            const currentAnswers = playerAnswers.filter(a => a.questionIndex === currentQuestion);
+            const progress = connectedPlayers.length > 0 ? (currentAnswers.length / connectedPlayers.length) * 100 : 0;
+            
+            elements.answersProgress.textContent = `${currentAnswers.length}/${connectedPlayers.length}`;
+            elements.progressFill.style.width = progress + '%';
+            
+            elements.skipTimerBtn.disabled = currentAnswers.length === 0;
+            elements.showAnswerBtn.disabled = currentAnswers.length === 0;
+        }
+
+        function calculatePoints(answer, question) {
+            let points = 0;
+            let speedBonus = 0;
+            
+            if (answer.answerIndex === question.correct) {
+                points += question.points || 10;
+                
+                if (answer.answerTime <= 5) {
+                    speedBonus = 6 - answer.answerTime;
+                    points += speedBonus;
+                }
+            }
+            
+            return { points, speedBonus };
+        }
+
+        function updateAnswersList() {
+            elements.answersList.innerHTML = '';
+            
+            if (playerAnswers.length === 0) {
+                elements.answersList.innerHTML = '<li class="player-item"><span class="player-icon">⏳</span><span class="player-name">Waiting for responses...</span></li>';
+            } else {
+                const currentAnswers = playerAnswers.filter(a => a.questionIndex === currentQuestion);
+                
+                if (!answersRevealed) {
+                    currentAnswers.forEach(answer => {
+                        const li = document.createElement('li');
+                        li.className = 'player-item';
+                        li.innerHTML = `<span class="player-icon">🎯</span><span class="player-name">${answer.playerName}: Response submitted</span>`;
+                        elements.answersList.appendChild(li);
+                    });
+                    
+                    if (currentAnswers.length > 0) {
+                        const summary = document.createElement('li');
+                        summary.className = 'player-item';
+                        summary.style.background = 'rgba(255, 215, 0, 0.2)';
+                        summary.innerHTML = `<span class="player-icon">📊</span><span class="player-name">${currentAnswers.length}/${connectedPlayers.length} contestants responded</span>`;
+                        elements.answersList.appendChild(summary);
+                    }
+                } else {
+                    const question = questions[currentQuestion];
+                    currentAnswers.forEach(answer => {
+                        const pointsData = calculatePoints(answer, question);
+                        
+                        const li = document.createElement('li');
+                        li.className = 'player-item';
+                        
+                        const isCorrect = answer.answerIndex === question.correct;
+                        const icon = isCorrect ? '🏆' : '❌';
+                        
+                        let pointsText = '';
+                        if (isCorrect) {
+                            pointsText = ` (+${pointsData.points}${pointsData.speedBonus > 0 ? ` ⚡+${pointsData.speedBonus}` : ''})`;
+                            
+                            if (!playerScores[answer.playerName]) {
+                                playerScores[answer.playerName] = { total: 0, correctAnswers: 0, speedBonuses: 0 };
+                            }
+                            playerScores[answer.playerName].total += pointsData.points;
+                            playerScores[answer.playerName].correctAnswers += 1;
+                            if (pointsData.speedBonus > 0) {
+                                playerScores[answer.playerName].speedBonuses += pointsData.speedBonus;
+                            }
+                        }
+                        
+                        li.innerHTML = `<span class="player-icon">${icon}</span><span class="player-name">${answer.playerName}: Option ${answer.answerIndex + 1}${pointsText}</span>`;
+                        elements.answersList.appendChild(li);
+                    });
+                }
+                
+                updateAnswersProgress();
+                
+                if (checkAllPlayersAnswered() && timeLeft > 0 && !answersRevealed) {
+                    clearInterval(timer);
+                    showCorrectAnswer();
+                    elements.nextBtn.disabled = false;
+                    elements.nextBtn.innerHTML = '<span>➡️</span> NEXT QUESTION';
+                    elements.timer.textContent = "🎉 ALL RESPONSES IN!";
+                }
+            }
+        }
+
+        function startGame() {
+            audio.playSFX('startSound');
+            audio.playMusic('gameMusic');
+            
+            elements.lobbyScreen.classList.add('hidden');
+            setTimeout(() => {
+                elements.gameScreen.classList.remove('hidden');
+            }, 300);
+            
+            database.ref('games/' + gameCode).update({
+                status: 'started',
+                currentQuestion: 0
+            });
+
+            setTimeout(() => {
+                loadQuestion(0);
+            }, 500);
+        }
+
+        function loadQuestion(index) {
+            if (index >= questions.length) {
+                endGame();
+                return;
+            }
+
+            currentQuestion = index;
+            const question = questions[index];
+            
+            playerAnswers = [];
+            answersRevealed = false;
+            
+            console.log(`🔄 Caricando domanda ${index + 1}`);
+            
+            elements.questionCounter.textContent = `QUESTION ${index + 1}/${questions.length}`;
+            elements.questionText.textContent = question.question;
+            
+            elements.answersGrid.innerHTML = '';
+            database.ref('games/' + gameCode + '/answers').remove();
             
             updateAnswersProgress();
             
-            if (checkAllPlayersAnswered() && timeLeft > 0 && !answersRevealed) {
-                clearInterval(timer);
-                showCorrectAnswer();
-                elements.nextBtn.disabled = false;
-                elements.nextBtn.innerHTML = '<span>➡️</span> NEXT QUESTION';
-                elements.timer.textContent = "🎉 ALL RESPONSES IN!";
-            }
-        }
-    }
-
-    function startGame() {
-        audio.playSFX('startSound');
-        audio.playMusic('gameMusic');
-        
-        elements.lobbyScreen.classList.add('hidden');
-        setTimeout(() => {
-            elements.gameScreen.classList.remove('hidden');
-        }, 300);
-        
-        database.ref('games/' + gameCode).update({
-            status: 'started',
-            currentQuestion: 0
-        });
-
-        setTimeout(() => {
-            loadQuestion(0);
-        }, 500);
-    }
-
-    function loadQuestion(index) {
-        if (index >= questions.length) {
-            endGame();
-            return;
+            question.answers.forEach((answer, i) => {
+                const div = document.createElement('div');
+                div.className = 'answer-option';
+                div.textContent = answer;
+                elements.answersGrid.appendChild(div);
+            });
+            
+            database.ref('games/' + gameCode).update({
+                currentQuestion: index,
+                currentQuestionData: question
+            });
+            
+            startTimer();
         }
 
-        currentQuestion = index;
-        const question = questions[index];
-        
-        playerAnswers = [];
-        answersRevealed = false;
-        
-        console.log(`🔄 Caricando domanda ${index + 1}`);
-        
-        elements.questionCounter.textContent = `QUESTION ${index + 1}/${questions.length}`;
-        elements.questionText.textContent = question.question;
-        
-        elements.answersGrid.innerHTML = '';
-        database.ref('games/' + gameCode + '/answers').remove();
-        
-        updateAnswersProgress();
-        
-        question.answers.forEach((answer, i) => {
-            const div = document.createElement('div');
-            div.className = 'answer-option';
-            div.textContent = answer;
-            elements.answersGrid.appendChild(div);
-        });
-        
-        database.ref('games/' + gameCode).update({
-            currentQuestion: index,
-            currentQuestionData: question
-        });
-        
-        startTimer();
-    }
-
-    function startTimer() {
-        timeLeft = 20; // ⏰ RIDOTTO DA 30 A 20 SECONDI
-        elements.timer.textContent = timeLeft;
-        elements.timer.classList.remove('warning');
-        elements.nextBtn.disabled = true;
-        elements.nextBtn.innerHTML = '<span>⏳</span> WAITING...';
-        
-        clearInterval(timer);
-        timer = setInterval(() => {
-            timeLeft--;
+        function startTimer() {
+            timeLeft = 20;
             elements.timer.textContent = timeLeft;
+            elements.timer.classList.remove('warning');
+            elements.nextBtn.disabled = true;
+            elements.nextBtn.innerHTML = '<span>⏳</span> WAITING...';
             
-            if (timeLeft <= 5) {
-                elements.timer.classList.add('warning');
-                if (timeLeft === 3 || timeLeft === 2 || timeLeft === 1) {
-                    audio.playSFX('timerSound');
-                }
-            }
-            
-            if (checkAllPlayersAnswered() && timeLeft > 0 && !answersRevealed) {
-                console.log('⏰ Timer fermato - tutti hanno risposto');
-                clearInterval(timer);
-                showCorrectAnswer();
-                elements.nextBtn.disabled = false;
-                elements.nextBtn.innerHTML = '<span>➡️</span> NEXT QUESTION';
-                elements.timer.textContent = "🎉 ALL RESPONSES IN!";
-                return;
-            }
-            
-            if (timeLeft <= 0) {
-                clearInterval(timer);
-                showCorrectAnswer();
-                elements.nextBtn.disabled = false;
-                elements.nextBtn.innerHTML = '<span>➡️</span> NEXT QUESTION';
-            }
-        }, 1000);
-    }
-
-    // 🎯 FUNZIONE PER RIVELARE RISPOSTE AI PLAYER
-    function revealAnswersToPlayers() {
-        console.log('🎯 Rivelando risposte a tutti i player...');
-        
-        // Comunica a tutti i player che le risposte sono state rivelate
-        database.ref('games/' + gameCode).update({
-            answersRevealed: true,
-            currentQuestion: currentQuestion
-        });
-    }
-
-    function showCorrectAnswer() {
-        const question = questions[currentQuestion];
-        const answerElements = elements.answersGrid.querySelectorAll('.answer-option');
-        answerElements[question.correct].classList.add('correct');
-        
-        audio.playSFX('correctSound');
-        
-        answersRevealed = true;
-        updateAnswersList();
-        
-        // 🎯 COMUNICA AI PLAYER DI MOSTRARE I RISULTATI
-        revealAnswersToPlayers();
-        
-        // 🚀 ABILITA IL PULSANTE NEXT - L'HOST DECIDE QUANDO PROCEDERE
-        elements.nextBtn.disabled = false;
-        elements.nextBtn.innerHTML = '<span>➡️</span> NEXT QUESTION';
-    }
-
-    // 🎯 FUNZIONE PER MOSTRARE RISPOSTE MANUALMENTE
-    function showAnswerManually() {
-        if (!answersRevealed) {
             clearInterval(timer);
-            showCorrectAnswer();
-            elements.timer.textContent = "⏹️ STOPPED";
+            timer = setInterval(() => {
+                timeLeft--;
+                elements.timer.textContent = timeLeft;
+                
+                if (timeLeft <= 5) {
+                    elements.timer.classList.add('warning');
+                    if (timeLeft === 3 || timeLeft === 2 || timeLeft === 1) {
+                        audio.playSFX('timerSound');
+                    }
+                }
+                
+                if (checkAllPlayersAnswered() && timeLeft > 0 && !answersRevealed) {
+                    console.log('⏰ Timer fermato - tutti hanno risposto');
+                    clearInterval(timer);
+                    showCorrectAnswer();
+                    elements.nextBtn.disabled = false;
+                    elements.nextBtn.innerHTML = '<span>➡️</span> NEXT QUESTION';
+                    elements.timer.textContent = "🎉 ALL RESPONSES IN!";
+                    return;
+                }
+                
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    showCorrectAnswer();
+                    elements.nextBtn.disabled = false;
+                    elements.nextBtn.innerHTML = '<span>➡️</span> NEXT QUESTION';
+                }
+            }, 1000);
         }
-    }
 
-    function nextQuestion() {
-        // 🎯 RIMUOVI LO STATO DI RISPOSTE RIVELATE PRIMA DI PROCEDERE
-        database.ref('games/' + gameCode + '/answersRevealed').remove();
-        
-        audio.playSFX('transitionSound');
-        answersRevealed = false;
-        loadQuestion(currentQuestion + 1);
-    }
-
-    function showLeaderboard() {
-        audio.playMusic('victoryMusic');
-        
-        elements.gameScreen.classList.add('hidden');
-        setTimeout(() => {
-            elements.leaderboardScreen.classList.remove('hidden');
-        }, 300);
-        
-        const sortedPlayers = Object.entries(playerScores)
-            .sort(([,a], [,b]) => b.total - a.total)
-            .map(([name, data], index) => ({
-                name,
-                score: data.total,
-                correctAnswers: data.correctAnswers,
-                speedBonuses: data.speedBonuses,
-                rank: index + 1
-            }));
-        
-        database.ref('games/' + gameCode).update({
-            leaderboard: sortedPlayers,
-            status: 'ended'
-        });
-        
-        elements.podium.innerHTML = '';
-        const top3 = sortedPlayers.slice(0, 3);
-        
-        top3.forEach((player, index) => {
-            const podiumItem = document.createElement('div');
-            podiumItem.className = `podium-item podium-${index + 1}`;
-            podiumItem.innerHTML = `
-                <div style="font-size: 3rem; margin-bottom: 15px;">${getMedalIcon(index + 1)}</div>
-                <div style="font-weight: bold; font-size: 1.5rem; margin-bottom: 10px;">${player.name}</div>
-                <div style="font-size: 2rem; font-weight: 800; margin-bottom: 5px;">${player.score}p</div>
-                ${player.speedBonuses > 0 ? `<div style="font-size: 1rem; opacity: 0.9;">⚡ ${player.speedBonuses}p bonus</div>` : ''}
-            `;
-            elements.podium.appendChild(podiumItem);
-        });
-        
-        elements.finalLeaderboard.innerHTML = '';
-        sortedPlayers.forEach((player, index) => {
-            const li = document.createElement('li');
-            li.className = 'player-item';
-            li.innerHTML = `
-                <span class="player-icon">${getMedalIcon(player.rank)}</span>
-                <span class="player-name">${player.name}</span>
-                <span style="font-weight: 700; color: var(--accent-gold); font-size: 1.3rem;">${player.score}p</span>
-            `;
-            elements.finalLeaderboard.appendChild(li);
-        });
-    }
-
-    function getMedalIcon(rank) {
-        switch(rank) {
-            case 1: return '🥇';
-            case 2: return '🥈';
-            case 3: return '🥉';
-            default: return '⭐';
+        // 🎯 FUNZIONE PER RIVELARE RISPOSTE AI PLAYER
+        function revealAnswersToPlayers() {
+            console.log('🎯 Rivelando risposte a tutti i player...');
+            
+            // Comunica a tutti i player che le risposte sono state rivelate
+            database.ref('games/' + gameCode).update({
+                answersRevealed: true,
+                currentQuestion: currentQuestion
+            });
         }
-    }
 
-    function endGame() {
-        playerAnswers.forEach(answer => {
-            if (answer.questionIndex !== undefined) {
-                const question = questions[answer.questionIndex];
-                if (question) {
-                    const pointsData = calculatePoints(answer, question);
-                    if (pointsData.points > 0) {
-                        if (!playerScores[answer.playerName]) {
-                            playerScores[answer.playerName] = { total: 0, correctAnswers: 0, speedBonuses: 0 };
-                        }
-                        playerScores[answer.playerName].total += pointsData.points;
-                        playerScores[answer.playerName].correctAnswers += 1;
-                        if (pointsData.speedBonus > 0) {
-                            playerScores[answer.playerName].speedBonuses += pointsData.speedBonus;
+        function showCorrectAnswer() {
+            const question = questions[currentQuestion];
+            const answerElements = elements.answersGrid.querySelectorAll('.answer-option');
+            answerElements[question.correct].classList.add('correct');
+            
+            audio.playSFX('correctSound');
+            
+            answersRevealed = true;
+            updateAnswersList();
+            
+            // 🎯 COMUNICA AI PLAYER DI MOSTRARE I RISULTATI
+            revealAnswersToPlayers();
+            
+            // 🚀 ABILITA IL PULSANTE NEXT - L'HOST DECIDE QUANDO PROCEDERE
+            elements.nextBtn.disabled = false;
+            elements.nextBtn.innerHTML = '<span>➡️</span> NEXT QUESTION';
+        }
+
+        // 🎯 FUNZIONE PER MOSTRARE RISPOSTE MANUALMENTE
+        function showAnswerManually() {
+            if (!answersRevealed) {
+                clearInterval(timer);
+                showCorrectAnswer();
+                elements.timer.textContent = "⏹️ STOPPED";
+            }
+        }
+
+        function nextQuestion() {
+            // 🎯 RIMUOVI LO STATO DI RISPOSTE RIVELATE PRIMA DI PROCEDERE
+            database.ref('games/' + gameCode + '/answersRevealed').remove();
+            
+            audio.playSFX('transitionSound');
+            answersRevealed = false;
+            loadQuestion(currentQuestion + 1);
+        }
+
+        function showLeaderboard() {
+            audio.playMusic('victoryMusic');
+            
+            elements.gameScreen.classList.add('hidden');
+            setTimeout(() => {
+                elements.leaderboardScreen.classList.remove('hidden');
+            }, 300);
+            
+            const sortedPlayers = Object.entries(playerScores)
+                .sort(([,a], [,b]) => b.total - a.total)
+                .map(([name, data], index) => ({
+                    name,
+                    score: data.total,
+                    correctAnswers: data.correctAnswers,
+                    speedBonuses: data.speedBonuses,
+                    rank: index + 1
+                }));
+            
+            database.ref('games/' + gameCode).update({
+                leaderboard: sortedPlayers,
+                status: 'ended'
+            });
+            
+            elements.podium.innerHTML = '';
+            const top3 = sortedPlayers.slice(0, 3);
+            
+            top3.forEach((player, index) => {
+                const podiumItem = document.createElement('div');
+                podiumItem.className = `podium-item podium-${index + 1}`;
+                podiumItem.innerHTML = `
+                    <div style="font-size: 3rem; margin-bottom: 15px;">${getMedalIcon(index + 1)}</div>
+                    <div style="font-weight: bold; font-size: 1.5rem; margin-bottom: 10px;">${player.name}</div>
+                    <div style="font-size: 2rem; font-weight: 800; margin-bottom: 5px;">${player.score}p</div>
+                    ${player.speedBonuses > 0 ? `<div style="font-size: 1rem; opacity: 0.9;">⚡ ${player.speedBonuses}p bonus</div>` : ''}
+                `;
+                elements.podium.appendChild(podiumItem);
+            });
+            
+            elements.finalLeaderboard.innerHTML = '';
+            sortedPlayers.forEach((player, index) => {
+                const li = document.createElement('li');
+                li.className = 'player-item';
+                li.innerHTML = `
+                    <span class="player-icon">${getMedalIcon(player.rank)}</span>
+                    <span class="player-name">${player.name}</span>
+                    <span style="font-weight: 700; color: var(--accent-gold); font-size: 1.3rem;">${player.score}p</span>
+                `;
+                elements.finalLeaderboard.appendChild(li);
+            });
+        }
+
+        function getMedalIcon(rank) {
+            switch(rank) {
+                case 1: return '🥇';
+                case 2: return '🥈';
+                case 3: return '🥉';
+                default: return '⭐';
+            }
+        }
+
+        function endGame() {
+            playerAnswers.forEach(answer => {
+                if (answer.questionIndex !== undefined) {
+                    const question = questions[answer.questionIndex];
+                    if (question) {
+                        const pointsData = calculatePoints(answer, question);
+                        if (pointsData.points > 0) {
+                            if (!playerScores[answer.playerName]) {
+                                playerScores[answer.playerName] = { total: 0, correctAnswers: 0, speedBonuses: 0 };
+                            }
+                            playerScores[answer.playerName].total += pointsData.points;
+                            playerScores[answer.playerName].correctAnswers += 1;
+                            if (pointsData.speedBonus > 0) {
+                                playerScores[answer.playerName].speedBonuses += pointsData.speedBonus;
+                            }
                         }
                     }
                 }
-            }
+            });
+            
+            showLeaderboard();
+        }
+
+        // === EVENT LISTENERS ===
+        elements.startBtn.addEventListener('click', function() {
+            audio.playSFX('clickSound');
+            startGame();
         });
         
-        showLeaderboard();
-    }
+        elements.nextBtn.addEventListener('click', function() {
+            audio.playSFX('clickSound');
+            nextQuestion();
+        });
 
-    // === EVENT LISTENERS ===
-    elements.startBtn.addEventListener('click', function() {
-        audio.playSFX('clickSound');
-        startGame();
-    });
-    
-    elements.nextBtn.addEventListener('click', function() {
-        audio.playSFX('clickSound');
-        nextQuestion();
-    });
+        elements.skipTimerBtn.addEventListener('click', function() {
+            audio.playSFX('clickSound');
+            clearInterval(timer);
+            showCorrectAnswer();
+            elements.nextBtn.disabled = false;
+            elements.nextBtn.innerHTML = '<span>➡️</span> NEXT QUESTION';
+            elements.timer.textContent = "⏩ TIMER SKIPPED";
+        });
 
-    elements.skipTimerBtn.addEventListener('click', function() {
-        audio.playSFX('clickSound');
-        clearInterval(timer);
-        showCorrectAnswer();
-        elements.nextBtn.disabled = false;
-        elements.nextBtn.innerHTML = '<span>➡️</span> NEXT QUESTION';
-        elements.timer.textContent = "⏩ TIMER SKIPPED";
-    });
+        elements.showAnswerBtn.addEventListener('click', function() {
+            audio.playSFX('clickSound');
+            showAnswerManually();
+        });
 
-    elements.showAnswerBtn.addEventListener('click', function() {
-        audio.playSFX('clickSound');
-        showAnswerManually();
-    });
+        elements.restartBtn.addEventListener('click', function() {
+            audio.playSFX('clickSound');
+            location.reload();
+        });
 
-    elements.restartBtn.addEventListener('click', function() {
-        audio.playSFX('clickSound');
-        location.reload();
-    });
+        document.getElementById('musicToggle').addEventListener('click', function() {
+            audio.playSFX('clickSound');
+            audio.toggleMusic();
+        });
+        
+        document.getElementById('sfxToggle').addEventListener('click', function() {
+            audio.toggleSFX();
+        });
 
-    document.getElementById('musicToggle').addEventListener('click', function() {
-        audio.playSFX('clickSound');
-        audio.toggleMusic();
-    });
-    
-    document.getElementById('sfxToggle').addEventListener('click', function() {
-        audio.toggleSFX();
-    });
+        document.getElementById('activateAudio').addEventListener('click', function() {
+            console.log('🎵 Pulsante Attiva Audio cliccato');
+            audio.activateAudio();
+        });
 
-    document.getElementById('activateAudio').addEventListener('click', function() {
-        console.log('🎵 Pulsante Attiva Audio cliccato');
-        audio.activateAudio();
-    });
-
-    // === AVVIA IL GIOCO ===
-    initGame();
-    
-    setTimeout(() => {
-        console.log('🔄 HOST Game Show Edition attivo');
-        document.title = "Pigiama Party - Game Master";
-    }, 100);
-</script>
+        // === AVVIA IL GIOCO ===
+        initGame();
+        
+        setTimeout(() => {
+            console.log('🔄 HOST Game Show Edition attivo');
+            document.title = "Pigiama Party - Game Master";
+        }, 100);
+    </script>
 </body>
 </html>
-
-
