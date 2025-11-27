@@ -986,7 +986,7 @@
         // === VARIABILI DI STATO ===
         let gameCode = '';
         let playerName = '';
-        let currentQuestionIndex = 0;
+        let currentQuestionIndex = -1;
         let selectedAnswer = null;
         let timeLeft = 30;
         let timer;
@@ -1053,15 +1053,7 @@
                 joinedAt: Date.now()
             });
 
-            // Ascolta quando l'host rivela le risposte
-            database.ref('games/' + gameCode + '/answersRevealed').on('value', (snapshot) => {
-                const answersRevealed = snapshot.val();
-                if (answersRevealed && currentQuestionData) {
-                    console.log('🎯 Risposte rivelate! Mostrando risultato...');
-                    showQuestionResult();
-                }
-            });
-
+            // ASCOLTA LO STATO DEL GIOCO PRINCIPALE
             database.ref('games/' + gameCode).on('value', (snapshot) => {
                 const game = snapshot.val();
                 if (!game) {
@@ -1070,17 +1062,28 @@
                 }
 
                 if (game.status === 'started') {
-                    currentQuestionIndex = game.currentQuestion || 0;
-                    console.log(`🎮 Player: Game started, question ${currentQuestionIndex + 1}`);
-                    showQuestionScreen();
+                    // SOLO SE È UNA NUOVA DOMANDA
+                    if (game.currentQuestion !== currentQuestionIndex) {
+                        currentQuestionIndex = game.currentQuestion || 0;
+                        console.log(`🎮 Player: Nuova domanda ${currentQuestionIndex + 1}`);
+                        selectedAnswer = null; // RESET RISPOSTA
+                        showQuestionScreen();
+                    }
                 } else if (game.status === 'ended') {
                     showLeaderboard(game.leaderboard || []);
                 }
+                
+                // CONTROLLA SE L'HOST HA RIVELATO LE RISPOSTE
+                if (game.answersRevealed && game.currentQuestion === currentQuestionIndex) {
+                    console.log('🎯 Host ha rivelato le risposte! Mostrando risultato...');
+                    showQuestionResult();
+                }
             });
 
+            // ASCOLTA LE DOMANDE
             database.ref('games/' + gameCode + '/currentQuestionData').on('value', (snapshot) => {
                 const question = snapshot.val();
-                if (question) {
+                if (question && question.currentQuestion !== currentQuestionIndex) {
                     currentQuestionData = question;
                     showQuestion(question);
                 }
@@ -1106,7 +1109,7 @@
             currentQuestionIndex = question.currentQuestion || currentQuestionIndex;
             currentQuestionData = question;
             
-            console.log(`📝 Player: Showing question ${currentQuestionIndex + 1}`, question);
+            console.log(`📝 Player: Mostrando domanda ${currentQuestionIndex + 1}`, question);
             
             selectedAnswer = null;
             elements.submitBtn.disabled = true;
@@ -1192,19 +1195,24 @@
             }, 1000);
         }
 
-        // === NUOVA FUNZIONE: MOSTRA RISULTATO DOMANDA ===
+        // === FUNZIONE: MOSTRA RISULTATO DOMANDA ===
         function showQuestionResult() {
-            if (!currentQuestionData || selectedAnswer === null) return;
+            if (!currentQuestionData || selectedAnswer === null) {
+                console.log('❌ Dati mancanti per mostrare il risultato');
+                return;
+            }
             
             const isCorrect = selectedAnswer === currentQuestionData.correct;
-            const answerTime = 30 - timeLeft;
+            const answerTime = 30 - (timeLeft > 0 ? timeLeft : 0);
             const basePoints = currentQuestionData.points || 10;
             const speedBonus = (answerTime <= 5) ? (6 - answerTime) : 0;
             const totalPoints = isCorrect ? (basePoints + speedBonus) : 0;
             
             console.log(`🎯 Risultato: ${isCorrect ? 'CORRETTO' : 'SBAGLIATO'}, Punti: ${totalPoints}`);
             
-            // Prepara il contenuto del risultato
+            // FERMA IL TIMER SE È ANCORA ATTIVO
+            clearInterval(timer);
+            
             let resultHTML = '';
             
             if (isCorrect) {
@@ -1219,7 +1227,7 @@
                 `;
                 elements.resultCard.className = 'tv-card correct-result';
                 
-                // Effetti per risposta corretta
+                // EFFETTI PER RISPOSTA CORRETTA
                 audio.playSFX('applauseSound');
                 createConfetti();
                 
@@ -1234,14 +1242,14 @@
                 `;
                 elements.resultCard.className = 'tv-card wrong-result';
                 
-                // Effetti per risposta sbagliata
+                // EFFETTI PER RISPOSTA SBAGLIATA
                 audio.playSFX('fartSound');
             }
             
             elements.resultContainer.innerHTML = resultHTML;
             showScreen('questionResultScreen');
             
-            // Passa alla prossima domanda dopo 3 secondi
+            // TORNA ALLA SCHERMATA DI ATTESA DOPO 3 SECONDI
             setTimeout(() => {
                 showScreen('waitingScreen');
             }, 3000);
