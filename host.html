@@ -80,6 +80,7 @@
         }
 
         .scanlines {
+    display: none !important;
             position: absolute;
             top: 0;
             left: 0;
@@ -95,25 +96,14 @@
             animation: scanlines 0.1s linear infinite;
         }
 
-        .light-beams {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: 
-                radial-gradient(circle at 20% 80%, rgba(255, 215, 0, 0.3) 0%, transparent 50%),
-                radial-gradient(circle at 80% 20%, rgba(0, 180, 219, 0.3) 0%, transparent 50%),
-                radial-gradient(circle at 40% 40%, rgba(138, 43, 226, 0.2) 0%, transparent 50%);
-            animation: lightMove 8s ease-in-out infinite;
-        }
+.light-beams {
+    opacity: 0.1 !important;
+    animation: none !important;
+}
 
-        .particles {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-        }
+.particles {
+    display: none !important;
+}
 
         .particle {
             position: absolute;
@@ -1256,7 +1246,11 @@
 
     <script>
         // === CREA PARTICELLE ANIMATE ===
-        function createParticles() {
+        // RIGA ~1300 - SOSTITUISCI CON:
+function createParticles() {
+    console.log('🎮 Particelle disabilitate per performance');
+    return; // NON CREA NULLA
+}
             const container = document.getElementById('particlesContainer');
             const particleCount = 15;
             
@@ -2564,49 +2558,89 @@ if (!document.getElementById('tv-optimization-css')) {
     style.textContent = tvOptimizationCSS;
     document.head.appendChild(style);
 }
-        function initGame() {
-            gameCode = 'SHOW' + Math.floor(1000 + Math.random() * 9000);
-            elements.gameCode.textContent = gameCode;
-            
-            playerScores = {};
-            
-            console.log('🎮 Host Game Show creato con codice:', gameCode);
-            
-            database.ref('games/' + gameCode).set({
-                status: 'waiting',
-                host: true,
-                createdAt: Date.now(),
-                version: 'Game-Show-2.0'
-            });
-
-            database.ref('games/' + gameCode + '/players').on('value', (snapshot) => {
-                const players = snapshot.val() || {};
-                connectedPlayers = Object.values(players);
-                
-                connectedPlayers.forEach(player => {
-                    if (!playerScores[player.name]) {
-                        playerScores[player.name] = {
-                            total: 0,
-                            correctAnswers: 0,
-                            speedBonuses: 0
-                        };
-                    }
-                });
-                
-                updatePlayerList();
-            });
-
-            database.ref('games/' + gameCode + '/answers').on('value', (snapshot) => {
-                const answers = snapshot.val() || {};
-                playerAnswers = Object.values(answers);
-                updateAnswersList();
-            });
-
-            // Auto-attiva audio dopo breve ritardo
+        
+        // AGGIUNGI PRIMA DI initGame (riga ~1990):
+function preloadCriticalAssets() {
+    console.log('🔧 Preload assets critici...');
+    
+    // Preload solo primi 3 media
+    const preloadQuestions = questions.slice(0, 3);
+    preloadQuestions.forEach((q, index) => {
+        if (q.media && q.media !== "") {
             setTimeout(() => {
-                audio.activateAudio();
-            }, 1000);
+                const link = document.createElement('link');
+                link.rel = 'preload';
+                if (q.media.includes('.mp4')) {
+                    link.as = 'video';
+                } else if (q.media.includes('.mp3') || q.media.includes('.wav')) {
+                    link.as = 'audio'; 
+                } else {
+                    link.as = 'image';
+                }
+                link.href = q.media;
+                document.head.appendChild(link);
+                console.log(`🔧 Preload: ${q.media}`);
+            }, index * 500); // Spread nel tempo
         }
+    });
+}
+
+// MODIFICA L'INIZIO DELLO SCRIPT (riga ~1995):
+// Sposta tutto dopo DOMContentLoaded
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🚀 DOM pronto - avvio ottimizzato');
+    preloadCriticalAssets();
+    setTimeout(initGame, 800);
+});
+        
+// RIGA ~2000 - SOSTITUISCI initGame COMPLETAMENTE:
+function initGame() {
+    console.log('🎮 Avvio ottimizzato con tutte le domande');
+    
+    // DISABILITA EFFETTI VISIVI PESANTI
+    document.getElementById('particlesContainer').style.display = 'none';
+    
+    gameCode = 'SHOW' + Math.floor(1000 + Math.random() * 9000);
+    elements.gameCode.textContent = gameCode;
+    
+    playerScores = {};
+    
+    console.log('🎮 Host Game Show creato con codice:', gameCode);
+    
+    database.ref('games/' + gameCode).set({
+        status: 'waiting',
+        host: true,
+        createdAt: Date.now(),
+        version: 'Game-Show-2.0'
+    });
+
+    // OTTIMIZZAZIONE FIREBASE - RIDUCI FREQUENZA AGGIORNAMENTI
+    let playerUpdateTimeout;
+    database.ref('games/' + gameCode + '/players').on('value', (snapshot) => {
+        clearTimeout(playerUpdateTimeout);
+        playerUpdateTimeout = setTimeout(() => {
+            const players = snapshot.val() || {};
+            connectedPlayers = Object.values(players);
+            updatePlayerList();
+        }, 300); // Aggiorna ogni 300ms max
+    });
+
+    // OTTIMIZZAZIONE RISPOSTE - ANCORA PIÙ LENTO
+    let answerUpdateTimeout; 
+    database.ref('games/' + gameCode + '/answers').on('value', (snapshot) => {
+        clearTimeout(answerUpdateTimeout);
+        answerUpdateTimeout = setTimeout(() => {
+            const answers = snapshot.val() || {};
+            playerAnswers = Object.values(answers);
+            updateAnswersList();
+        }, 500); // Aggiorna ogni 500ms max
+    });
+
+    // Auto-attiva audio
+    setTimeout(() => {
+        audio.activateAudio();
+    }, 1000);
+}
 
         function updatePlayerList() {
             elements.playerList.innerHTML = '';
@@ -2744,7 +2778,37 @@ function startGame() {
     }, 500);
 }
 
+        // CERCA cleanupQuestion E SOSTITUISCI CON:
+function cleanupQuestion() {
+    console.log('🧹 Pulizia memoria...');
+    
+    // Ferma timer
+    clearInterval(timer);
+    
+    // Pulisci media in modo aggressivo
+    const mediaContainer = document.getElementById('mediaContainer');
+    if (mediaContainer) {
+        const mediaElements = mediaContainer.querySelectorAll('audio, video, img');
+        mediaElements.forEach(media => {
+            if (media.pause) media.pause();
+            if (media.src) media.src = '';
+            if (media.load) media.load();
+        });
+        // Svuota ma mantieni l'elemento
+        mediaContainer.innerHTML = '';
+        mediaContainer.style.display = 'none';
+    }
+    
+    // Force garbage collection hint
+    if (window.gc) {
+        window.gc();
+    }
+}
+        
+// RIGA ~2150 - MODIFICA loadQuestion:
 function loadQuestion(index) {
+    cleanupQuestion();
+    
     if (index >= questions.length) {
         endGame();
         return;
@@ -2753,26 +2817,37 @@ function loadQuestion(index) {
     currentQuestion = index;
     const question = questions[index];
 
-    optimizeForTV();
-    
-    playerAnswers = [];
-    answersRevealed = false;
-    
-    console.log(`🔄 Caricando domanda ${index + 1}: ${question.question}`);
-    console.log(`📊 Tipo: ${question.type}, Media: ${question.media || 'nessuno'}`);
-    
+    // CARICAMENTO LAZY DEI MEDIA
+    setTimeout(() => {
+        if (question.media && question.media !== "") {
+            if (question.media.includes('.mp3') || question.media.includes('.wav') || question.media.includes('.mp4')) {
+                console.log('🎵 Caricamento lazy media:', question.media);
+                playMedia(question.media);
+            } else {
+                // Immagini - carica immediatamente
+                const mediaContainer = document.getElementById('mediaContainer');
+                mediaContainer.style.display = 'block';
+                mediaContainer.innerHTML = '';
+                
+                const imgElement = document.createElement('img');
+                imgElement.src = question.media;
+                imgElement.className = 'media-element';
+                imgElement.onerror = () => {
+                    mediaContainer.innerHTML = '<div style="color: var(--accent-red);">❌ Immagine non disponibile</div>';
+                };
+                mediaContainer.appendChild(imgElement);
+            }
+        }
+    }, 100);
+
     elements.questionCounter.textContent = `QUESTION ${index + 1}/${questions.length}`;
     elements.questionText.textContent = question.question;
     
-    // RESET TIMER ALL'INIZIO DI OGNI DOMANDA
+    // Reset UI
     elements.timer.textContent = getTimerDuration(question);
-    
-    // Reset media container
-    elements.mediaContainer.style.display = 'none';
-    elements.mediaContainer.innerHTML = '';
-    
-    // Reset answers grid
     elements.answersGrid.innerHTML = '';
+    
+    // Carica risposte
     question.answers.forEach((answer, i) => {
         const div = document.createElement('div');
         div.className = 'answer-option';
@@ -2780,8 +2855,8 @@ function loadQuestion(index) {
         elements.answersGrid.appendChild(div);
     });
     
+    // Reset Firebase
     database.ref('games/' + gameCode + '/answers').remove();
-    
     updateAnswersProgress();
     
     database.ref('games/' + gameCode).update({
@@ -2789,7 +2864,7 @@ function loadQuestion(index) {
         currentQuestionData: question
     });
     
-    // USA IL NUOVO SISTEMA TIMER DINAMICO
+    // Avvia timer
     startQuestion(question);
 }
 
@@ -3085,6 +3160,7 @@ document.getElementById('leaderboardToggle').addEventListener('click', function(
     </script>
 </body>
 </html>
+
 
 
 
