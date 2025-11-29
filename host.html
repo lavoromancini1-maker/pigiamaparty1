@@ -80,7 +80,6 @@
         }
 
         .scanlines {
-    display: none !important;
             position: absolute;
             top: 0;
             left: 0;
@@ -96,14 +95,25 @@
             animation: scanlines 0.1s linear infinite;
         }
 
-.light-beams {
-    opacity: 0.1 !important;
-    animation: none !important;
-}
+        .light-beams {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(255, 215, 0, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(0, 180, 219, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(138, 43, 226, 0.2) 0%, transparent 50%);
+            animation: lightMove 8s ease-in-out infinite;
+        }
 
-.particles {
-    display: none !important;
-}
+        .particles {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
 
         .particle {
             position: absolute;
@@ -1018,25 +1028,6 @@
             font-size: 0.8rem;
             font-weight: 500;
         }
-        /* === OTTIMIZZAZIONE SCHERMO TV - MINIMO INVASIVA === */
-.question-card {
-    padding: 30px 35px !important;
-    margin-bottom: 20px !important;
-}
-
-.tv-card {
-    padding: 30px 35px !important;
-    margin-bottom: 20px !important;
-}
-
-.question-text {
-    font-size: 2rem !important;
-    margin-bottom: 30px !important;
-}
-
-.timer-container {
-    margin: 25px 0 !important;
-}
     </style>
 </head>
 <body>
@@ -1182,7 +1173,12 @@
                     <span>📊</span>
                     CONTESTANT RESPONSES
                 </div>
-
+                <ul class="answers-list" id="answersList">
+                    <li class="player-item">
+                        <span class="player-icon">⏳</span>
+                        <span class="player-name">Waiting for responses...</span>
+                    </li>
+                </ul>
             </div>
         </div>
 
@@ -1245,12 +1241,31 @@
     </audio>
 
     <script>
-        
         // === CREA PARTICELLE ANIMATE ===
-function createParticles() {
-    console.log('🎮 Particelle disabilitate per performance');
-    return;
-}
+        function createParticles() {
+            const container = document.getElementById('particlesContainer');
+            const particleCount = 30;
+            
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                
+                const size = Math.random() * 4 + 1;
+                particle.style.width = size + 'px';
+                particle.style.height = size + 'px';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = Math.random() * 100 + '%';
+                
+                const colors = ['var(--accent-gold)', 'var(--accent-blue)', 'var(--accent-purple)', '#FF416C'];
+                particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+                
+                particle.style.animationDelay = Math.random() * 6 + 's';
+                particle.style.animationDuration = (Math.random() * 4 + 4) + 's';
+                
+                container.appendChild(particle);
+            }
+        }
+
         // === NUOVI EFFETTI VISIVI ===
         
         // 1. PARTICELLE DI CELEBRAZIONE
@@ -1394,111 +1409,121 @@ function createParticles() {
         
         // === SISTEMA AUDIO ===
         const audio = {
-    menuMusic: document.getElementById('menuMusic'),
-    gameMusic: document.getElementById('gameMusic'),
-    victoryMusic: document.getElementById('victoryMusic'),
-    
-    clickSound: document.getElementById('clickSound'),
-    correctSound: document.getElementById('correctSound'),
-    wrongSound: document.getElementById('wrongSound'),
-    transitionSound: document.getElementById('transitionSound'),
-    startSound: document.getElementById('startSound'),
-    
-    musicEnabled: false,
-    sfxEnabled: false,
-    audioActivated: false,
-    originalVolume: 0.3,
-    
-    async activateAudio() {
-        console.log('🎵 Attivazione audio...');
-        
-        try {
-            this.audioActivated = true;
-            this.musicEnabled = true;
-            this.sfxEnabled = true;
+            menuMusic: document.getElementById('menuMusic'),
+            gameMusic: document.getElementById('gameMusic'),
+            victoryMusic: document.getElementById('victoryMusic'),
             
-            document.getElementById('musicToggle').textContent = '🔊 Music';
-            document.getElementById('sfxToggle').textContent = '🔊 SFX';
+            clickSound: document.getElementById('clickSound'),
+            correctSound: document.getElementById('correctSound'),
+            wrongSound: document.getElementById('wrongSound'),
+            transitionSound: document.getElementById('transitionSound'),
+            timerSound: document.getElementById('timerSound'),
+            startSound: document.getElementById('startSound'),
             
-            const activationOverlay = document.getElementById('audioActivation');
-            activationOverlay.style.opacity = '0';
-            activationOverlay.style.transition = 'opacity 0.5s ease';
+            musicEnabled: false,
+            sfxEnabled: false,
+            audioActivated: false,
+            originalVolume: 0.3,
             
-            setTimeout(() => {
-                activationOverlay.style.display = 'none';
-            }, 500);
+            async activateAudio() {
+                console.log('🎵 Attivazione audio...');
+                
+                try {
+                    this.clickSound.volume = 0.01;
+                    await this.clickSound.play();
+                    this.clickSound.pause();
+                    this.clickSound.currentTime = 0;
+                    
+                    this.audioActivated = true;
+                    this.musicEnabled = true;
+                    this.sfxEnabled = true;
+                    
+                    document.getElementById('musicToggle').textContent = '🔊 Music';
+                    document.getElementById('sfxToggle').textContent = '🔊 SFX';
+                    
+                    const activationOverlay = document.getElementById('audioActivation');
+                    activationOverlay.style.opacity = '0';
+                    activationOverlay.style.transition = 'opacity 0.5s ease';
+                    
+                    setTimeout(() => {
+                        activationOverlay.style.display = 'none';
+                    }, 500);
+                    
+                    setTimeout(() => {
+                        this.playMusic('menuMusic');
+                    }, 100);
+                    
+                    console.log('🎵 Audio attivato!');
+                    
+                } catch (error) {
+                    console.error('❌ Errore attivazione audio:', error);
+                    this.audioActivated = true;
+                    this.musicEnabled = true;
+                    this.sfxEnabled = true;
+                }
+            },
             
-            console.log('🎵 Audio attivato!');
+            async playMusic(type) {
+                if (!this.musicEnabled || !this.audioActivated) return;
+                
+                try {
+                    this.stopAllMusic();
+                    const music = this[type];
+                    music.currentTime = 0;
+                    music.volume = 0.3;
+                    await music.play();
+                    console.log('🎵 Musica avviata:', type);
+                } catch (error) {
+                    console.error('❌ Errore musica:', error);
+                }
+            },
             
-        } catch (error) {
-            console.error('❌ Errore attivazione audio:', error);
-            this.audioActivated = true;
-            this.musicEnabled = true;
-            this.sfxEnabled = true;
-        }
-    },  // ✅ VIRGOLA
-    
-    async playMusic(type) {
-        if (!this.musicEnabled || !this.audioActivated) return;
-        
-        try {
-            this.stopAllMusic();
-            const music = this[type];
-            music.currentTime = 0;
-            music.volume = 0.3;
-            await music.play();
-            console.log('🎵 Musica avviata:', type);
-        } catch (error) {
-            console.error('❌ Errore musica:', error);
-        }
-    },  // ✅ VIRGOLA
-    
-    stopAllMusic() {
-        [this.menuMusic, this.gameMusic, this.victoryMusic].forEach(music => {
-            music.pause();
-            music.currentTime = 0;
-        });
-    },  // ✅ VIRGOLA AGGIUNTA QUI!
-    
-    async playSFX(type) {
-        if (!this.sfxEnabled || !this.audioActivated) return;
-        
-        try {
-            const sfx = this[type];
-            sfx.currentTime = 0;
-            sfx.volume = 0.6;
-            await sfx.play();
-            console.log('🔊 SFX:', type);
-        } catch (error) {
-            console.error('❌ Errore SFX:', error);
-        }
-    },  // ✅ VIRGOLA
-    
-    toggleMusic() {
-        if (!this.audioActivated) return;
-        this.musicEnabled = !this.musicEnabled;
-        document.getElementById('musicToggle').textContent = 
-            this.musicEnabled ? '🔊 Music' : '🔇 Music';
-        if (!this.musicEnabled) {
-            this.stopAllMusic();
-        } else {
-            if (document.getElementById('lobbyScreen').classList.contains('hidden') === false) {
-                this.playMusic('menuMusic');
-            } else if (document.getElementById('gameScreen').classList.contains('hidden') === false) {
-                this.playMusic('gameMusic');
-            } else if (document.getElementById('leaderboardScreen').classList.contains('hidden') === false) {
-                this.playMusic('victoryMusic');
+            stopAllMusic() {
+                [this.menuMusic, this.gameMusic, this.victoryMusic].forEach(music => {
+                    music.pause();
+                    music.currentTime = 0;
+                });
+            },
+            
+            async playSFX(type) {
+                if (!this.sfxEnabled || !this.audioActivated) return;
+                
+                try {
+                    const sfx = this[type];
+                    sfx.currentTime = 0;
+                    sfx.volume = 0.6;
+                    await sfx.play();
+                    console.log('🔊 SFX:', type);
+                } catch (error) {
+                    console.error('❌ Errore SFX:', error);
+                }
+            },
+            
+            toggleMusic() {
+                if (!this.audioActivated) return;
+                this.musicEnabled = !this.musicEnabled;
+                document.getElementById('musicToggle').textContent = 
+                    this.musicEnabled ? '🔊 Music' : '🔇 Music';
+                if (!this.musicEnabled) {
+                    this.stopAllMusic();
+                } else {
+                    if (document.getElementById('lobbyScreen').classList.contains('hidden') === false) {
+                        this.playMusic('menuMusic');
+                    } else if (document.getElementById('gameScreen').classList.contains('hidden') === false) {
+                        this.playMusic('gameMusic');
+                    } else if (document.getElementById('leaderboardScreen').classList.contains('hidden') === false) {
+                        this.playMusic('victoryMusic');
+                    }
+                }
+            },
+            
+            toggleSFX() {
+                if (!this.audioActivated) return;
+                this.sfxEnabled = !this.sfxEnabled;
+                document.getElementById('sfxToggle').textContent = 
+                    this.sfxEnabled ? '🔊 SFX' : '🔇 SFX';
             }
-        }
-    },  // ✅ VIRGOLA
-    
-    toggleSFX() {
-        if (!this.audioActivated) return;
-        this.sfxEnabled = !this.sfxEnabled;
-        document.getElementById('sfxToggle').textContent = 
-            this.sfxEnabled ? '🔊 SFX' : '🔇 SFX';
-    }  // ✅ NESSUNA VIRGOLA QUI (ultimo elemento)
-};
+        };
 
         // === CONFIGURA FIREBASE ===
         const firebaseConfig = {
@@ -1516,8 +1541,8 @@ function createParticles() {
         const database = firebase.database();
 
         // === DOMANDE DEL GIOCO ===
-const questions = [
-    {
+        const questions = [
+            {
         id: 1,
         question: "Questo filmato d'archivio mostra un momento cruciale di quale crisi internazionale?",
         answers: ["Crisi dei missili di Cuba", "Guerra del Vietnam", "Watergate", "Crisi di Suez"],
@@ -1573,7 +1598,7 @@ const questions = [
     },
     {
         id: 7,
-        question: "La citazione 'To Be or Not to Be' appartiene a quale opera teatrale shakespeariana?",
+        question: "La citazione "To Be or Not to Be" appartiene a quale opera teatrale shakespeariana?",
         answers: ["Amleto", "Macbeth", "Re Lear", "Otello"],
         correct: 0,
         points: 15,
@@ -1606,603 +1631,9 @@ const questions = [
         type: "audio",
         media: "audio/starnight.mp3"
     },
-        {
-        id: 11,
-        question: "Questo piatto tradizionale appartiene a quale regione italiana?",
-        answers: ["Veneto", "Sicilia", "Liguria", "Campania"],
-        correct: 0,
-        points: 15,
-        type: "image",
-        media: "images/sardesaor.jpg"
-    },
-    {
-        id: 12,
-        question: "Questo ingrediente 'segreto' è fondamentale in quale piatto internazionale?",
-        answers: ["Zuppa di miso", "Ramen", "Sushi", "Tempura"],
-        correct: 0,
-        points: 20,
-        type: "image",
-        media: "images/miso.jpg"
-    },
-     {
-        id: 13,
-        question: "🎵 Questa colonna sonora minimalista è di quale film di Wes Anderson?",
-        answers: ["Grand Budapest Hotel", "Moonrise Kingdom", "The Royal Tenenbaums", "The French Dispatch"],
-        correct: 0,
-        points: 15,
-        type: "audio",
-        media: "audio/hotelbu.mp3"
-    },
-    {
-        id: 14,
-        question: "🏛️ Questo oggetto personale apparteneva a quale figura storica controversa?",
-        answers: ["Winston Churchill", "Franklin D. Roosevelt", "Charles de Gaulle", "Joseph Stalin"],
-        correct: 0,
-        points: 20,
-        type: "image",
-        media: "images/glass.jpg"
-    },
-    {
-        id: 15,
-        question: "🎵 Questa colonna sonora epica è di quale film storico?",
-        answers: ["Il Gladiatore", "Braveheart", "Troy", "300"],
-        correct: 0,
-        points: 15,
-        type: "audio",
-        media: "audio/Gladiator.mp3"
-    },
-    {
-        id: 16,
-        question: "🏛️ Questo manufatto romano aveva uno scopo pratico incredibilmente moderno. A cosa serviva?",
-        answers: ["Calcolatore astronomico", "Strumento musicale", "Misuratore del tempo", "Navigatore"],
-        correct: 0,
-        points: 15,
-        type: "image",
-        media: "images/antik.png"
-    },
-    {
-        id: 17,
-        question: "😈 Questo simbolo è associato a quale organizzazione criminale internazionale?",
-        answers: ["Yakuza giapponese", "Cosa Nostra siciliana", "Bratva russa", "Cartelli messicani"],
-        correct: 0,
-        points: 15,
-        type: "image",
-        media: "images/yakuza.jpg"
-    },
-    {
-        id: 18,
-        question: "🎞️ Da quale film cult anni '80 proviene questa scena di ballo in mensa?",
-        answers: ["Ritorno al Futuro", "The Breakfast Club", "Ghostbusters - Acchiappafantasmi", "Weird Science"],
-        correct: 0,
-        points: 15,
-        type: "video",
-        media: "video/backto.mp4"
-    },
-    {
-        id: 19,
-        question: "🎻 Questo famoso motivo è di quale compositore classico?",
-        answers: ["Beethoven - Per Elisa", "Mozart - Eine kleine Nachtmusik", "Chopin - Notturno", "Bach - Toccata e fuga"],
-        correct: 0,
-        points: 15,
-        type: "audio",
-        media: "audio/furelisa.mp3"
-    },
-    {
-        id: 20,
-        question: "🏺 Questo monumento celebra la vittoria in quale importante guerra romana?",
-        answers: ["Guerre Daciche", "Guerre Puniche", "Guerre Galliche", "Guerre Civili"],
-        correct: 0,
-        points: 15,
-        type: "image",
-        media: "images/colonna.jpg"
-    },
-        {
-        id: 21,
-        question: "🗺️ Questo sito archeologico è stato scoperto in modo casuale. Dove si trova?",
-        answers: ["Francia - Grotte di Lascaux", "Spagna - Altamira", "Italia - Grotte di Fumane", "Croazia - Vindija"],
-        correct: 0,
-        points: 15,
-        type: "image",
-        media: "images/lascaux.jpg"
-    },
-    {
-        id: 22,
-        question: "⚔️ Questa arma è associata a quale famoso condottiero dell'antichità?",
-        answers: ["Spartaco", "Annibale", "Alessandro Magno", "Giulio Cesare"],
-        correct: 0,
-        points: 15,
-        type: "image",
-        media: "images/spartaco.jpg"
-    },
-    {
-        id: 23,
-        question: "🕵️ Questa 'anomalia' è citata da chi sostiene quale teoria sul famoso assassinio?",
-        answers: ["L'uomo con l'ombrello a JFK", "Il secondo cecchino a RFK", "La borsa della sparatoria a MLK", "L'automobile sospetta a Malcom X"],
-        correct: 0,
-        points: 15,
-        type: "image",
-        media: "images/jfk.jpg"
-    },
-    {
-        id: 24,
-        question: "🎻 Questo motivo è tratto da quale balletto di Tchaikovsky?",
-        answers: ["Lo Schiaccianoci - Danza della Fata Confetto", "Il Lago dei Cigni - Danza dei Piccoli Cigni", "La Bella Addormentata - Valzer", "Romeo e Giulietta - Danza dei Cavalieri"],
-        correct: 0,
-        points: 15,
-        type: "audio",
-        media: "audio/plum.mp3"
-    },
-    {
-        id: 25,
-        question: "☭ Questo edificio simbolo dell'architettura stalinista ospitava cosa?",
-        answers: ["Università Statale di Mosca", "Ministero degli Esteri", "Hotel Ucraina", "Palazzo dei Soviet"],
-        correct: 0,
-        points: 15,
-        type: "image",
-        media: "images/mosca.jpg"
-    },
-    {
-        id: 26,
-        question: "🌍 Questo stretto collega quali due mari?",
-        answers: ["Mar Mediterraneo e Oceano Atlantico", "Mar Nero e Mar di Marmara", "Mar Rosso e Golfo di Aden", "Mar Baltico e Mare del Nord"],
-        correct: 0,
-        points: 15,
-        type: "image",
-        media: "images/stretto.jpg"
-    },
-    {
-        id: 27,
-        question: "🤔 Questo fenomeno ottico atmosferico è causato da cosa?",
-        answers: ["Rifrazione in cristalli di ghiaccio", "Diffrazione in gocce d'acqua", "Riflessione su superfici piane", "Polarizzazione della luce"],
-        correct: 0,
-        points: 15,
-        type: "image",
-        media: "images/alone.jpg"
-    },
-    {
-        id: 28,
-        question: "🏺 Questo sito scoperto nel 1922 rivoluzionò le conoscenze su quale antica civiltà?",
-        answers: ["Civiltà egizia - Tomba di Tutankhamon", "Civiltà sumera - Tomba reale di Ur", "Civiltà minoica - Palazzo di Cnosso", "Civiltà micenea - Tomba di Agamennone"],
-        correct: 0,
-        points: 15,
-        type: "image",
-        media: "images/tomba.jpg"
-    },
-    {
-        id: 29,
-        question: "📜 Questo codice miniato del XIII secolo contiene opere di quale autore classico?",
-        answers: ["Virgilio - Eneide", "Omero - Iliade", "Ovidio - Metamorfosi", "Orazio - Odi"],
-        correct: 0,
-        points: 15,
-        type: "image",
-        media: "images/codex.jpg"
-    },
-    {
-        id: 30,
-        question: "🏰 Questo palazzo è un esempio di quale movimento architettonico?",
-        answers: ["Barocco romano", "Rinascimento fiorentino", "Gotico veneziano", "Neoclassico napoletano"],
-        correct: 0,
-        points: 15,
-        type: "image",
-        media: "images/barocco.jpg"
-    },
-    {
-        id: 31,
-        question: "🎨 Questa opera utilizza quale tecnica pittorica innovativa?",
-        answers: ["Pointillisme", "Divisionismo", "Impressionismo", "Macchiaiolo"],
-        correct: 0,
-        points: 15,
-        type: "image",
-        media: "images/point.jpeg"
-    },
-    {
-        id: 32,
-        question: "🎬 Quale attrice ha rifiutato il ruolo di Vivian in 'Pretty Woman' prima di Julia Roberts?",
-        answers: ["Molly Ringwald", "Michelle Pfeiffer", "Meg Ryan", "Demi Moore"],
-        correct: 0,
-        points: 15,
-        type: "text"
-    },
-    {
-        id: 33,
-        question: "🎬 Quale film ha vinto l'Oscar nonostante sia uscito lo stesso anno di 'Pulp Fiction' e 'The Shawshank Redemption'?",
-        answers: ["Forrest Gump", "Le ali della libertà", "Quiz Show", "Quattro matrimoni e un funerale"],
-        correct: 0,
-        points: 15,
-        type: "text"
-    },
-    {
-        id: 34,
-        question: "🕰️ Quale scandalo politico italiano degli anni '90 è noto come 'Mani Pulite'?",
-        answers: ["Tangentopoli", "Calciopoli", "Sme-Ariosto", "Banco Ambrosiano"],
-        correct: 0,
-        points: 15,
-        type: "text"
-    },
-    {
-        id: 35,
-        question: "🕰️ Quale pandemia del 1918 uccise più persone della Prima Guerra Mondiale?",
-        answers: ["Influenza Spagnola", "Peste Nera", "Colera", "Tifo"],
-        correct: 0,
-        points: 15,
-        type: "text"
-    },
-    {
-        id: 36,
-        question: "🎵 Questo riff di chitarra ha inaugurato quale genere musicale negli anni '70?",
-        answers: ["Heavy Metal", "Hard Rock", "Punk Rock", "Glam Rock"],
-        correct: 0,
-        points: 15,
-        type: "audio",
-        media: "audio/metal.mp3"
-    },
-    {
-        id: 37,
-        question: "🎵 Quale artista detiene il record per il maggior numero di brani nella Billboard Hot 100?",
-        answers: ["Drake", "The Beatles", "Madonna", "Elvis Presley"],
-        correct: 0,
-        points: 15,
-        type: "text"
-    },
-    {
-        id: 38,
-        question: "🎵 Questo strumento musicale insolito è caratteristico di quale cultura?",
-        answers: ["Svizzera - Hang Drum", "Giappone - Koto", "India - Sitar", "Africa - Djembe"],
-        correct: 0,
-        points: 15,
-        type: "image",
-        media: "images/hang.jpg"
-    },
-    {
-        id: 39,
-        question: "🏛️ Questo manufatto è legato a quale antica civiltà mesoamericana?",
-        answers: ["Aztechi", "Maya", "Inca", "Olmecchi"],
-        correct: 0,
-        points: 15,
-        type: "image",
-        media: "images/calendar.jpg"
-    },
-    {
-        id: 40,
-        question: "🏛️ Quale esploratore raggiunse per primo il Polo Sud?",
-        answers: ["Roald Amundsen", "Robert Falcon Scott", "Ernest Shackleton", "Richard Byrd"],
-        correct: 0,
-        points: 15,
-        type: "text"
-    },
-    {
-        id: 41,
-        question: "🔬 Quale scienziato formulò la teoria della relatività generale?",
-        answers: ["Albert Einstein", "Isaac Newton", "Stephen Hawking", "Niels Bohr"],
-        correct: 0,
-        points: 15,
-        type: "text"
-    },
-    {
-        id: 42,
-        question: "🔬 Quale elemento chimico ha numero atomico 79?",
-        answers: ["Oro", "Argento", "Platino", "Rame"],
-        correct: 0,
-        points: 15,
-        type: "text"
-    },
-    {
-        id: 43,
-        question: "🔬 Quale fisica vinse due Nobel in due diverse categorie scientifiche?",
-        answers: ["Marie Curie", "Rosalind Franklin", "Lise Meitner", "Barbara McClintock"],
-        correct: 0,
-        points: 15,
-        type: "text"
-    },
-    {
-        id: 44,
-        question: "🔬 Questo fenomeno ottico dimostra quale principio della fisica?",
-        answers: ["Dispersione della luce", "Rifrazione", "Diffrazione", "Interferenza"],
-        correct: 0,
-        points: 15,
-        type: "video",
-        media: "video/prism.mp4"
-    },
-    {
-        id: 45,
-        question: "🕰️ In quale anno è stata scattata questa foto del primo computer domestico?",
-        answers: ["1977", "1982", "1975", "1980"],
-        correct: 0,
-        points: 15,
-        type: "image",
-        media: "images/pc.jpg"
-    },
-    {
-        id: 46,
-        question: "🕰️ Questa foto della costruzione della Torre Eiffel risale al...",
-        answers: ["1888", "1875", "1895", "1900"],
-        correct: 0,
-        points: 15,
-        type: "image",
-        media: "images/tf.jpg"
-    },
-    {
-        id: 47,
-        question: "🎯 Completa la citazione di Churchill: 'Il successo è la capacità di passare da un fallimento all'altro senza perdere...'",
-        answers: ["l'entusiasmo", "la speranza", "la ragione", "il controllo"],
-        correct: 0,
-        points: 15,
-        type: "text"
-    },
-    {
-        id: 48,
-        question: "🎯 Completa la frase di Einstein: 'La fantasia è più importante della conoscenza, perché la conoscenza è limitata, mentre la fantasia...'",
-        answers: ["abbraccia il mondo intero", "non ha confini", "è infinita", "crea il futuro"],
-        correct: 0,
-        points: 15,
-        type: "text"
-    },
-    {
-        id: 49,
-        question: "🎯 Completa la frase di Forrest Gump: 'La vita è come una scatola di...'",
-        answers: ["cioccolatini", "sorprese", "regali", "memorie"],
-        correct: 0,
-        points: 15,
-        type: "text"
-    },
-    {
-        id: 50,
-        question: "🎻 Questo 'Requiem' incompiuto è di quale compositore?",
-        answers: ["Mozart", "Verdi", "Brahms", "Fauré"],
-        correct: 0,
-        points: 15,
-        type: "audio",
-        media: "audio/mozart.mp3"
-    },
-    {
-        id: 51,
-        question: "🎨 Questo paesaggio è di quale pittore olandese?",
-        answers: ["Vermeer", "Rembrandt", "Van Gogh", "Mondrian"],
-        correct: 0,
-        points: 15,
-        type: "image",
-        media: "images/jan.jpg"
-    },
-    {
-        id: 52,
-        question: "⚖️ Quale articolo della Costituzione italiana stabilisce il principio di uguaglianza?",
-        answers: ["Articolo 3", "Articolo 1", "Articolo 13", "Articolo 21"],
-        correct: 0,
-        points: 15,
-        type: "text"
-    },
-    {
-        id: 53,
-        question: "⚖️ In quale anno è stata abolita la pena di morte in Italia per i reati comuni?",
-        answers: ["1948", "1889", "1930", "1945"],
-        correct: 0,
-        points: 15,
-        type: "text"
-    },
-    {
-        id: 54,
-        question: "🎬 Da quale film di Kubrick proviene questa scena del labirinto?",
-        answers: ["Shining", "2001: Odissea nello spazio", "Arancia Meccanica", "Eyes Wide Shut"],
-        correct: 0,
-        points: 15,
-        type: "video",
-        media: "video/shining.mp4"
-    },
-    {
-        id: 55,
-        question: "🎬 Quale attore ha interpretato James Bond nel maggior numero di film?",
-        answers: ["Roger Moore", "Sean Connery", "Daniel Craig", "Pierce Brosnan"],
-        correct: 0,
-        points: 15,
-        type: "text"
-    },
-    {
-        id: 56,
-        question: "🎬 Quale film ha vinto 11 Oscar, eguagliando il record di 'Ben-Hur' e 'Titanic'?",
-        answers: ["Il Signore degli Anelli - Il Ritorno del Re", "Schindler's List", "The English Patient", "Amadeus"],
-        correct: 0,
-        points: 15,
-        type: "text"
-    },
-    {
-        id: 57,
-        question: "🎬 Quale regista ha diretto sia 'Taxi Driver' che 'Toro Scatenato'?",
-        answers: ["Martin Scorsese", "Brian De Palma", "Francis Ford Coppola", "Michael Mann"],
-        correct: 0,
-        points: 15,
-        type: "text"
-    },
-    {
-        id: 58,
-        question: "🎬 In quale film italiano compare la celebre scena del bagno nella fontana?",
-        answers: ["La Dolce Vita", "8½", "I soliti ignoti", "Divorzio all'italiana"],
-        correct: 0,
-        points: 15,
-        type: "text"
-    },
-    {
-        id: 59,
-        question: "🌟 Quale attore ha lavorato come clown prima di diventare famoso?",
-        answers: ["Robin Williams", "Jim Carrey", "Johnny Depp", "Jack Nicholson"],
-        correct: 1,
-        points: 15,
-        type: "text"
-    },
-    {
-        id: 60,
-        question: "🌟 Quale regista ha iniziato la carriera come fumettista?",
-        answers: ["Tim Burton", "Quentin Tarantino", "Steven Spielberg", "Christopher Nolan"],
-        correct: 0,
-        points: 15,
-        type: "text"
-    },
-    {
-        id: 61,
-        question: "🌟 Quale attrice ha vinto un Oscar per il suo primo film?",
-        answers: ["Barbra Streisand", "Julie Andrews", "Jennifer Hudson", "Lupita Nyong'o"],
-        correct: 2,
-        points: 15,
-        type: "text"
-    },
-    {
-        id: 62,
-        question: "🎵 Di quale paese è questo inno nazionale?",
-        answers: ["Giappone", "Cina", "Corea del Sud", "Vietnam"],
-        correct: 0,
-        points: 15,
-        type: "audio",
-        media: "audio/giap.mp3"
-    },
-    {
-        id: 63,
-        question: "🎻 Questo celebre valzer è di quale compositore russo?",
-        answers: ["Dmitri Shostakovich", "Sergei Prokofiev", "Igor Stravinsky", "Pyotr Tchaikovsky"],
-        correct: 0,
-        points: 15,
-        type: "audio",
-        media: "audio/shost.mp3"
-    },
-    {
-        id: 64,
-        question: "🔬 Quale scienziato scoprì la penicillina per caso nel 1928?",
-        answers: ["Alexander Fleming", "Louis Pasteur", "Robert Koch", "Paul Ehrlich"],
-        correct: 0,
-        points: 15,
-        type: "text"
-    },
-    {
-        id: 65,
-        question: "📽️ Quale fu il primo film sonoro della storia?",
-        answers: ["Il cantante di jazz", "Luci della città", "Ombre rosse", "Via col vento"],
-        correct: 0,
-        points: 15,
-        type: "text"
-    },
-    {
-        id: 66,
-        question: "📽️ Questo fu il primo film a utilizzare quale tecnica rivoluzionaria?",
-        answers: ["Tecnicolor", "Cinerama", "CinemaScope", "3D"],
-        correct: 0,
-        points: 15,
-        type: "video",
-        media: "video/color.mp4"
-    },
-    {
-        id: 67,
-        question: "🤔 Quale è il metallo più prezioso al mondo?",
-        answers: ["Rodio", "Platino", "Oro", "Iridio"],
-        correct: 0,
-        points: 15,
-        type: "text"
-    },
-    {
-        id: 68,
-        question: "🤔 Quale è l'osso più piccolo del corpo umano?",
-        answers: ["Staffa", "Martello", "Incudine", "Uno delle falangi"],
-        correct: 0,
-        points: 15,
-        type: "text"
-    },
-    {
-        id: 69,
-        question: "💰 I Medici di Firenze accumularono la loro fortuna iniziale attraverso...?",
-        answers: ["Banchieri e prestatori", "Commercio della lana", "Miniere d'argento", "Arte e collezionismo"],
-        correct: 0,
-        points: 15,
-        type: "text"
-    },
-    {
-        id: 70,
-        question: "💻 Il primo SMS della storia diceva...?",
-        answers: ["'Merry Christmas'", "'Hello World'", "'Pronto?'", "'Test message'"],
-        correct: 0,
-        points: 15,
-        type: "text"
-    },
-    {
-        id: 71,
-        question: "🌍 Quale paese ha la capitale più alta al mondo?",
-        answers: ["Bolivia (La Paz)", "Nepal (Kathmandu)", "Perù (Lima)", "Ecuador (Quito)"],
-        correct: 0,
-        points: 15,
-        type: "text"
-    },
-    {
-        id: 72,
-        question: "⚡ Quale incantesimo J.K. Rowling ha dichiarato essere il più difficile da inventare?",
-        answers: ["Expecto Patronum", "Avada Kedavra", "Wingardium Leviosa", "Expelliarmus"],
-        correct: 0,
-        points: 15,
-        type: "text"
-    },
-    {
-        id: 73,
-        question: "🌋 Questa isola vulcanica con spiagge di sabbia verde si trova in quale arcipelago?",
-        answers: ["Hawaii - Isola di Hawaii", "Galapagos - Isola Isabela", "Canarie - Lanzarote", "Azzorre - São Miguel"],
-        correct: 0,
-        points: 20,
-        type: "image",
-        media: "images/hawaii.jpg"
-    },
-    {
-        id: 74,
-        question: "❄️ Questo ghiacciaio che si getta direttamente in mare si trova in quale paese?",
-        answers: ["Argentina - Patagonia", "Norvegia - Svalbard", "Groenlandia", "Alaska - USA"],
-        correct: 0,
-        points: 15,
-        type: "image",
-        media: "images/ice.jpg"
-    },
-    {
-        id: 75,
-        question: "Metti in ordine cronologico questi eventi della storia italiana",
-        answers: ["Unità d'Italia", "Caduta del Fascismo", "Miracolo economico", "Tangentopoli"],
-        correct: 0,
-        points: 25,
-        type: "order"
-    },
-    {
-        id: 76,
-        question: "Metti in ordine cronologico queste scoperte scientifiche",
-        answers: ["Scoperta della penicillina", "Teoria della relatività", "Struttura del DNA", "Primo trapianto di cuore"],
-        correct: 1,
-        points: 25,
-        type: "order"
-    },
-    {
-        id: 77,
-        question: "Metti in ordine cronologico queste rivoluzioni",
-        answers: ["Rivoluzione russa", "Rivoluzione americana", "Rivoluzione francese", "Primavera araba"],
-        correct: 1,
-        points: 25,
-        type: "order"
-    },
-    {
-        id: 78,
-        question: "Metti in ordine cronologico questi franchise cinematografici",
-        answers: ["Marvel Cinematic Universe", "Harry Potter", "Il Signore degli Anelli", "Fast & Furious"],
-        correct: 2,
-        points: 25,
-        type: "order"
-    },
-    {
-        id: 79,
-        question: "Metti in ordine cronologico queste innovazioni tecnologiche recenti",
-        answers: ["iPhone", "Bitcoin", "ChatGPT", "Netflix streaming"],
-        correct: 0,
-        points: 25,
-        type: "order"
-    },
-{
-    id: 80,
-    question: "🍫 Quale famoso dolce è stato inventato per caso quando un pasticcere si accorse di non avere più burro?",
-    answers: ["Sacher Torte", "Tiramisù", "Brownie", "Crème Brûlée"],
-    correct: 2,
-    points: 15,
-    type: "text"
-},
-];
 
+
+        ];
 
         // === SISTEMA TIMER DINAMICO ===
         function getTimerDuration(question) {
@@ -2486,119 +1917,49 @@ function resumeBackgroundMusicAfterMedia() {
         };
 
         // === INIZIALIZZAZIONE ===
-        // === OTTIMIZZAZIONE PER TV ===
+        function initGame() {
+            gameCode = 'SHOW' + Math.floor(1000 + Math.random() * 9000);
+            elements.gameCode.textContent = gameCode;
+            
+            playerScores = {};
+            
+            console.log('🎮 Host Game Show creato con codice:', gameCode);
+            
+            database.ref('games/' + gameCode).set({
+                status: 'waiting',
+                host: true,
+                createdAt: Date.now(),
+                version: 'Game-Show-2.0'
+            });
 
-// Inietta CSS per ottimizzazione TV
-const tvOptimizationCSS = `
-    .tv-optimized .question-card {
-        margin-bottom: 15px;
-    }
-    .tv-optimized .tv-card {
-        margin-bottom: 15px;
-    }
-    .tv-optimized .timer-container {
-        margin: 20px 0;
-    }
-    .tv-optimized .answers-grid {
-        margin: 20px 0;
-    }
-    .tv-optimized .progress-section {
-        margin: 15px 0;
-    }
-    .tv-optimized .quick-actions {
-        margin: 15px 0;
-    }
-`;
+            database.ref('games/' + gameCode + '/players').on('value', (snapshot) => {
+                const players = snapshot.val() || {};
+                connectedPlayers = Object.values(players);
+                
+                connectedPlayers.forEach(player => {
+                    if (!playerScores[player.name]) {
+                        playerScores[player.name] = {
+                            total: 0,
+                            correctAnswers: 0,
+                            speedBonuses: 0
+                        };
+                    }
+                });
+                
+                updatePlayerList();
+            });
 
-if (!document.getElementById('tv-optimization-css')) {
-    const style = document.createElement('style');
-    style.id = 'tv-optimization-css';
-    style.textContent = tvOptimizationCSS;
-    document.head.appendChild(style);
-}
-        
-        // AGGIUNGI PRIMA DI initGame (riga ~1990):
-function preloadCriticalAssets() {
-    console.log('🔧 Preload assets critici...');
-    
-    // Preload solo primi 3 media
-    const preloadQuestions = questions.slice(0, 3);
-    preloadQuestions.forEach((q, index) => {
-        if (q.media && q.media !== "") {
+            database.ref('games/' + gameCode + '/answers').on('value', (snapshot) => {
+                const answers = snapshot.val() || {};
+                playerAnswers = Object.values(answers);
+                updateAnswersList();
+            });
+
+            // Auto-attiva audio dopo breve ritardo
             setTimeout(() => {
-                const link = document.createElement('link');
-                link.rel = 'preload';
-                if (q.media.includes('.mp4')) {
-                    link.as = 'video';
-                } else if (q.media.includes('.mp3') || q.media.includes('.wav')) {
-                    link.as = 'audio'; 
-                } else {
-                    link.as = 'image';
-                }
-                link.href = q.media;
-                document.head.appendChild(link);
-                console.log(`🔧 Preload: ${q.media}`);
-            }, index * 500); // Spread nel tempo
+                audio.activateAudio();
+            }, 1000);
         }
-    });
-}
-
-// MODIFICA L'INIZIO DELLO SCRIPT (riga ~1995):
-// Sposta tutto dopo DOMContentLoaded
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('🚀 DOM pronto - avvio ottimizzato');
-    preloadCriticalAssets();
-    setTimeout(initGame, 800);
-});
-        
-// RIGA ~2000 - SOSTITUISCI initGame COMPLETAMENTE:
-function initGame() {
-    console.log('🎮 Avvio ottimizzato con tutte le domande');
-    
-    // DISABILITA EFFETTI VISIVI PESANTI
-    document.getElementById('particlesContainer').style.display = 'none';
-    
-    gameCode = 'SHOW' + Math.floor(1000 + Math.random() * 9000);
-    elements.gameCode.textContent = gameCode;
-    
-    playerScores = {};
-    
-    console.log('🎮 Host Game Show creato con codice:', gameCode);
-    
-    database.ref('games/' + gameCode).set({
-        status: 'waiting',
-        host: true,
-        createdAt: Date.now(),
-        version: 'Game-Show-2.0'
-    });
-
-    // OTTIMIZZAZIONE FIREBASE - RIDUCI FREQUENZA AGGIORNAMENTI
-    let playerUpdateTimeout;
-    database.ref('games/' + gameCode + '/players').on('value', (snapshot) => {
-        clearTimeout(playerUpdateTimeout);
-        playerUpdateTimeout = setTimeout(() => {
-            const players = snapshot.val() || {};
-            connectedPlayers = Object.values(players);
-            updatePlayerList();
-        }, 300); // Aggiorna ogni 300ms max
-    });
-
-    // OTTIMIZZAZIONE RISPOSTE - ANCORA PIÙ LENTO
-    let answerUpdateTimeout; 
-    database.ref('games/' + gameCode + '/answers').on('value', (snapshot) => {
-        clearTimeout(answerUpdateTimeout);
-        answerUpdateTimeout = setTimeout(() => {
-            const answers = snapshot.val() || {};
-            playerAnswers = Object.values(answers);
-            updateAnswersList();
-        }, 500); // Aggiorna ogni 500ms max
-    });
-
-    // Auto-attiva audio
-    setTimeout(() => {
-        audio.activateAudio();
-    }, 1000);
-}
 
         function updatePlayerList() {
             elements.playerList.innerHTML = '';
@@ -2716,57 +2077,26 @@ function initGame() {
             updateLiveLeaderboard();
         }
 
-function startGame() {
-    audio.playSFX('startSound');
-    audio.playMusic('gameMusic');
-    
-    elements.lobbyScreen.classList.add('hidden');
-    setTimeout(() => {
-        elements.gameScreen.classList.remove('hidden');
-        optimizeForTV(); // ← AGGIUNGI QUESTA RIGA
-    }, 300);
-    
-    database.ref('games/' + gameCode).update({
-        status: 'started',
-        currentQuestion: 0
-    });
+        function startGame() {
+            audio.playSFX('startSound');
+            audio.playMusic('gameMusic');
+            
+            elements.lobbyScreen.classList.add('hidden');
+            setTimeout(() => {
+                elements.gameScreen.classList.remove('hidden');
+            }, 300);
+            
+            database.ref('games/' + gameCode).update({
+                status: 'started',
+                currentQuestion: 0
+            });
 
-    setTimeout(() => {
-        loadQuestion(0);
-    }, 500);
-}
+            setTimeout(() => {
+                loadQuestion(0);
+            }, 500);
+        }
 
-        // CERCA cleanupQuestion E SOSTITUISCI CON:
-function cleanupQuestion() {
-    console.log('🧹 Pulizia memoria...');
-    
-    // Ferma timer
-    clearInterval(timer);
-    
-    // Pulisci media in modo aggressivo
-    const mediaContainer = document.getElementById('mediaContainer');
-    if (mediaContainer) {
-        const mediaElements = mediaContainer.querySelectorAll('audio, video, img');
-        mediaElements.forEach(media => {
-            if (media.pause) media.pause();
-            if (media.src) media.src = '';
-            if (media.load) media.load();
-        });
-        // Svuota ma mantieni l'elemento
-        mediaContainer.innerHTML = '';
-        mediaContainer.style.display = 'none';
-    }
-    
-    // Force garbage collection hint
-    if (window.gc) {
-        window.gc();
-    }
-}
-        
-// RIGA ~2150 - MODIFICA loadQuestion:
 function loadQuestion(index) {
-    cleanupQuestion();
-    
     if (index >= questions.length) {
         endGame();
         return;
@@ -2774,38 +2104,25 @@ function loadQuestion(index) {
 
     currentQuestion = index;
     const question = questions[index];
-
-    // CARICAMENTO LAZY DEI MEDIA
-    setTimeout(() => {
-        if (question.media && question.media !== "") {
-            if (question.media.includes('.mp3') || question.media.includes('.wav') || question.media.includes('.mp4')) {
-                console.log('🎵 Caricamento lazy media:', question.media);
-                playMedia(question.media);
-            } else {
-                // Immagini - carica immediatamente
-                const mediaContainer = document.getElementById('mediaContainer');
-                mediaContainer.style.display = 'block';
-                mediaContainer.innerHTML = '';
-                
-                const imgElement = document.createElement('img');
-                imgElement.src = question.media;
-                imgElement.className = 'media-element';
-                imgElement.onerror = () => {
-                    mediaContainer.innerHTML = '<div style="color: var(--accent-red);">❌ Immagine non disponibile</div>';
-                };
-                mediaContainer.appendChild(imgElement);
-            }
-        }
-    }, 100);
-
+    
+    playerAnswers = [];
+    answersRevealed = false;
+    
+    console.log(`🔄 Caricando domanda ${index + 1}: ${question.question}`);
+    console.log(`📊 Tipo: ${question.type}, Media: ${question.media || 'nessuno'}`);
+    
     elements.questionCounter.textContent = `QUESTION ${index + 1}/${questions.length}`;
     elements.questionText.textContent = question.question;
     
-    // Reset UI
+    // RESET TIMER ALL'INIZIO DI OGNI DOMANDA
     elements.timer.textContent = getTimerDuration(question);
-    elements.answersGrid.innerHTML = '';
     
-    // Carica risposte
+    // Reset media container
+    elements.mediaContainer.style.display = 'none';
+    elements.mediaContainer.innerHTML = '';
+    
+    // Reset answers grid
+    elements.answersGrid.innerHTML = '';
     question.answers.forEach((answer, i) => {
         const div = document.createElement('div');
         div.className = 'answer-option';
@@ -2813,8 +2130,8 @@ function loadQuestion(index) {
         elements.answersGrid.appendChild(div);
     });
     
-    // Reset Firebase
     database.ref('games/' + gameCode + '/answers').remove();
+    
     updateAnswersProgress();
     
     database.ref('games/' + gameCode).update({
@@ -2822,7 +2139,7 @@ function loadQuestion(index) {
         currentQuestionData: question
     });
     
-    // Avvia timer
+    // USA IL NUOVO SISTEMA TIMER DINAMICO
     startQuestion(question);
 }
 
@@ -2887,11 +2204,7 @@ function showCorrectAnswer() {
 }
 
 function revealAnswersToPlayers() {
-    console.log('🎯 Rivelando risposte ai player...');
-    database.ref('games/' + gameCode).update({
-        answersRevealed: true,
-        currentQuestion: currentQuestion
-    });
+    console.log('🎯 Rivelando risposte a TUTTI i player...');
     
     // Aggiorna multipli campi per forzare l'aggiornamento
     database.ref('games/' + gameCode).update({
@@ -2905,10 +2218,6 @@ function revealAnswersToPlayers() {
         database.ref('games/' + gameCode + '/answersRevealed').set(true);
     }, 200);
 }
-
-        function optimizeForTV() {
-    console.log('📺 Ottimizzazione TV - Nessuna azione necessaria');
-
 
 function showAnswerManually() {
     if (!answersRevealed) {
@@ -2932,7 +2241,6 @@ function showAnswerManually() {
             elements.gameScreen.classList.add('hidden');
             setTimeout(() => {
                 elements.leaderboardScreen.classList.remove('hidden');
-                optimizeForTV();
             }, 300);
             
             const sortedPlayers = Object.entries(playerScores)
@@ -3126,34 +2434,3 @@ document.getElementById('leaderboardToggle').addEventListener('click', function(
     </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
