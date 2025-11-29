@@ -2532,9 +2532,41 @@ function shuffleQuestionsAndAnswers() {
     return shuffledQuestions;
 }
 
-        function initializeGameQuestions() {
-    shuffledQuestions = shuffleQuestionsAndAnswers();
-    console.log(`🎲 Domande randomizzate: ${shuffledQuestions.length}`);
+function initializeGameQuestions() {
+    // Seleziona casualmente 30 domande dall'array completo
+    const selectedQuestions = shuffleArray(questions).slice(0, 30);
+    
+    // Randomizza domande e risposte solo per le 30 selezionate
+    shuffledQuestions = shuffleQuestionsAndAnswersForSelected(selectedQuestions);
+    
+    console.log(`🎲 Selezionate ${shuffledQuestions.length} domande su ${questions.length} totali`);
+}
+
+// Nuova funzione per randomizzare solo le domande selezionate
+function shuffleQuestionsAndAnswersForSelected(selectedQuestions) {
+    // Randomizza l'ordine delle domande selezionate
+    const shuffledQuestions = shuffleArray(selectedQuestions);
+    
+    // Per ogni domanda, randomizza le risposte e aggiorna l'indice corretto
+    shuffledQuestions.forEach(question => {
+        if (question.type !== "order") { // Non randomizzare domande di ordine
+            const originalAnswers = [...question.answers];
+            const originalCorrect = question.correct;
+            const correctAnswer = originalAnswers[originalCorrect];
+            
+            // Randomizza le risposte
+            const shuffledAnswers = shuffleArray(originalAnswers);
+            
+            // Trova la nuova posizione della risposta corretta
+            const newCorrectIndex = shuffledAnswers.indexOf(correctAnswer);
+            
+            // Aggiorna la domanda
+            question.answers = shuffledAnswers;
+            question.correct = newCorrectIndex;
+        }
+    });
+    
+    return shuffledQuestions;
 }
 
         // === VARIABILI DI STATO ===
@@ -3096,6 +3128,7 @@ document.getElementById('leaderboardToggle').addEventListener('click', function(
     </script>
 </body>
 </html>
+
 
 
 
