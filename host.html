@@ -1047,28 +1047,6 @@
 .timer-container {
     margin: 25px 0 !important;
 }
-
-.answers-grid {
-    margin: 25px 0 !important;
-    gap: 20px !important;
-}
-
-.answer-option {
-    padding: 25px !important;
-}
-
-.progress-section {
-    margin: 20px 0 !important;
-}
-
-.quick-actions {
-    margin: 20px 0 !important;
-    gap: 15px !important;
-}
-
-.game-btn {
-    padding: 18px 35px !important;
-}
     </style>
 </head>
 <body>
@@ -2552,6 +2530,45 @@ function resumeBackgroundMusicAfterMedia() {
         };
 
         // === INIZIALIZZAZIONE ===
+        // === OTTIMIZZAZIONE PER TV ===
+function optimizeForTV() {
+    console.log('🎮 Ottimizzazione TV attivata');
+    
+    if (!document.getElementById('gameScreen').classList.contains('hidden')) {
+        document.body.classList.add('tv-optimized');
+    } else {
+        document.body.classList.remove('tv-optimized');
+    }
+}
+
+// Inietta CSS per ottimizzazione TV
+const tvOptimizationCSS = `
+    .tv-optimized .question-card {
+        margin-bottom: 15px;
+    }
+    .tv-optimized .tv-card {
+        margin-bottom: 15px;
+    }
+    .tv-optimized .timer-container {
+        margin: 20px 0;
+    }
+    .tv-optimized .answers-grid {
+        margin: 20px 0;
+    }
+    .tv-optimized .progress-section {
+        margin: 15px 0;
+    }
+    .tv-optimized .quick-actions {
+        margin: 15px 0;
+    }
+`;
+
+if (!document.getElementById('tv-optimization-css')) {
+    const style = document.createElement('style');
+    style.id = 'tv-optimization-css';
+    style.textContent = tvOptimizationCSS;
+    document.head.appendChild(style);
+}
         function initGame() {
             gameCode = 'SHOW' + Math.floor(1000 + Math.random() * 9000);
             elements.gameCode.textContent = gameCode;
@@ -2712,24 +2729,25 @@ function resumeBackgroundMusicAfterMedia() {
             updateLiveLeaderboard();
         }
 
-        function startGame() {
-            audio.playSFX('startSound');
-            audio.playMusic('gameMusic');
-            
-            elements.lobbyScreen.classList.add('hidden');
-            setTimeout(() => {
-                elements.gameScreen.classList.remove('hidden');
-            }, 300);
-            
-            database.ref('games/' + gameCode).update({
-                status: 'started',
-                currentQuestion: 0
-            });
+function startGame() {
+    audio.playSFX('startSound');
+    audio.playMusic('gameMusic');
+    
+    elements.lobbyScreen.classList.add('hidden');
+    setTimeout(() => {
+        elements.gameScreen.classList.remove('hidden');
+        optimizeForTV(); // ← AGGIUNGI QUESTA RIGA
+    }, 300);
+    
+    database.ref('games/' + gameCode).update({
+        status: 'started',
+        currentQuestion: 0
+    });
 
-            setTimeout(() => {
-                loadQuestion(0);
-            }, 500);
-        }
+    setTimeout(() => {
+        loadQuestion(0);
+    }, 500);
+}
 
 function loadQuestion(index) {
     if (index >= questions.length) {
@@ -2739,6 +2757,8 @@ function loadQuestion(index) {
 
     currentQuestion = index;
     const question = questions[index];
+
+    optimizeForTV();
     
     playerAnswers = [];
     answersRevealed = false;
@@ -2876,6 +2896,7 @@ function showAnswerManually() {
             elements.gameScreen.classList.add('hidden');
             setTimeout(() => {
                 elements.leaderboardScreen.classList.remove('hidden');
+                optimizeForTV();
             }, 300);
             
             const sortedPlayers = Object.entries(playerScores)
@@ -3069,6 +3090,7 @@ document.getElementById('leaderboardToggle').addEventListener('click', function(
     </script>
 </body>
 </html>
+
 
 
 
