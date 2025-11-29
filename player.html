@@ -1317,31 +1317,34 @@
                 joinedAt: Date.now()
             });
 
-            // ASCOLTA LO STATO DEL GIOCO PRINCIPALE
-            database.ref('games/' + gameCode).on('value', (snapshot) => {
-                const game = snapshot.val();
-                if (!game) {
-                    alert('Game not found! Check the code.');
-                    return;
-                }
+// Nella funzione joinGame(), modifica questo listener:
+database.ref('games/' + gameCode).on('value', (snapshot) => {
+    const game = snapshot.val();
+    if (!game) {
+        alert('Game not found! Check the code.');
+        return;
+    }
 
-                if (game.status === 'started') {
-                    if (game.currentQuestion !== currentQuestionIndex) {
-                        currentQuestionIndex = game.currentQuestion || 0;
-                        console.log(`🎮 Player: Nuova domanda ${currentQuestionIndex + 1}`);
-                        selectedAnswer = null;
-                        hasSubmitted = false;
-                        showQuestionScreen();
-                    }
-                } else if (game.status === 'ended') {
-                    showLeaderboard(game.leaderboard || []);
-                }
-                
-                if (game.answersRevealed && game.currentQuestion === currentQuestionIndex) {
-                    console.log('🎯 Host ha rivelato le risposte! Mostrando risultato...');
-                    showQuestionResult();
-                }
-            });
+    if (game.status === 'started') {
+        if (game.currentQuestion !== currentQuestionIndex) {
+            currentQuestionIndex = game.currentQuestion || 0;
+            console.log(`🎮 Player: Nuova domanda ${currentQuestionIndex + 1}`);
+            selectedAnswer = null;
+            hasSubmitted = false;
+            showQuestionScreen();
+        }
+    } else if (game.status === 'ended') {
+        showLeaderboard(game.leaderboard || []);
+    }
+    
+    // MIGLIORATO: Controlla più condizioni per mostrare il risultato
+    if (game.answersRevealed && 
+        game.currentQuestion === currentQuestionIndex && 
+        selectedAnswer !== null) {
+        console.log('🎯 Host ha rivelato le risposte! Mostrando risultato...');
+        showQuestionResult();
+    }
+});
 
             database.ref('games/' + gameCode + '/currentQuestionData').on('value', (snapshot) => {
                 const question = snapshot.val();
@@ -1745,10 +1748,6 @@ function startTimer() {
         `;
         elements.resultCard.className = 'tv-card correct-result';
         
-        audio.playSFX('applauseSound');
-        createConfetti();
-        createCelebrationParticles(window.innerWidth / 2, window.innerHeight / 2, 30);
-        
     } else {
         let correctAnswerText = '';
         if (Array.isArray(selectedAnswer)) {
@@ -1842,6 +1841,7 @@ function startTimer() {
     </script>
 </body>
 </html>
+
 
 
 
