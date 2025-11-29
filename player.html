@@ -502,44 +502,6 @@
             display: none !important;
         }
 
-        /* CONTROLLI TEMI */
-        .theme-controls {
-            position: fixed;
-            top: 15px;
-            left: 15px;
-            z-index: 1000;
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-            max-width: 280px;
-        }
-
-        .theme-btn {
-            background: rgba(255, 255, 255, 0.08);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            color: var(--text-primary);
-            padding: 6px 10px;
-            border-radius: 12px;
-            font-size: 0.7rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            flex: 1;
-            min-width: 55px;
-            text-align: center;
-        }
-
-        .theme-btn:hover {
-            background: rgba(255, 255, 255, 0.12);
-            border-color: var(--accent-gold);
-        }
-
-        .theme-btn.active {
-            background: var(--accent-gold);
-            color: #000;
-            border-color: var(--accent-gold);
-        }
-
         /* VERSION INFO */
         .version {
             position: fixed;
@@ -559,14 +521,14 @@
         }
 
         /* AUDIO CONTROLS */
-        .audio-controls {
-            position: fixed;
-            top: 15px;
-            right: 15px;
-            z-index: 1000;
-            display: flex;
-            gap: 8px;
-        }
+.audio-controls {
+    position: fixed;
+    top: 15px;
+    left: 15px; /* CAMBIATO DA right A left */
+    z-index: 1000;
+    display: flex;
+    gap: 8px;
+}
 
         .audio-btn {
             background: rgba(255, 255, 255, 0.1);
@@ -798,20 +760,13 @@
                 font-size: 2rem;
             }
 
-            .theme-controls {
-                top: 70px;
-                left: 50%;
-                transform: translateX(-50%);
-                justify-content: center;
-                max-width: 90%;
-            }
-
-            .audio-controls {
-                top: 70px;
-                right: 50%;
-                transform: translateX(50%);
-                flex-direction: column;
-            }
+    .audio-controls {
+        top: 15px;
+        left: 15px; /* CAMBIATO */
+        right: auto;
+        transform: none;
+        flex-direction: row; /* CAMBIATO DA column A row */
+    }
 
                     /* === STILE DRAG-AND-DROP PER ORDINE CRONOLOGICO === */
         .drag-drop-container {
@@ -932,14 +887,6 @@
         <div class="scanlines"></div>
         <div class="light-beams"></div>
         <div class="particles" id="particlesContainer"></div>
-    </div>
-
-    <!-- CONTROLLI TEMI -->
-    <div class="theme-controls">
-        <button class="theme-btn active" data-theme="default">🎮 Default</button>
-        <button class="theme-btn" data-theme="space">🚀 Space</button>
-        <button class="theme-btn" data-theme="neon">🌈 Neon</button>
-        <button class="theme-btn" data-theme="royal">👑 Royal</button>
     </div>
 
     <!-- CONTROLLO AUDIO PLAYER -->
@@ -1882,14 +1829,6 @@ function shuffleArray(array) {
             audio.toggleSFX();
         });
 
-        // CONTROLLI TEMI
-        document.querySelectorAll('.theme-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                audio.playSFX('clickSound');
-                changeTheme(this.dataset.theme);
-            });
-        });
-
         elements.gameCodeInput.addEventListener('keypress', function(e) {
             if (e.key === 'Enter') joinGame();
         });
@@ -1907,6 +1846,7 @@ function shuffleArray(array) {
     </script>
 </body>
 </html>
+
 
 
 
