@@ -427,46 +427,40 @@
         }
 
         /* MEDIA CONTAINER */
-.media-container {
-    text-align: center;
-    margin: 30px 0;
-    position: relative;
-}
+        .media-container {
+            text-align: center;
+            margin: 30px 0;
+            position: relative;
+            display: none;
+        }
 
-.media-element {
-    max-width: 100%;
-    max-height: 300px;
-    border-radius: var(--border-radius);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-}
+        .media-element {
+            max-width: 100%;
+            max-height: 300px;
+            border-radius: var(--border-radius);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
 
         /* TIMER DRAMMATICO */
-        /* TIMER CONTAINER MIGLIORATO */
-.timer-container {
-    text-align: center;
-    margin: 40px 0;
-    position: relative;
-    min-height: 120px; /* Assicura spazio per il timer */
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-}
+        .timer-container {
+            text-align: center;
+            margin: 40px 0;
+            position: relative;
+        }
 
-.timer {
-    font-size: 6rem;
-    font-weight: 800;
-    background: linear-gradient(135deg, var(--accent-gold), var(--accent-blue));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    transition: all 0.3s ease;
-    font-family: 'Montserrat', sans-serif;
-    text-shadow: 0 0 30px rgba(255, 215, 0, 0.5);
-    position: relative;
-    animation: timerPulse 1s ease-in-out infinite;
-    margin: 20px 0;
-}
+        .timer {
+            font-size: 6rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--accent-gold), var(--accent-blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            transition: all 0.3s ease;
+            font-family: 'Montserrat', sans-serif;
+            text-shadow: 0 0 30px rgba(255, 215, 0, 0.5);
+            position: relative;
+            animation: timerPulse 1s ease-in-out infinite;
+        }
 
         .timer.warning {
             background: linear-gradient(135deg, #FF416C, #FF4B2B);
@@ -1055,9 +1049,9 @@
                 </div>
 
                 <!-- Media Container -->
-<div class="media-container" id="mediaContainer" style="display: none;">
-    <!-- Media elements will be inserted here -->
-</div>
+                <div class="media-container" id="mediaContainer">
+                    <!-- Media elements will be inserted here -->
+                </div>
 
                 <div class="timer-container">
                     <div class="timer" id="timer">20</div>
@@ -1469,389 +1463,163 @@
         const database = firebase.database();
 
         // === DOMANDE DEL GIOCO ===
-const questions = [
-    {
-        id: 1,
-        question: "Qual è la capitale dell'Australia?",
-        answers: ["Sydney", "Melbourne", "Canberra", "Perth"],
-        correct: 2,
-        points: 10,
-        type: "text"
-        // Timer: 15 secondi (nessun media)
-    },
-    {
-        id: 2, 
-        question: "Ascolta questo brano musicale - di chi è?",
-        answers: ["Beethoven", "Mozart", "Bach", "Vivaldi"],
-        correct: 0,
-        points: 15,
-        type: "audio",
-        media: "audio/sampleaudio.mp3"
-        // Timer: 20 secondi (DOPO la riproduzione audio)
-    },
-    {
-        id: 3,
-        question: "Guarda questo video e rispondi",
-        answers: ["Opzione A", "Opzione B", "Opzione C", "Opzione D"],
-        correct: 1,
-        points: 15,
-        type: "video", 
-        media: "video/samplevideo.mp4"
-        // Timer: 20 secondi (DOPO la riproduzione video)
-    },
-    {
-        id: 4,
-        question: "Metti in ordine cronologico questi eventi storici",
-        answers: ["Rivoluzione Francese", "Scoperta dell'America", "Caduta dell'Impero Romano", "Prima Guerra Mondiale"],
-        correct: 2,
-        points: 20,
-        type: "chronological"
-        // Timer: 30 secondi
-    },
-    {
-        id: 5,
-        question: "Guarda questa immagine e rispondi",
-        answers: ["Risposta A", "Risposta B", "Risposta C", "Risposta D"],
-        correct: 0,
-        points: 10,
-        type: "image",
-        media: "images/sampleimage.jpg"
-        // Timer: 20 secondi (immediato per immagini)
-    }
-];
-
-        // === DEBUG DETTAGLIATO ===
-function debugQuestionLoading() {
-    console.log('=== 🐛 DEBUG DOMANDE ===');
-    questions.forEach((q, index) => {
-        console.log(`Domanda ${index + 1}:`, {
-            testo: q.question.substring(0, 50) + '...',
-            tipo: q.type,
-            media: q.media || 'nessuno',
-            risposte: q.answers.length
-        });
-    });
-    console.log('=== FINE DEBUG ===');
-}
-
-// Chiamala subito
-setTimeout(debugQuestionLoading, 1000);
-
-        // === UTILITY PER VERIFICARE FILE MEDIA ===
-function checkMediaFiles() {
-    questions.forEach((q, index) => {
-        if (q.media) {
-            console.log(`🔍 Domanda ${index + 1}: ${q.media}`);
-            // Qui puoi aggiungere un controllo per verificare se i file esistono
-        }
-    });
-}
-
-// Chiamala dopo aver definito le domande
-setTimeout(checkMediaFiles, 2000);
+        const questions = [
+            {
+                id: 1,
+                question: "Qual è la capitale dell'Australia?",
+                answers: ["Sydney", "Melbourne", "Canberra", "Perth"],
+                correct: 2,
+                points: 10,
+                type: "text"
+            },
+            {
+                id: 2, 
+                question: "Ascolta questo brano musicale - di chi è?",
+                answers: ["Beethoven", "Mozart", "Bach", "Vivaldi"],
+                correct: 0,
+                points: 15,
+                type: "audio",
+                media: "audio/sampleaudio.mp3"
+            },
+            {
+                id: 3,
+                question: "Guarda questo video e rispondi",
+                answers: ["Opzione A", "Opzione B", "Opzione C", "Opzione D"],
+                correct: 1,
+                points: 15,
+                type: "video", 
+                media: "video/samplevideo.mp4"
+            },
+            {
+                id: 4,
+                question: "Metti in ordine cronologico questi eventi storici",
+                answers: ["Rivoluzione Francese", "Scoperta dell'America", "Caduta dell'Impero Romano", "Prima Guerra Mondiale"],
+                correct: 2,
+                points: 20,
+                type: "chronological"
+            },
+            {
+                id: 5,
+                question: "Guarda questa immagine e rispondi",
+                answers: ["Risposta A", "Risposta B", "Risposta C", "Risposta D"],
+                correct: 0,
+                points: 10,
+                type: "image",
+                media: "images/sampleimage.jpg"
+            }
+        ];
 
         // === SISTEMA TIMER DINAMICO ===
-function getTimerDuration(question) {
-    if (question.type === "chronological") return 30;
-    if (question.media && question.media !== "") return 20;
-    return 15;
-}
-
-        // === VERIFICA STRUTTURA FILE ===
-function verifyFileStructure() {
-    console.log('=== 📁 VERIFICA STRUTTURA FILE ===');
-    
-    // Crea elementi di test per verificare i file
-    const testFiles = [
-        'audio/sampleaudio.mp3',
-        'video/samplevideo.mp4', 
-        'images/sampleimage.jpg'
-    ];
-    
-    testFiles.forEach(file => {
-        const tester = file.includes('.mp3') || file.includes('.mp4') 
-            ? document.createElement('audio') 
-            : document.createElement('img');
-            
-        tester.src = file;
-        tester.onerror = () => console.error(`❌ FILE NON TROVATO: ${file}`);
-        tester.onload = () => console.log(`✅ FILE OK: ${file}`);
-    });
-    
-    console.log('=== FINE VERIFICA ===');
-}
-
-// Chiamala dopo 3 secondi
-setTimeout(verifyFileStructure, 3000);
-
-async function playMedia(mediaUrl) {
-    return new Promise((resolve) => {
-        const mediaContainer = document.getElementById('mediaContainer');
-        const questionCard = document.getElementById('questionCard');
-        
-        // Reset e prepara il container
-        mediaContainer.style.display = 'block';
-        mediaContainer.innerHTML = '';
-        
-        console.log('🎵 Tentativo di caricare media:', mediaUrl);
-
-        // Aggiungi messaggio di caricamento
-        const loadingMsg = document.createElement('div');
-        loadingMsg.innerHTML = '🔄 <strong>Caricamento contenuto...</strong>';
-        loadingMsg.style.cssText = `
-            color: var(--accent-gold);
-            font-size: 1.2rem;
-            margin: 20px 0;
-            text-align: center;
-            padding: 15px;
-            background: rgba(255,215,0,0.1);
-            border-radius: 10px;
-            border: 1px solid var(--accent-gold);
-        `;
-        mediaContainer.appendChild(loadingMsg);
-
-        // Aggiungi indicatore visivo che il timer partirà dopo il media
-        const timerInfo = document.createElement('div');
-        timerInfo.innerHTML = '⏰ <em>Il timer partirà automaticamente dopo il media</em>';
-        timerInfo.style.cssText = `
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-            margin: 10px 0;
-            text-align: center;
-            font-style: italic;
-        `;
-        mediaContainer.appendChild(timerInfo);
-
-        // FUNZIONE PER GESTIRE IL SUCCESSO
-        const onMediaReady = () => {
-            console.log('✅ Media pronto, risolvo la Promise');
-            loadingMsg.remove();
-            timerInfo.remove();
-            resolve();
-        };
-
-        // FUNZIONE PER GESTIRE ERRORI
-        const onMediaError = (errorType = 'sconosciuto') => {
-            console.log(`❌ Errore media (${errorType}):`, mediaUrl);
-            loadingMsg.innerHTML = `⚠️ <strong>Contenuto non disponibile</strong><br>
-                                   <small>Il timer partirà comunque tra 3 secondi</small>`;
-            loadingMsg.style.background = 'rgba(255,65,108,0.1)';
-            loadingMsg.style.borderColor = 'var(--accent-red)';
-            loadingMsg.style.color = 'var(--accent-red)';
-            
-            timerInfo.innerHTML = '⏰ <em>Continua con la domanda...</em>';
-            
-            // Aspetta 3 secondi poi continua comunque
-            setTimeout(() => {
-                console.log('🔄 Continuo nonostante errore media');
-                resolve();
-            }, 3000);
-        };
-
-        // GESTIONE AUDIO
-        if (mediaUrl.includes('.mp3') || mediaUrl.includes('.wav')) {
-            console.log('🔊 Riconosciuto come AUDIO');
-            
-            const audioElement = document.createElement('audio');
-            audioElement.controls = true;
-            audioElement.src = mediaUrl;
-            audioElement.style.cssText = `
-                width: 100%;
-                max-width: 400px;
-                margin: 15px 0;
-                border-radius: 10px;
-                background: rgba(0,0,0,0.3);
-            `;
-
-            // EVENTI AUDIO
-            audioElement.addEventListener('loadeddata', () => {
-                console.log('✅ Audio caricato con successo');
-                loadingMsg.innerHTML = '🎵 <strong>Audio pronto!</strong><br><small>Riproduzione in corso...</small>';
-                loadingMsg.style.background = 'rgba(0,180,219,0.1)';
-                loadingMsg.style.borderColor = 'var(--accent-blue)';
-            });
-
-            audioElement.addEventListener('canplaythrough', () => {
-                console.log('▶️ Audio pronto per la riproduzione');
-            });
-
-            audioElement.addEventListener('ended', () => {
-                console.log('⏹️ Audio terminato, avvio timer');
-                onMediaReady();
-            });
-
-            audioElement.addEventListener('error', (e) => {
-                console.error('❌ Errore audio:', e);
-                onMediaError('audio');
-            });
-
-            // Aggiungi al DOM e prova autoplay
-            mediaContainer.appendChild(audioElement);
-            
-            setTimeout(() => {
-                console.log('▶️ Tentativo autoplay audio...');
-                audioElement.play().then(() => {
-                    console.log('✅ Autoplay audio avviato');
-                }).catch(error => {
-                    console.log('⚠️ Autoplay audio bloccato, richiesta interazione utente');
-                    loadingMsg.innerHTML = '🎵 <strong>Audio pronto!</strong><br><small>Clicca PLAY per ascoltare</small>';
-                    timerInfo.innerHTML = '⏰ <em>Il timer partirà dopo la riproduzione</em>';
-                    
-                    // Se dopo 10 secondi non è partito, continua comunque
-                    setTimeout(() => {
-                        if (!audioElement.ended) {
-                            console.log('🔄 Timeout audio, continuo comunque');
-                            resolve();
-                        }
-                    }, 10000);
-                });
-            }, 500);
-
-        // GESTIONE VIDEO  
-        } else if (mediaUrl.includes('.mp4')) {
-            console.log('🎬 Riconosciuto come VIDEO');
-            
-            const videoElement = document.createElement('video');
-            videoElement.controls = true;
-            videoElement.src = mediaUrl;
-            videoElement.style.cssText = `
-                max-width: 500px;
-                width: 100%;
-                margin: 15px 0;
-                border-radius: 10px;
-                background: #000;
-            `;
-            videoElement.className = 'media-element';
-
-            // EVENTI VIDEO
-            videoElement.addEventListener('loadeddata', () => {
-                console.log('✅ Video caricato con successo');
-                loadingMsg.innerHTML = '🎬 <strong>Video pronto!</strong><br><small>Riproduzione in corso...</small>';
-                loadingMsg.style.background = 'rgba(138,43,226,0.1)';
-                loadingMsg.style.borderColor = 'var(--accent-purple)';
-            });
-
-            videoElement.addEventListener('canplaythrough', () => {
-                console.log('▶️ Video pronto per la riproduzione');
-            });
-
-            videoElement.addEventListener('ended', () => {
-                console.log('⏹️ Video terminato, avvio timer');
-                onMediaReady();
-            });
-
-            videoElement.addEventListener('error', (e) => {
-                console.error('❌ Errore video:', e);
-                onMediaError('video');
-            });
-
-            // Aggiungi al DOM e prova autoplay
-            mediaContainer.appendChild(videoElement);
-            
-            setTimeout(() => {
-                console.log('▶️ Tentativo autoplay video...');
-                videoElement.play().then(() => {
-                    console.log('✅ Autoplay video avviato');
-                }).catch(error => {
-                    console.log('⚠️ Autoplay video bloccato, richiesta interazione utente');
-                    loadingMsg.innerHTML = '🎬 <strong>Video pronto!</strong><br><small>Clicca PLAY per guardare</small>';
-                    timerInfo.innerHTML = '⏰ <em>Il timer partirà dopo la riproduzione</em>';
-                    
-                    // Timeout di sicurezza
-                    setTimeout(() => {
-                        if (!videoElement.ended) {
-                            console.log('🔄 Timeout video, continuo comunque');
-                            resolve();
-                        }
-                    }, 15000);
-                });
-            }, 500);
-
-        // GESTIONE IMMAGINI
-        } else if (mediaUrl.includes('.jpg') || mediaUrl.includes('.png') || mediaUrl.includes('.jpeg')) {
-            console.log('🖼️ Riconosciuto come IMMAGINE');
-            
-            const imgElement = document.createElement('img');
-            imgElement.src = mediaUrl;
-            imgElement.className = 'media-element';
-            imgElement.style.cssText = `
-                max-width: 400px;
-                max-height: 300px;
-                border-radius: 10px;
-                box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-            `;
-
-            imgElement.onload = () => {
-                console.log('✅ Immagine caricata con successo');
-                loadingMsg.innerHTML = '🖼️ <strong>Immagine caricata!</strong>';
-                loadingMsg.style.background = 'rgba(0,255,0,0.1)';
-                loadingMsg.style.borderColor = 'var(--accent-green)';
-                
-                // Per le immagini, parti SUBITO (non aspettare)
-                setTimeout(() => {
-                    onMediaReady();
-                }, 1000);
-            };
-
-            imgElement.onerror = () => {
-                console.error('❌ Errore caricamento immagine');
-                onMediaError('immagine');
-            };
-
-            mediaContainer.appendChild(imgElement);
-
-        // TIPO NON SUPPORTATO
-        } else {
-            console.warn('⚠️ Tipo media non supportato:', mediaUrl);
-            onMediaError('tipo non supportato');
+        function getTimerDuration(question) {
+            if (question.type === "chronological") return 30;
+            if (question.media && question.media !== "") return 20;
+            return 15;
         }
-    });
-}
 
-function startQuestion(question) {
-    const timerDuration = getTimerDuration(question);
-    
-    console.log(`⏰ Timer duration: ${timerDuration}s per tipo: ${question.type}`);
-    console.log(`🎵 Media: ${question.media || 'nessuno'}`);
-    
-    // Gestione media
-    if (question.media && question.media !== "") {
-        console.log('🎵 Media detected:', question.media);
-        
-        if (question.media.includes('.mp3') || question.media.includes('.wav') || question.media.includes('.mp4')) {
-            // Audio/Video - abbassa musica e aspetta fine riproduzione
-            console.log('🔊 Audio/Video detected, abbasso musica');
-            audio.gameMusic.volume = 0.1;
-            
-            // Timeout di sicurezza per evitare blocchi
-            const safetyTimeout = setTimeout(() => {
-                console.log('🔄 Safety timeout - continuo comunque');
-                audio.gameMusic.volume = 0.3;
-                startTimer(timerDuration);
-            }, 30000); // 30 secondi massimo
-            
-            playMedia(question.media).then(() => {
-                clearTimeout(safetyTimeout);
-                console.log('⏰ Media finito, avvio timer di', timerDuration, 'secondi');
-                audio.gameMusic.volume = 0.3;
-                startTimer(timerDuration);
-            }).catch(error => {
-                clearTimeout(safetyTimeout);
-                console.error('❌ Errore media, continuo comunque:', error);
-                audio.gameMusic.volume = 0.3;
-                startTimer(timerDuration);
+        async function playMedia(mediaUrl) {
+            return new Promise((resolve) => {
+                const mediaContainer = document.getElementById('mediaContainer');
+                mediaContainer.style.display = 'block';
+                mediaContainer.innerHTML = '';
+
+                console.log('🎵 Riproduzione media:', mediaUrl);
+
+                if (mediaUrl.includes('.mp3') || mediaUrl.includes('.wav')) {
+                    const audioElement = document.createElement('audio');
+                    audioElement.controls = true;
+                    audioElement.src = mediaUrl;
+                    audioElement.style.width = '100%';
+                    audioElement.style.maxWidth = '400px';
+                    
+                    audioElement.addEventListener('ended', () => {
+                        console.log('🎵 Audio terminato');
+                        resolve();
+                    });
+                    
+                    audioElement.addEventListener('error', () => {
+                        console.error('❌ Errore audio');
+                        resolve();
+                    });
+                    
+                    mediaContainer.appendChild(audioElement);
+                    
+                    // Prova autoplay
+                    audioElement.play().catch(() => {
+                        console.log('⚠️ Autoplay bloccato');
+                        resolve();
+                    });
+                    
+                } else if (mediaUrl.includes('.mp4')) {
+                    const videoElement = document.createElement('video');
+                    videoElement.controls = true;
+                    videoElement.src = mediaUrl;
+                    videoElement.style.maxWidth = '500px';
+                    videoElement.className = 'media-element';
+                    
+                    videoElement.addEventListener('ended', () => {
+                        console.log('🎬 Video terminato');
+                        resolve();
+                    });
+                    
+                    videoElement.addEventListener('error', () => {
+                        console.error('❌ Errore video');
+                        resolve();
+                    });
+                    
+                    mediaContainer.appendChild(videoElement);
+                    
+                    // Prova autoplay
+                    videoElement.play().catch(() => {
+                        console.log('⚠️ Autoplay video bloccato');
+                        resolve();
+                    });
+                }
             });
-        } else {
-            // Immagini - timer parte immediatamente
-            console.log('🖼️ Immagine detected, timer parte subito');
-            startTimer(timerDuration);
         }
-    } else {
-        // Nessun media - timer normale
-        console.log('📝 Nessun media, avvio timer di', timerDuration, 'secondi');
-        startTimer(timerDuration);
-    }
-}
+
+        function startQuestion(question) {
+            const timerDuration = getTimerDuration(question);
+            
+            console.log(`⏰ Timer: ${timerDuration}s per tipo: ${question.type}`);
+            
+            // Gestione media
+            if (question.media && question.media !== "") {
+                if (question.media.includes('.mp3') || question.media.includes('.wav') || question.media.includes('.mp4')) {
+                    // Audio/Video - abbassa musica e aspetta fine riproduzione
+                    console.log('🎵 Media audio/video, abbasso musica');
+                    audio.gameMusic.volume = 0.1;
+                    
+                    playMedia(question.media).then(() => {
+                        console.log('⏰ Media finito, avvio timer');
+                        audio.gameMusic.volume = 0.3;
+                        startTimer(timerDuration);
+                    });
+                } else {
+                    // Immagini - timer parte immediatamente
+                    console.log('🖼️ Immagine, timer parte subito');
+                    
+                    // Mostra immagine
+                    const mediaContainer = document.getElementById('mediaContainer');
+                    mediaContainer.style.display = 'block';
+                    mediaContainer.innerHTML = '';
+                    
+                    const imgElement = document.createElement('img');
+                    imgElement.src = question.media;
+                    imgElement.className = 'media-element';
+                    imgElement.onerror = () => {
+                        console.error('❌ Errore caricamento immagine');
+                        mediaContainer.innerHTML = '<div style="color: var(--accent-red);">❌ Immagine non disponibile</div>';
+                    };
+                    mediaContainer.appendChild(imgElement);
+                    
+                    startTimer(timerDuration);
+                }
+            } else {
+                // Nessun media - timer normale
+                console.log('📝 Nessun media, timer normale');
+                startTimer(timerDuration);
+            }
+        }
 
         // === VARIABILI DI STATO ===
         let currentQuestion = 0;
@@ -1883,7 +1651,8 @@ function startQuestion(question) {
             showAnswerBtn: document.getElementById('showAnswerBtn'),
             finalLeaderboard: document.getElementById('finalLeaderboard'),
             podium: document.getElementById('podium'),
-            restartBtn: document.getElementById('restartBtn')
+            restartBtn: document.getElementById('restartBtn'),
+            mediaContainer: document.getElementById('mediaContainer')
         };
 
         // === INIZIALIZZAZIONE ===
@@ -2064,143 +1833,86 @@ function startQuestion(question) {
             }, 500);
         }
 
-function loadQuestion(index) {
-    if (index >= questions.length) {
-        endGame();
-        return;
-    }
-
-    currentQuestion = index;
-    const question = questions[index];
-    
-    playerAnswers = [];
-    answersRevealed = false;
-    
-    console.log(`🔄 Caricando domanda ${index + 1}: "${question.question}"`);
-    console.log(`📊 Tipo: ${question.type}, Media: ${question.media || 'nessuno'}`);
-    
-    elements.questionCounter.textContent = `QUESTION ${index + 1}/${questions.length}`;
-    elements.questionText.textContent = question.question;
-    
-    // Reset media container
-    elements.mediaContainer.style.display = 'none';
-    elements.mediaContainer.innerHTML = '';
-    
-    // === AGGIUNGI QUESTO CODICE ===
-    // MOSTRA MEDIA SE PRESENTE (IMMAGINI, AUDIO, VIDEO)
-    if (question.media && question.media !== "") {
-        console.log('🎵 CARICAMENTO MEDIA:', question.media);
-        elements.mediaContainer.style.display = 'block';
-        
-        if (question.media.includes('.mp3') || question.media.includes('.wav')) {
-            // AUDIO
-            console.log('🔊 Creando player audio');
-            const audioElement = document.createElement('audio');
-            audioElement.controls = true;
-            audioElement.src = question.media; // <-- QUI USA IL PERCORSO DELLA DOMANDA
-            audioElement.style.width = '100%';
-            audioElement.style.maxWidth = '400px';
-            audioElement.onerror = () => console.error('❌ Errore caricamento audio');
-            elements.mediaContainer.appendChild(audioElement);
-            
-        } else if (question.media.includes('.mp4')) {
-            // VIDEO
-            console.log('🎬 Creando player video');
-            const videoElement = document.createElement('video');
-            videoElement.controls = true;
-            videoElement.src = question.media; // <-- QUI USA IL PERCORSO DELLA DOMANDA
-            videoElement.style.maxWidth = '500px';
-            videoElement.className = 'media-element';
-            videoElement.onerror = () => console.error('❌ Errore caricamento video');
-            elements.mediaContainer.appendChild(videoElement);
-            
-        } else if (question.media.includes('.jpg') || question.media.includes('.png') || question.media.includes('.jpeg')) {
-            // IMMAGINE
-            console.log('🖼️ Creando immagine');
-            const imgElement = document.createElement('img');
-            imgElement.src = question.media; // <-- QUI USA IL PERCORSO DELLA DOMANDA
-            imgElement.className = 'media-element';
-            imgElement.alt = 'Immagine domanda';
-            imgElement.onload = () => console.log('✅ Immagine caricata');
-            imgElement.onerror = () => {
-                console.error('❌ Errore caricamento immagine:', question.media);
-                elements.mediaContainer.innerHTML = '<div style="color: var(--accent-red); text-align: center;">❌ Immagine non disponibile</div>';
-            };
-            elements.mediaContainer.appendChild(imgElement);
-        }
-    }
-    // === FINE CODICE AGGIUNTO ===
-    
-    // Pulisci e ricrea le risposte
-    elements.answersGrid.innerHTML = '';
-    console.log(`📝 Creando ${question.answers.length} risposte`);
-    
-    question.answers.forEach((answer, i) => {
-        const div = document.createElement('div');
-        div.className = 'answer-option';
-        div.textContent = answer;
-        elements.answersGrid.appendChild(div);
-    });
-    
-    // Reset Firebase answers
-    database.ref('games/' + gameCode + '/answers').remove();
-    
-    updateAnswersProgress();
-    
-    // Aggiorna Firebase con la domanda corrente
-    database.ref('games/' + gameCode).update({
-        currentQuestion: index,
-        currentQuestionData: question
-    });
-    
-    console.log('🎯 Avvio sistema timer dinamico...');
-    // AVVIA IL SISTEMA TIMER DINAMICO
-    startQuestion(question);
-}
-       function startTimer(duration = 20) {
-    console.log(`⏰ AVVIO TIMER: ${duration} secondi`);
-    
-    timeLeft = duration;
-    elements.timer.textContent = timeLeft;
-    elements.timer.classList.remove('warning');
-    elements.nextBtn.disabled = true;
-    elements.nextBtn.innerHTML = '<span>⏳</span> WAITING...';
-    
-    // Ferma qualsiasi timer precedente
-    clearInterval(timer);
-    
-    timer = setInterval(() => {
-        timeLeft--;
-        elements.timer.textContent = timeLeft;
-        console.log(`⏰ Timer: ${timeLeft}s`);
-        
-        if (timeLeft <= 5) {
-            elements.timer.classList.add('warning');
-            if (timeLeft === 3 || timeLeft === 2 || timeLeft === 1) {
-                audio.playSFX('timerSound');
+        function loadQuestion(index) {
+            if (index >= questions.length) {
+                endGame();
+                return;
             }
+
+            currentQuestion = index;
+            const question = questions[index];
+            
+            playerAnswers = [];
+            answersRevealed = false;
+            
+            console.log(`🔄 Caricando domanda ${index + 1}: ${question.question}`);
+            console.log(`📊 Tipo: ${question.type}, Media: ${question.media || 'nessuno'}`);
+            
+            elements.questionCounter.textContent = `QUESTION ${index + 1}/${questions.length}`;
+            elements.questionText.textContent = question.question;
+            
+            // Reset media container
+            elements.mediaContainer.style.display = 'none';
+            elements.mediaContainer.innerHTML = '';
+            
+            elements.answersGrid.innerHTML = '';
+            database.ref('games/' + gameCode + '/answers').remove();
+            
+            updateAnswersProgress();
+            
+            question.answers.forEach((answer, i) => {
+                const div = document.createElement('div');
+                div.className = 'answer-option';
+                div.textContent = answer;
+                elements.answersGrid.appendChild(div);
+            });
+            
+            database.ref('games/' + gameCode).update({
+                currentQuestion: index,
+                currentQuestionData: question
+            });
+            
+            // USA IL NUOVO SISTEMA TIMER DINAMICO
+            startQuestion(question);
         }
-        
-        // Controlla se tutti hanno risposto
-        if (checkAllPlayersAnswered() && timeLeft > 0 && !answersRevealed) {
-            console.log('⏰ Timer fermato - tutti hanno risposto');
+
+        function startTimer(duration = 20) {
+            timeLeft = duration;
+            elements.timer.textContent = timeLeft;
+            elements.timer.classList.remove('warning');
+            elements.nextBtn.disabled = true;
+            elements.nextBtn.innerHTML = '<span>⏳</span> WAITING...';
+            
             clearInterval(timer);
-            showCorrectAnswer();
-            elements.nextBtn.disabled = false;
-            elements.nextBtn.innerHTML = '<span>➡️</span> NEXT QUESTION';
-            elements.timer.textContent = "🎉 ALL RESPONSES IN!";
-            return;
+            timer = setInterval(() => {
+                timeLeft--;
+                elements.timer.textContent = timeLeft;
+                
+                if (timeLeft <= 5) {
+                    elements.timer.classList.add('warning');
+                    if (timeLeft === 3 || timeLeft === 2 || timeLeft === 1) {
+                        audio.playSFX('timerSound');
+                    }
+                }
+                
+                if (checkAllPlayersAnswered() && timeLeft > 0 && !answersRevealed) {
+                    console.log('⏰ Timer fermato - tutti hanno risposto');
+                    clearInterval(timer);
+                    showCorrectAnswer();
+                    elements.nextBtn.disabled = false;
+                    elements.nextBtn.innerHTML = '<span>➡️</span> NEXT QUESTION';
+                    elements.timer.textContent = "🎉 ALL RESPONSES IN!";
+                    return;
+                }
+                
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    showCorrectAnswer();
+                    elements.nextBtn.disabled = false;
+                    elements.nextBtn.innerHTML = '<span>➡️</span> NEXT QUESTION';
+                }
+            }, 1000);
         }
-        
-        if (timeLeft <= 0) {
-            console.log('⏰ Timer scaduto');
-            clearInterval(timer);
-            showCorrectAnswer();
-            elements.nextBtn.disabled = false;
-            elements.nextBtn.innerHTML = '<span>➡️</span> NEXT QUESTION';
-        }
-    }, 1000);
-}
 
         function showCorrectAnswer() {
             const question = questions[currentQuestion];
@@ -2401,7 +2113,3 @@ function loadQuestion(index) {
     </script>
 </body>
 </html>
-
-
-
-
