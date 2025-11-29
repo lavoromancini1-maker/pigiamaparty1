@@ -1677,21 +1677,17 @@ function shuffleArray(array) {
             }, 500);
         }
 
-       function startTimer() {
+function startTimer() {
     timeLeft = 20;
     elements.timer.textContent = timeLeft;
     elements.timer.classList.remove('warning');
     
     // FERMA EVENTUALI TIMER PRECEDENTI
     clearInterval(timer);
-    clearTimeout(timerSoundTimeout);
     
     timer = setInterval(() => {
         timeLeft--;
         elements.timer.textContent = timeLeft;
-                }
-            }
-        }
         
         if (timeLeft <= 0) {
             clearInterval(timer);
@@ -1846,6 +1842,7 @@ function shuffleArray(array) {
     </script>
 </body>
 </html>
+
 
 
 
