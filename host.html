@@ -1508,132 +1508,120 @@
     return 20; // 20 secondi per domande normali
 }
 
-       async function playMedia(mediaUrl) {
-    return new Promise((resolve) => {
-        const mediaContainer = document.getElementById('mediaContainer');
-        mediaContainer.style.display = 'block';
-        mediaContainer.innerHTML = '';
+    function playMedia(mediaUrl) {
+    const mediaContainer = document.getElementById('mediaContainer');
+    mediaContainer.style.display = 'block';
+    mediaContainer.innerHTML = '';
 
-        console.log('🎵 Riproduzione media:', mediaUrl);
+    console.log('🎵 Riproduzione media:', mediaUrl);
 
-        if (mediaUrl.includes('.mp3') || mediaUrl.includes('.wav')) {
-            const audioElement = document.createElement('audio');
-            audioElement.controls = true;
-            audioElement.src = mediaUrl;
-            audioElement.style.width = '100%';
-            audioElement.style.maxWidth = '400px';
-            audioElement.volume = 0.8; // Volume alto per l'audio della domanda
-            
-            // FERMA COMPLETAMENTE LA MUSICA DURANTE LA RIPRODUZIONE AUDIO
-            stopBackgroundMusicForMedia();
-            
-            audioElement.addEventListener('loadeddata', () => {
-                console.log('🎵 Audio caricato, inizio riproduzione...');
-            });
-            
-            audioElement.addEventListener('play', () => {
-                console.log('🎵 Audio in riproduzione, musica di sottofondo fermata');
-            });
-            
-            audioElement.addEventListener('ended', () => {
-                console.log('🎵 Audio terminato');
-                // RIPRISTINA LA MUSICA
-                resumeBackgroundMusicAfterMedia();
-                resolve();
-            });
-            
-            audioElement.addEventListener('pause', () => {
-                console.log('🎵 Audio in pausa');
-                // RIPRISTINA LA MUSICA SE L'AUDIO SI FERMA
-                resumeBackgroundMusicAfterMedia();
-            });
-            
-            audioElement.addEventListener('error', (e) => {
-                console.error('❌ Errore audio:', e);
-                // RIPRISTINA LA MUSICA IN CASO DI ERRORE
-                resumeBackgroundMusicAfterMedia();
-                resolve();
-            });
-            
-            mediaContainer.appendChild(audioElement);
-            
-            // Prova autoplay
-            audioElement.play().catch((error) => {
-                console.log('⚠️ Autoplay bloccato:', error);
-                // Mostra messaggio per l'utente
-                mediaContainer.innerHTML += `
-                    <div style="color: var(--accent-gold); margin-top: 10px; font-weight: 600;">
-                        🔇 Clicca play per ascoltare l'audio
-                    </div>
-                `;
-                // RIPRISTINA LA MUSICA SE AUTOPLAY FALLISCE
-                resumeBackgroundMusicAfterMedia();
-                resolve();
-            });
-            
-        } else if (mediaUrl.includes('.mp4')) {
-            const videoElement = document.createElement('video');
-            videoElement.controls = true;
-            videoElement.src = mediaUrl;
-            videoElement.style.maxWidth = '500px';
-            videoElement.className = 'media-element';
-            videoElement.volume = 0.8; // Volume alto per il video
-            
-            // ABBASSA LA MUSICA PER IL VIDEO
-            lowerBackgroundMusic();
-            
-            videoElement.addEventListener('loadeddata', () => {
-                console.log('🎬 Video caricato, pronto per la riproduzione');
-            });
-            
-            videoElement.addEventListener('play', () => {
-                console.log('🎬 Video in riproduzione, musica abbassata');
-            });
-            
-            videoElement.addEventListener('ended', () => {
-                console.log('🎬 Video terminato');
-                // RIPRISTINA LA MUSICA
-                restoreBackgroundMusic();
-                resolve();
-            });
-            
-            videoElement.addEventListener('pause', () => {
-                console.log('🎬 Video in pausa');
-                // RIPRISTINA LA MUSICA SE IL VIDEO SI FERMA
-                restoreBackgroundMusic();
-            });
-            
-            videoElement.addEventListener('error', (e) => {
-                console.error('❌ Errore video:', e);
-                // RIPRISTINA LA MUSICA IN CASO DI ERRORE
-                restoreBackgroundMusic();
-                resolve();
-            });
-            
-            mediaContainer.appendChild(videoElement);
-            
-            // Prova autoplay
-            videoElement.play().catch((error) => {
-                console.log('⚠️ Autoplay video bloccato:', error);
-                // Mostra messaggio per l'utente
-                mediaContainer.innerHTML += `
-                    <div style="color: var(--accent-gold); margin-top: 10px; font-weight: 600;">
-                        🔇 Clicca play per guardare il video
-                    </div>
-                `;
-                // RIPRISTINA LA MUSICA SE AUTOPLAY FALLISCE
-                restoreBackgroundMusic();
-                resolve();
-            });
-        } else {
-            // Per altri tipi di media, risolvi immediatamente
-            console.log('📁 Tipo media non supportato:', mediaUrl);
-            resolve();
-        }
-    });
+    if (mediaUrl.includes('.mp3') || mediaUrl.includes('.wav')) {
+        const audioElement = document.createElement('audio');
+        audioElement.controls = true;
+        audioElement.src = mediaUrl;
+        audioElement.style.width = '100%';
+        audioElement.style.maxWidth = '400px';
+        audioElement.volume = 1.0; // VOLUME MASSIMO per l'audio della domanda
+        
+        // FERMA COMPLETAMENTE LA MUSICA per AUDIO
+        stopBackgroundMusicForMedia();
+        
+        audioElement.addEventListener('loadeddata', () => {
+            console.log('🎵 Audio caricato, pronto per la riproduzione');
+        });
+        
+        audioElement.addEventListener('play', () => {
+            console.log('🎵 Audio in riproduzione, musica di sottofondo FERMATA');
+        });
+        
+        audioElement.addEventListener('ended', () => {
+            console.log('🎵 Audio terminato');
+            // RIPRISTINA LA MUSICA
+            resumeBackgroundMusicAfterMedia();
+        });
+        
+        audioElement.addEventListener('pause', () => {
+            console.log('🎵 Audio in pausa');
+            // RIPRISTINA LA MUSICA SE L'AUDIO SI FERMA
+            resumeBackgroundMusicAfterMedia();
+        });
+        
+        audioElement.addEventListener('error', (e) => {
+            console.error('❌ Errore audio:', e);
+            // RIPRISTINA LA MUSICA IN CASO DI ERRORE
+            resumeBackgroundMusicAfterMedia();
+        });
+        
+        mediaContainer.appendChild(audioElement);
+        
+        // Prova autoplay
+        audioElement.play().catch((error) => {
+            console.log('⚠️ Autoplay bloccato:', error);
+            mediaContainer.innerHTML += `
+                <div style="color: var(--accent-gold); margin-top: 10px; font-weight: 600;">
+                    🔇 Clicca play per ascoltare l'audio
+                </div>
+            `;
+            // RIPRISTINA LA MUSICA SE AUTOPLAY FALLISCE
+            resumeBackgroundMusicAfterMedia();
+        });
+        
+    } else if (mediaUrl.includes('.mp4')) {
+        const videoElement = document.createElement('video');
+        videoElement.controls = true;
+        videoElement.src = mediaUrl;
+        videoElement.style.maxWidth = '500px';
+        videoElement.className = 'media-element';
+        videoElement.volume = 1.0; // VOLUME MASSIMO per il video
+        
+        // ABBASSA MOLTO LA MUSICA per VIDEO (2%)
+        lowerBackgroundMusic();
+        
+        videoElement.addEventListener('loadeddata', () => {
+            console.log('🎬 Video caricato, pronto per la riproduzione');
+        });
+        
+        videoElement.addEventListener('play', () => {
+            console.log('🎬 Video in riproduzione, musica abbassata al 2%');
+        });
+        
+        videoElement.addEventListener('ended', () => {
+            console.log('🎬 Video terminato');
+            // RIPRISTINA LA MUSICA
+            restoreBackgroundMusic();
+        });
+        
+        videoElement.addEventListener('pause', () => {
+            console.log('🎬 Video in pausa');
+            // RIPRISTINA LA MUSICA SE IL VIDEO SI FERMA
+            restoreBackgroundMusic();
+        });
+        
+        videoElement.addEventListener('error', (e) => {
+            console.error('❌ Errore video:', e);
+            // RIPRISTINA LA MUSICA IN CASO DI ERRORE
+            restoreBackgroundMusic();
+        });
+        
+        mediaContainer.appendChild(videoElement);
+        
+        // Prova autoplay
+        videoElement.play().catch((error) => {
+            console.log('⚠️ Autoplay video bloccato:', error);
+            mediaContainer.innerHTML += `
+                <div style="color: var(--accent-gold); margin-top: 10px; font-weight: 600;">
+                    🔇 Clicca play per guardare il video
+                </div>
+            `;
+            // RIPRISTINA LA MUSICA SE AUTOPLAY FALLISCE
+            restoreBackgroundMusic();
+        });
+    } else {
+        console.log('📁 Tipo media non supportato:', mediaUrl);
+    }
 }
 
-     function startQuestion(question) {
+function startQuestion(question) {
     const timerDuration = getTimerDuration(question);
     
     console.log(`⏰ Timer: ${timerDuration}s per tipo: ${question.type}, media: ${question.media || 'nessuno'}`);
@@ -1642,20 +1630,20 @@
     elements.mediaContainer.style.display = 'none';
     elements.mediaContainer.innerHTML = '';
     
-    // Gestione media
+    // Gestione media - TIMER PARTE SUBITO, NON ASPETTA LA FINE
     if (question.media && question.media !== "") {
         if (question.media.includes('.mp3') || question.media.includes('.wav') || question.media.includes('.mp4')) {
-            console.log('🎵 Media audio/video, abbasso musica');
+            console.log('🎵 Media audio/video, abbasso musica e avvio timer SUBITO');
             
+            // Abbassa la musica ma AVVIA SUBITO IL TIMER
             lowerBackgroundMusic();
             
-            playMedia(question.media).then(() => {
-                console.log('⏰ Media finito, ripristino musica e avvio timer');
-                restoreBackgroundMusic();
-                
-                // SOLO DOPO CHE IL MEDIA È FINITO, PARTE IL TIMER
-                startTimer(timerDuration);
-            });
+            // Mostra il media
+            playMedia(question.media);
+            
+            // TIMER PARTE IMMEDIATAMENTE, NON ASPETTA LA FINE DEL MEDIA
+            startTimer(timerDuration);
+            
         } else {
             // Immagini - timer parte immediatamente
             console.log('🖼️ Immagine, timer parte subito');
@@ -1673,7 +1661,6 @@
             };
             mediaContainer.appendChild(imgElement);
             
-            // PER LE IMMAGINI, TIMER PARTE SUBITO
             startTimer(timerDuration);
         }
     } else {
@@ -1685,22 +1672,24 @@
 
         // === FUNZIONI PER GESTIONE MUSICA DI SOTTOFONDO ===
 
+// === FUNZIONI PER GESTIONE MUSICA DI SOTTOFONDO ===
+
 function lowerBackgroundMusic() {
     if (!audio.audioActivated || !audio.musicEnabled) return;
     
-    console.log('🔉 Abbasso musica di sottofondo...');
+    console.log('🔉 Abbasso musica di sottofondo al 2%...');
     
     // Salva il volume corrente
     audio.originalVolume = audio.gameMusic.volume;
     
-    // Abbassa gradualmente il volume
+    // Abbassa gradualmente il volume FINO AL 2% (molto basso)
     const fadeOut = setInterval(() => {
-        if (audio.gameMusic.volume > 0.05) {
+        if (audio.gameMusic.volume > 0.02) {
             audio.gameMusic.volume -= 0.05;
         } else {
-            audio.gameMusic.volume = 0.05; // Volume molto basso ma non zero
+            audio.gameMusic.volume = 0.02; // Volume MOLTO basso (2%)
             clearInterval(fadeOut);
-            console.log('🔉 Musica abbassata al 5%');
+            console.log('🔉 Musica abbassata al 2%');
         }
     }, 50);
 }
@@ -1718,7 +1707,7 @@ function restoreBackgroundMusic() {
         } else {
             audio.gameMusic.volume = targetVolume;
             clearInterval(fadeIn);
-            console.log('🔊 Musica ripristinata al volume normale');
+            console.log('🔊 Musica ripristinata al volume normale (30%)');
         }
     }, 50);
 }
@@ -1726,14 +1715,14 @@ function restoreBackgroundMusic() {
 function stopBackgroundMusicForMedia() {
     if (!audio.audioActivated || !audio.musicEnabled) return;
     
-    console.log('🔇 Fermo musica per riproduzione media...');
-    audio.gameMusic.volume = 0;
+    console.log('🔇 Fermo COMPLETAMENTE musica per riproduzione AUDIO...');
+    audio.gameMusic.volume = 0; // Volume ZERO per audio
 }
 
 function resumeBackgroundMusicAfterMedia() {
     if (!audio.audioActivated || !audio.musicEnabled) return;
     
-    console.log('🔊 Riprendo musica dopo media...');
+    console.log('🔊 Riprendo musica dopo audio...');
     audio.gameMusic.volume = audio.originalVolume || 0.3;
 }
 
@@ -2237,6 +2226,7 @@ elements.skipTimerBtn.addEventListener('click', function() {
     </script>
 </body>
 </html>
+
 
 
 
