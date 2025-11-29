@@ -2055,14 +2055,21 @@ function showCorrectAnswer() {
     elements.timer.textContent = "0";
 }
 
-        function revealAnswersToPlayers() {
-            console.log('🎯 Rivelando risposte a tutti i player...');
-            
-            database.ref('games/' + gameCode).update({
-                answersRevealed: true,
-                currentQuestion: currentQuestion
-            });
-        }
+function revealAnswersToPlayers() {
+    console.log('🎯 Rivelando risposte a TUTTI i player...');
+    
+    database.ref('games/' + gameCode).update({
+        answersRevealed: true,
+        currentQuestion: currentQuestion,
+        // FORZA l'aggiornamento per tutti i player
+        lastUpdate: Date.now()
+    });
+    
+    // Aggiungi un ulteriore aggiornamento per sicurezza
+    setTimeout(() => {
+        database.ref('games/' + gameCode + '/answersRevealed').set(true);
+    }, 100);
+}
 
 function showAnswerManually() {
     if (!answersRevealed) {
@@ -2230,6 +2237,7 @@ elements.skipTimerBtn.addEventListener('click', function() {
     </script>
 </body>
 </html>
+
 
 
 
