@@ -1520,6 +1520,23 @@ const questions = [
     }
 ];
 
+        // === DEBUG DETTAGLIATO ===
+function debugQuestionLoading() {
+    console.log('=== 🐛 DEBUG DOMANDE ===');
+    questions.forEach((q, index) => {
+        console.log(`Domanda ${index + 1}:`, {
+            testo: q.question.substring(0, 50) + '...',
+            tipo: q.type,
+            media: q.media || 'nessuno',
+            risposte: q.answers.length
+        });
+    });
+    console.log('=== FINE DEBUG ===');
+}
+
+// Chiamala subito
+setTimeout(debugQuestionLoading, 1000);
+
         // === UTILITY PER VERIFICARE FILE MEDIA ===
 function checkMediaFiles() {
     questions.forEach((q, index) => {
@@ -1539,6 +1556,33 @@ function getTimerDuration(question) {
     if (question.media && question.media !== "") return 20;
     return 15;
 }
+
+        // === VERIFICA STRUTTURA FILE ===
+function verifyFileStructure() {
+    console.log('=== 📁 VERIFICA STRUTTURA FILE ===');
+    
+    // Crea elementi di test per verificare i file
+    const testFiles = [
+        'audio/sampleaudio.mp3',
+        'video/samplevideo.mp4', 
+        'images/sampleimage.jpg'
+    ];
+    
+    testFiles.forEach(file => {
+        const tester = file.includes('.mp3') || file.includes('.mp4') 
+            ? document.createElement('audio') 
+            : document.createElement('img');
+            
+        tester.src = file;
+        tester.onerror = () => console.error(`❌ FILE NON TROVATO: ${file}`);
+        tester.onload = () => console.log(`✅ FILE OK: ${file}`);
+    });
+    
+    console.log('=== FINE VERIFICA ===');
+}
+
+// Chiamala dopo 3 secondi
+setTimeout(verifyFileStructure, 3000);
 
 async function playMedia(mediaUrl) {
     return new Promise((resolve) => {
@@ -1768,6 +1812,7 @@ function startQuestion(question) {
     const timerDuration = getTimerDuration(question);
     
     console.log(`⏰ Timer duration: ${timerDuration}s per tipo: ${question.type}`);
+    console.log(`🎵 Media: ${question.media || 'nessuno'}`);
     
     // Gestione media
     if (question.media && question.media !== "") {
@@ -1778,12 +1823,20 @@ function startQuestion(question) {
             console.log('🔊 Audio/Video detected, abbasso musica');
             audio.gameMusic.volume = 0.1;
             
+            // Timeout di sicurezza per evitare blocchi
+            const safetyTimeout = setTimeout(() => {
+                console.log('🔄 Safety timeout - continuo comunque');
+                audio.gameMusic.volume = 0.3;
+                startTimer(timerDuration);
+            }, 30000); // 30 secondi massimo
+            
             playMedia(question.media).then(() => {
+                clearTimeout(safetyTimeout);
                 console.log('⏰ Media finito, avvio timer di', timerDuration, 'secondi');
-                // Ripristina volume musica
                 audio.gameMusic.volume = 0.3;
                 startTimer(timerDuration);
             }).catch(error => {
+                clearTimeout(safetyTimeout);
                 console.error('❌ Errore media, continuo comunque:', error);
                 audio.gameMusic.volume = 0.3;
                 startTimer(timerDuration);
@@ -2023,7 +2076,8 @@ function loadQuestion(index) {
     playerAnswers = [];
     answersRevealed = false;
     
-    console.log(`🔄 Caricando domanda ${index + 1} - Tipo: ${question.type} - Media: ${question.media || 'nessuno'}`);
+    console.log(`🔄 Caricando domanda ${index + 1}: "${question.question}"`);
+    console.log(`📊 Tipo: ${question.type}, Media: ${question.media || 'nessuno'}`);
     
     elements.questionCounter.textContent = `QUESTION ${index + 1}/${questions.length}`;
     elements.questionText.textContent = question.question;
@@ -2032,15 +2086,17 @@ function loadQuestion(index) {
     elements.mediaContainer.style.display = 'none';
     elements.mediaContainer.innerHTML = '';
     
-    // Mostra IMMAGINI immediatamente (audio/video gestiti dopo)
+    // Mostra IMMAGINI immediatamente
     if (question.media && (question.media.includes('.jpg') || question.media.includes('.png') || question.media.includes('.jpeg'))) {
-        console.log('🖼️ Caricamento immagine immediato');
+        console.log('🖼️ Caricamento immagine:', question.media);
         elements.mediaContainer.style.display = 'block';
         const imgElement = document.createElement('img');
         imgElement.src = question.media;
         imgElement.className = 'media-element';
+        imgElement.alt = 'Immagine domanda';
+        imgElement.onload = () => console.log('✅ Immagine caricata con successo');
         imgElement.onerror = () => {
-            console.error('❌ Errore caricamento immagine');
+            console.error('❌ Errore caricamento immagine:', question.media);
             elements.mediaContainer.innerHTML = '<div style="color: var(--accent-red); text-align: center;">❌ Immagine non disponibile</div>';
         };
         elements.mediaContainer.appendChild(imgElement);
@@ -2048,6 +2104,8 @@ function loadQuestion(index) {
     
     // Pulisci e ricrea le risposte
     elements.answersGrid.innerHTML = '';
+    console.log(`📝 Creando ${question.answers.length} risposte`);
+    
     question.answers.forEach((answer, i) => {
         const div = document.createElement('div');
         div.className = 'answer-option';
@@ -2066,21 +2124,26 @@ function loadQuestion(index) {
         currentQuestionData: question
     });
     
+    console.log('🎯 Avvio sistema timer dinamico...');
     // AVVIA IL SISTEMA TIMER DINAMICO
     startQuestion(question);
 }
-
-        function startTimer(duration = 20) {
+       function startTimer(duration = 20) {
+    console.log(`⏰ AVVIO TIMER: ${duration} secondi`);
+    
     timeLeft = duration;
     elements.timer.textContent = timeLeft;
     elements.timer.classList.remove('warning');
     elements.nextBtn.disabled = true;
     elements.nextBtn.innerHTML = '<span>⏳</span> WAITING...';
     
+    // Ferma qualsiasi timer precedente
     clearInterval(timer);
+    
     timer = setInterval(() => {
         timeLeft--;
         elements.timer.textContent = timeLeft;
+        console.log(`⏰ Timer: ${timeLeft}s`);
         
         if (timeLeft <= 5) {
             elements.timer.classList.add('warning');
@@ -2089,6 +2152,7 @@ function loadQuestion(index) {
             }
         }
         
+        // Controlla se tutti hanno risposto
         if (checkAllPlayersAnswered() && timeLeft > 0 && !answersRevealed) {
             console.log('⏰ Timer fermato - tutti hanno risposto');
             clearInterval(timer);
@@ -2100,6 +2164,7 @@ function loadQuestion(index) {
         }
         
         if (timeLeft <= 0) {
+            console.log('⏰ Timer scaduto');
             clearInterval(timer);
             showCorrectAnswer();
             elements.nextBtn.disabled = false;
@@ -2307,5 +2372,6 @@ function loadQuestion(index) {
     </script>
 </body>
 </html>
+
 
 
