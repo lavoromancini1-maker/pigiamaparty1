@@ -1752,7 +1752,7 @@ function startQuestion(question) {
             mediaContainer.innerHTML = '';
             
             const imgElement = document.createElement('img');
-            imgElement.src = 'media/' + question.media;
+            imgElement.src = question.media;
             imgElement.className = 'media-element';
             imgElement.onerror = () => {
                 console.error('❌ Errore caricamento immagine');
@@ -2377,6 +2377,7 @@ document.getElementById('leaderboardToggle').addEventListener('click', function(
     </script>
 </body>
 </html>
+
 
 
 
