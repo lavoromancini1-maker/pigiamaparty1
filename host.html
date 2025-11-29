@@ -1756,10 +1756,6 @@ function startQuestion(question) {
     
     const timerDuration = getTimerDuration(question);
     
-    console.log('🔍 DEBUG startQuestion:');
-    console.log(' - Tipo:', question.type);
-    console.log(' - Media path:', question.media);
-    console.log(' - Full URL:', window.location.origin + '/' + question.media);
     console.log(`⏰ Timer: ${timerDuration}s per tipo: ${question.type}, media: ${question.media || 'nessuno'}`);
     
     // Reset stato
@@ -2414,6 +2410,7 @@ document.getElementById('leaderboardToggle').addEventListener('click', function(
     </script>
 </body>
 </html>
+
 
 
 
