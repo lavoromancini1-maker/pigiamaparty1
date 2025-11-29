@@ -1598,7 +1598,7 @@
     },
     {
         id: 7,
-        question: "La citazione "To Be or Not to Be" appartiene a quale opera teatrale shakespeariana?",
+        question: "La citazione 'To Be or Not to Be' appartiene a quale opera teatrale shakespeariana?",
         answers: ["Amleto", "Macbeth", "Re Lear", "Otello"],
         correct: 0,
         points: 15,
@@ -1652,7 +1652,7 @@
     return 20; // 20 secondi per domande normali
 }
 
-    function playMedia(mediaUrl) {
+function playMedia(mediaUrl) {
     const mediaContainer = document.getElementById('mediaContainer');
     mediaContainer.style.display = 'block';
     mediaContainer.innerHTML = '';
@@ -1710,71 +1710,92 @@
             resumeBackgroundMusicAfterMedia();
         });
         
-} else if (mediaUrl.includes('.mp4')) {
-    const videoElement = document.createElement('video');
-    videoElement.controls = true;
-    videoElement.src = mediaUrl;
-    videoElement.style.maxWidth = '500px';
-    videoElement.className = 'media-element';
-    videoElement.volume = 1.0;
-    
-    // AGGIUNGI QUESTI CONTROLLI:
-    videoElement.addEventListener('error', function(e) {
-        console.error('❌ Errore video:', e);
-        console.error('Video source:', mediaUrl);
-        mediaContainer.innerHTML = `
-            <div style="color: var(--accent-red); text-align: center; padding: 20px;">
-                ❌ Errore caricamento video<br>
-                <small>Formato non supportato o file corrotto</small>
-            </div>
-        `;
-        restoreBackgroundMusic();
-    });
-    
-    videoElement.addEventListener('loadeddata', function() {
-        console.log('✅ Video caricato correttamente:', mediaUrl);
-    });
-    
-    videoElement.addEventListener('stalled', function() {
-        console.warn('⚠️ Video in stallo:', mediaUrl);
-    });
-    
-    // ABBASSA MOLTO LA MUSICA per VIDEO (2%)
-    lowerBackgroundMusic();
-    
-    videoElement.addEventListener('play', function() {
-        console.log('🎬 Video in riproduzione, musica abbassata al 2%');
-    });
-    
-    videoElement.addEventListener('ended', function() {
-        console.log('🎬 Video terminato');
-        // RIPRISTINA LA MUSICA
-        restoreBackgroundMusic();
-    });
-    
-    videoElement.addEventListener('pause', function() {
-        console.log('🎬 Video in pausa');
-        // RIPRISTINA LA MUSICA SE IL VIDEO SI FERMA
-        restoreBackgroundMusic();
-    });
-    
-    mediaContainer.appendChild(videoElement);
-    
-    // Prova autoplay
-    videoElement.play().catch((error) => {
-        console.log('⚠️ Autoplay video bloccato:', error);
-        mediaContainer.innerHTML += `
-            <div style="color: var(--accent-gold); margin-top: 10px; font-weight: 600;">
-                🔇 Clicca play per guardare il video
-            </div>
-        `;
-        // RIPRISTINA LA MUSICA SE AUTOPLAY FALLISCE
-        restoreBackgroundMusic();
-    });
+    } else if (mediaUrl.includes('.mp4')) {
+        const videoElement = document.createElement('video');
+        videoElement.controls = true;
+        videoElement.src = mediaUrl;
+        videoElement.style.maxWidth = '500px';
+        videoElement.className = 'media-element';
+        videoElement.volume = 1.0;
+        
+        // AGGIUNGI QUESTI CONTROLLI:
+        videoElement.addEventListener('error', function(e) {
+            console.error('❌ Errore video:', e);
+            console.error('Video source:', mediaUrl);
+            mediaContainer.innerHTML = `
+                <div style="color: var(--accent-red); text-align: center; padding: 20px;">
+                    ❌ Errore caricamento video<br>
+                    <small>Formato non supportato o file corrotto</small>
+                </div>
+            `;
+            restoreBackgroundMusic();
+        });
+        
+        videoElement.addEventListener('loadeddata', function() {
+            console.log('✅ Video caricato correttamente:', mediaUrl);
+        });
+        
+        videoElement.addEventListener('stalled', function() {
+            console.warn('⚠️ Video in stallo:', mediaUrl);
+        });
+        
+        // ABBASSA MOLTO LA MUSICA per VIDEO (2%)
+        lowerBackgroundMusic();
+        
+        videoElement.addEventListener('play', function() {
+            console.log('🎬 Video in riproduzione, musica abbassata al 2%');
+        });
+        
+        videoElement.addEventListener('ended', function() {
+            console.log('🎬 Video terminato');
+            // RIPRISTINA LA MUSICA
+            restoreBackgroundMusic();
+        });
+        
+        videoElement.addEventListener('pause', function() {
+            console.log('🎬 Video in pausa');
+            // RIPRISTINA LA MUSICA SE IL VIDEO SI FERMA
+            restoreBackgroundMusic();
+        });
+        
+        mediaContainer.appendChild(videoElement);
+        
+        // Prova autoplay
+        videoElement.play().catch((error) => {
+            console.log('⚠️ Autoplay video bloccato:', error);
+            mediaContainer.innerHTML += `
+                <div style="color: var(--accent-gold); margin-top: 10px; font-weight: 600;">
+                    🔇 Clicca play per guardare il video
+                </div>
+            `;
+            // RIPRISTINA LA MUSICA SE AUTOPLAY FALLISCE
+            restoreBackgroundMusic();
+        });
+        
+    } else if (mediaUrl.includes('.jpg') || mediaUrl.includes('.jpeg') || mediaUrl.includes('.png') || mediaUrl.includes('.gif')) {
+        // Gestione immagini
+        const imgElement = document.createElement('img');
+        imgElement.src = mediaUrl;
+        imgElement.className = 'media-element';
+        imgElement.onerror = () => {
+            console.error('❌ Errore caricamento immagine');
+            mediaContainer.innerHTML = '<div style="color: var(--accent-red);">❌ Immagine non disponibile</div>';
+        };
+        imgElement.onload = () => {
+            console.log('✅ Immagine caricata correttamente:', mediaUrl);
+        };
+        mediaContainer.appendChild(imgElement);
+        
     } else {
         console.log('📁 Tipo media non supportato:', mediaUrl);
+        mediaContainer.innerHTML = `
+            <div style="color: var(--accent-red); text-align: center; padding: 20px;">
+                ❌ Tipo di media non supportato<br>
+                <small>Formato: ${mediaUrl}</small>
+            </div>
+        `;
     }
-}
+} // ← CHIUSURA DELLA FUNZIONE
 
 function startQuestion(question) {
     
@@ -2434,3 +2455,4 @@ document.getElementById('leaderboardToggle').addEventListener('click', function(
     </script>
 </body>
 </html>
+
