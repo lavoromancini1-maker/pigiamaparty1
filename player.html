@@ -943,24 +943,6 @@
             </div>
         </div>
 
-        <!-- SCHERMATA DOMANDA -->
-        <div id="questionScreen" class="screen hidden">
-            <div class="question-container">
-                <div id="questionNumber" style="color: var(--accent-blue); font-weight: 700; margin-bottom: 15px; text-align: center; font-size: 1.1rem;">
-                    QUESTION 1/10
-                </div>
-                <div class="question-text" id="questionText">The game show question will appear here...</div>
-                
-                <div class="timer-container">
-                    <div class="timer" id="timer">20</div>
-                </div>
-                
-                <div class="answers-container" id="answersContainer">
-                    <!-- Le risposte appariranno qui -->
-                </div>
-            </div>
-        </div>
-
         <!-- SCHERMATA RISPOSTA INVIATA -->
         <div id="answerSubmittedScreen" class="screen hidden">
             <div class="game-header">
@@ -1384,22 +1366,21 @@ database.ref('games/' + gameCode).on('value', (snapshot) => {
             showScreen('questionScreen');
         }
 
-       function showQuestion(question) {
+function showQuestion(question) {
     currentQuestionIndex = question.currentQuestion || currentQuestionIndex;
     currentQuestionData = question;
     
-    console.log(`📝 Player: Mostrando domanda ${currentQuestionIndex + 1}`, question);
-    console.log(`🎯 Tipo domanda: ${question.type || 'multiple-choice'}`);
+    console.log(`📝 Player: Mostrando RISPOSTE per domanda ${currentQuestionIndex + 1}`);
     
     selectedAnswer = null;
     hasSubmitted = false;
     
-    elements.questionText.textContent = question.question;
+    // RIMOSSO: elements.questionText.textContent = question.question;
     elements.questionNumber.textContent = `QUESTION ${currentQuestionIndex + 1}`;
     
     elements.answersContainer.innerHTML = '';
     
-    // CONTROLLA SE È UNA DOMANDA DI TIPO "ORDINE"
+    // Mostra solo le risposte
     if (question.type === 'order' || question.question.toLowerCase().includes('ordine') || 
         question.question.toLowerCase().includes('cronolog') || 
         question.question.toLowerCase().includes('sequenza')) {
@@ -1694,29 +1675,6 @@ function shuffleArray(array) {
             }, 500);
         }
 
-function startTimer() {
-    timeLeft = 20;
-    elements.timer.textContent = timeLeft;
-    elements.timer.classList.remove('warning');
-    
-    // FERMA EVENTUALI TIMER PRECEDENTI
-    clearInterval(timer);
-    
-    timer = setInterval(() => {
-        timeLeft--;
-        elements.timer.textContent = timeLeft;
-        
-        if (timeLeft <= 0) {
-            clearInterval(timer);
-            if (selectedAnswer !== null && !hasSubmitted) {
-                submitAnswer();
-            } else if (!hasSubmitted) {
-                showScreen('answerSubmittedScreen');
-            }
-        }
-    }, 1000);
-}
-
 function showQuestionResult() {
     if (!currentQuestionData || selectedAnswer === null) {
         console.log('❌ Dati mancanti per mostrare il risultato');
@@ -1894,6 +1852,7 @@ function showScreen(screenId) {
     </script>
 </body>
 </html>
+
 
 
 
