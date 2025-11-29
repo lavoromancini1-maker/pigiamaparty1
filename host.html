@@ -692,6 +692,93 @@
             border-color: var(--accent-gold);
         }
 
+        /* === MINI CLASSIFICA LIVE === */
+.live-leaderboard {
+    position: fixed;
+    top: 50%;
+    right: 20px;
+    transform: translateY(-50%);
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.15), rgba(0, 180, 219, 0.1));
+    backdrop-filter: blur(20px);
+    border: 2px solid var(--accent-gold);
+    border-radius: var(--border-radius);
+    padding: 20px;
+    width: 220px;
+    max-height: 400px;
+    overflow-y: auto;
+    box-shadow: var(--neon-glow);
+    z-index: 100;
+    transition: all 0.3s ease;
+}
+
+.live-leaderboard.hidden {
+    opacity: 0;
+    transform: translateY(-50%) translateX(100px);
+    pointer-events: none;
+}
+
+.live-leaderboard-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--accent-gold);
+    margin-bottom: 15px;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.live-leaderboard-list {
+    list-style: none;
+}
+
+.live-leaderboard-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    font-size: 0.9rem;
+}
+
+.live-leaderboard-item:last-child {
+    border-bottom: none;
+}
+
+.live-player-name {
+    flex: 1;
+    font-weight: 600;
+}
+
+.live-player-score {
+    font-weight: 800;
+    color: var(--accent-gold);
+    font-size: 1rem;
+}
+
+.live-rank {
+    width: 25px;
+    text-align: center;
+    font-weight: 700;
+    margin-right: 8px;
+}
+
+/* Toggle per mostrare/nascondere */
+.leaderboard-toggle {
+    position: fixed;
+    top: 50%;
+    right: 0;
+    transform: translateY(-50%);
+    background: var(--accent-gold);
+    color: #000;
+    border: none;
+    padding: 10px 5px;
+    border-radius: 10px 0 0 10px;
+    cursor: pointer;
+    font-weight: 700;
+    z-index: 101;
+    box-shadow: -2px 0 10px rgba(255, 215, 0, 0.5);
+}
+
         /* ANIMAZIONI */
         @keyframes scanlines {
             0% { transform: translateY(0); }
@@ -1020,6 +1107,15 @@
                 </div>
             </div>
         </div>
+
+        <!-- MINI CLASSIFICA LIVE -->
+<button class="leaderboard-toggle" id="leaderboardToggle">📊</button>
+<div class="live-leaderboard hidden" id="liveLeaderboard">
+    <div class="live-leaderboard-title">LIVE RANKING</div>
+    <ul class="live-leaderboard-list" id="liveLeaderboardList">
+        <!-- La classifica live verrà generata qui -->
+    </ul>
+</div>
 
         <!-- SCHERMATA GIOCO -->
         <div id="gameScreen" class="screen hidden">
@@ -1918,6 +2014,7 @@ function resumeBackgroundMusicAfterMedia() {
                     elements.timer.textContent = "🎉 ALL RESPONSES IN!";
                 }
             }
+            updateLiveLeaderboard();
         }
 
         function startGame() {
@@ -2042,6 +2139,8 @@ function showCorrectAnswer() {
     
     // ASSICURIAMOCI CHE IL TIMER MOSTRI SEMPRE IL NUMERO CORRETTO
     elements.timer.textContent = "0";
+
+    updateLiveLeaderboard();
 }
 
 function revealAnswersToPlayers() {
@@ -2141,6 +2240,49 @@ function showAnswerManually() {
             }
         }
 
+        // === MINI CLASSIFICA LIVE ===
+function updateLiveLeaderboard() {
+    if (Object.keys(playerScores).length === 0) return;
+    
+    const sortedPlayers = Object.entries(playerScores)
+        .sort(([,a], [,b]) => b.total - a.total)
+        .map(([name, data], index) => ({
+            name,
+            score: data.total,
+            rank: index + 1
+        }));
+    
+    const leaderboardList = document.getElementById('liveLeaderboardList');
+    leaderboardList.innerHTML = '';
+    
+    sortedPlayers.forEach(player => {
+        const li = document.createElement('li');
+        li.className = 'live-leaderboard-item';
+        li.innerHTML = `
+            <span class="live-rank">${player.rank}°</span>
+            <span class="live-player-name">${player.name}</span>
+            <span class="live-player-score">${player.score}p</span>
+        `;
+        leaderboardList.appendChild(li);
+    });
+}
+
+function toggleLiveLeaderboard() {
+    const leaderboard = document.getElementById('liveLeaderboard');
+    const toggleBtn = document.getElementById('leaderboardToggle');
+    
+    leaderboard.classList.toggle('hidden');
+    
+    if (leaderboard.classList.contains('hidden')) {
+        toggleBtn.textContent = '📊';
+        toggleBtn.title = 'Mostra classifica';
+    } else {
+        toggleBtn.textContent = '❌';
+        toggleBtn.title = 'Nascondi classifica';
+        updateLiveLeaderboard();
+    }
+}
+
         function endGame() {
             playerAnswers.forEach(answer => {
                 if (answer.questionIndex !== undefined) {
@@ -2216,6 +2358,12 @@ elements.skipTimerBtn.addEventListener('click', function() {
             audio.activateAudio();
         });
 
+        // Controllo classifica live
+document.getElementById('leaderboardToggle').addEventListener('click', function() {
+    audio.playSFX('clickSound');
+    toggleLiveLeaderboard();
+});
+
         // === AVVIA IL GIOCO ===
         initGame();
         
@@ -2226,6 +2374,7 @@ elements.skipTimerBtn.addEventListener('click', function() {
     </script>
 </body>
 </html>
+
 
 
 
