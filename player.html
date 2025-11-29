@@ -357,9 +357,13 @@
         }
 
         .timer.warning {
-            background: linear-gradient(135deg, #FF416C, #FF4B2B);
-            animation: timerDanger 0.5s ease-in-out infinite;
-        }
+    background: linear-gradient(135deg, #FF416C, #FF4B2B);
+    animation: timerDanger 0.5s ease-in-out infinite;
+    position: relative;
+    z-index: 10;
+    padding: 0 20px;
+    border-radius: 10px;
+}
 
         /* ANSWERS GRID STILE GAME SHOW */
         .answers-container {
@@ -1320,6 +1324,7 @@
         let selectedAnswer = null;
         let timeLeft = 20;
         let timer;
+        let timerSoundTimeout;
         let playerScore = 0;
         let currentQuestionData = null;
         let hasSubmitted = false;
@@ -1744,33 +1749,40 @@ function shuffleArray(array) {
             }, 500);
         }
 
-        function startTimer() {
-            timeLeft = 20;
-            elements.timer.textContent = timeLeft;
-            elements.timer.classList.remove('warning');
+       function startTimer() {
+    timeLeft = 20;
+    elements.timer.textContent = timeLeft;
+    elements.timer.classList.remove('warning');
+    
+    // FERMA EVENTUALI TIMER PRECEDENTI
+    clearInterval(timer);
+    clearTimeout(timerSoundTimeout);
+    
+    timer = setInterval(() => {
+        timeLeft--;
+        elements.timer.textContent = timeLeft;
+        
+        if (timeLeft <= 10) {
+            elements.timer.classList.add('warning');
             
-            clearInterval(timer);
-            timer = setInterval(() => {
-                timeLeft--;
-                elements.timer.textContent = timeLeft;
-                
-                if (timeLeft <= 10) {
-                    elements.timer.classList.add('warning');
-                    if (timeLeft <= 5) {
-                        audio.playSFX('timerSound');
-                    }
+            // SUONERIA SOLO SE NON HAI ANCORA RISPOSTO
+            if (timeLeft <= 5 && timeLeft > 0 && !hasSubmitted) {
+                if (timeLeft === 5 || timeLeft === 3 || timeLeft === 1) {
+                    audio.playSFX('timerSound');
                 }
-                
-                if (timeLeft <= 0) {
-                    clearInterval(timer);
-                    if (selectedAnswer !== null && !hasSubmitted) {
-                        submitAnswer();
-                    } else if (!hasSubmitted) {
-                        showScreen('answerSubmittedScreen');
-                    }
-                }
-            }, 1000);
+            }
         }
+        
+        if (timeLeft <= 0) {
+            clearInterval(timer);
+            if (selectedAnswer !== null && !hasSubmitted) {
+                submitAnswer();
+            } else if (!hasSubmitted) {
+                showScreen('answerSubmittedScreen');
+            }
+        }
+    }, 1000);
+}
 
        function showQuestionResult() {
     if (!currentQuestionData || selectedAnswer === null) {
@@ -1922,4 +1934,5 @@ function shuffleArray(array) {
     </script>
 </body>
 </html>
+
 
