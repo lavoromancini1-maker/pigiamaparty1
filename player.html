@@ -1,4 +1,4 @@
-player 
+non funz 
 
 <!DOCTYPE html>
 <html lang="it">
@@ -1242,32 +1242,91 @@ player
         let hasSubmitted = false;
 
         // === ELEMENTI DOM ===
-        const elements = {
-            initialScreen: document.getElementById('initialScreen'),
-            waitingScreen: document.getElementById('waitingScreen'),
-            questionScreen: document.getElementById('questionScreen'),
-            answerSubmittedScreen: document.getElementById('answerSubmittedScreen'),
-            questionResultScreen: document.getElementById('questionResultScreen'),
-            leaderboardScreen: document.getElementById('leaderboardScreen'),
-            gameCodeInput: document.getElementById('gameCodeInput'),
-            playerName: document.getElementById('playerName'),
-            joinBtn: document.getElementById('joinBtn'),
-            gameCodeDisplay: document.getElementById('gameCodeDisplay'),
-            waitingMessage: document.getElementById('waitingMessage'),
-            playerNameDisplay: document.getElementById('playerNameDisplay'),
-            questionNumber: document.getElementById('questionNumber'),
-            questionText: document.getElementById('questionText'),
-            timer: document.getElementById('timer'),
-            answersContainer: document.getElementById('answersContainer'),
-            selectedAnswerText: document.getElementById('selectedAnswerText'),
-            leaderboardList: document.getElementById('leaderboardList'),
-            playerScore: document.getElementById('playerScore'),
-            resultContainer: document.getElementById('resultContainer'),
-            resultCard: document.getElementById('resultCard'),
-            waitingHostMessage: document.getElementById('waitingHostMessage')
-        };
+// === ELEMENTI DOM ===
+const elements = {
+    initialScreen: document.getElementById('initialScreen'),
+    waitingScreen: document.getElementById('waitingScreen'),
+    questionScreen: document.getElementById('questionScreen'),
+    answerSubmittedScreen: document.getElementById('answerSubmittedScreen'),
+    questionResultScreen: document.getElementById('questionResultScreen'),
+    leaderboardScreen: document.getElementById('leaderboardScreen'),
+    gameCodeInput: document.getElementById('gameCodeInput'),
+    playerName: document.getElementById('playerName'),
+    joinBtn: document.getElementById('joinBtn'),
+    gameCodeDisplay: document.getElementById('gameCodeDisplay'),
+    waitingMessage: document.getElementById('waitingMessage'),
+    playerNameDisplay: document.getElementById('playerNameDisplay'),
+    questionNumber: document.getElementById('questionNumber'),
+    questionText: document.getElementById('questionText'),
+    timer: document.getElementById('timer'),
+    answersContainer: document.getElementById('answersContainer'),
+    
+    // ✅ CORREZIONE: Aggiunto l'alias 'answerOptions' per risolvere il TypeError
+    answerOptions: document.getElementById('answersContainer'), 
+    
+    selectedAnswerText: document.getElementById('selectedAnswerText'),
+    leaderboardList: document.getElementById('leaderboardList'),
+    playerScore: document.getElementById('playerScore'),
+    resultContainer: document.getElementById('resultContainer'),
+    resultCard: document.getElementById('resultCard'),
+    waitingHostMessage: document.getElementById('waitingHostMessage')
+};
 
         // === FUNZIONI PRINCIPALI ===
+        function getTimerDuration(question) {
+    if (!question) return 20;
+    
+    // Timer per tipo di domanda - STESSO CODICE DELL'HOST
+    if (question.type === "order" || 
+        question.question.toLowerCase().includes('ordine') || 
+        question.question.toLowerCase().includes('cronolog') || 
+        question.question.toLowerCase().includes('sequenza')) {
+        return 30; // 30 secondi per domande di ordine
+    }
+    
+    if (question.media && question.media !== "") {
+        return 30; // 30 secondi per domande con media
+    }
+    
+    return 20; // 20 secondi per domande normali
+}
+
+        // === FUNZIONE START TIMER ===
+function startTimer() {
+    // USA LA STESSA LOGICA DELL'HOST
+    const duration = getTimerDuration(currentQuestionData);
+    timeLeft = duration;
+    
+    // ✅ CONTROLLO DI SICUREZZA
+    if (elements.timer) {
+        elements.timer.textContent = timeLeft;
+    } else {
+        console.error('❌ elements.timer è null!');
+        return;
+    }
+    
+    console.log(`⏰ Player Timer: ${timeLeft}s (stesso dell'host)`);
+    
+    clearInterval(timer);
+    
+    timer = setInterval(() => {
+        timeLeft--;
+        
+        // ✅ CONTROLLO DI SICUREZZA
+        if (elements.timer) {
+            elements.timer.textContent = timeLeft;
+        }
+        
+        if (timeLeft <= 0) {
+            clearInterval(timer);
+            if (selectedAnswer !== null && !hasSubmitted) {
+                submitAnswer();
+            } else if (!hasSubmitted) {
+                showScreen('answerSubmittedScreen');
+            }
+        }
+    }, 1000);
+}
         function showScreen(screenId) {
             document.querySelectorAll('.screen').forEach(screen => {
                 screen.classList.add('hidden');
@@ -1372,15 +1431,32 @@ function showQuestion(question) {
     currentQuestionIndex = question.currentQuestion || currentQuestionIndex;
     currentQuestionData = question;
     
-    console.log(`📝 Player: Mostrando RISPOSTE per domanda ${currentQuestionIndex + 1}`);
+    const timerDuration = getTimerDuration(question);
+    console.log(`📝 Player: Domanda ${currentQuestionIndex + 1}, Timer: ${timerDuration}s`);
     
     selectedAnswer = null;
     hasSubmitted = false;
     
-    // RIMOSSO: elements.questionText.textContent = question.question;
-    elements.questionNumber.textContent = `QUESTION ${currentQuestionIndex + 1}`;
+    // ✅ CONTROLLI DI SICUREZZA PER TUTTI GLI ELEMENTI
+    console.log('🔍 Debug elementi DOM:', {
+        questionNumber: !!elements.questionNumber,
+        answersContainer: !!elements.answersContainer,
+        timer: !!elements.timer,
+        questionText: !!elements.questionText
+    });
     
-    elements.answersContainer.innerHTML = '';
+    // SOLO se l'elemento esiste
+    if (elements.questionNumber) {
+        elements.questionNumber.textContent = `QUESTION ${currentQuestionIndex + 1}`;
+    } else {
+        console.error('❌ elements.questionNumber è null!');
+    }
+    
+    if (elements.answersContainer) {
+        elements.answersContainer.innerHTML = '';
+    } else {
+        console.error('❌ elements.answersContainer è null!');
+    }
     
     // Mostra solo le risposte
     if (question.type === 'order' || question.question.toLowerCase().includes('ordine') || 
@@ -1656,26 +1732,26 @@ function shuffleArray(array) {
     submitAnswer();
 }
 
-        function submitAnswer() {
-            if (selectedAnswer === null || hasSubmitted) return;
-            
-            audio.playSFX('submitSound');
-            hasSubmitted = true;
-            
-            const answerTime = 20 - timeLeft;
-            console.log(`⏱️ Answer time: ${answerTime}s (bonus: ${answerTime <= 5 ? 'YES' : 'NO'})`);
-            
-            database.ref('games/' + gameCode + '/answers').push({
-                playerName: playerName,
-                answerIndex: selectedAnswer,
-                questionIndex: currentQuestionIndex,
-                answerTime: answerTime
-            });
+function submitAnswer() {
+    if (selectedAnswer === null || hasSubmitted) return;
+    
+    audio.playSFX('submitSound');
+    hasSubmitted = true;
+    
+    const answerTime = getTimerDuration(currentQuestionData) - timeLeft;
+    console.log(`⏱️ Answer submitted at: ${timeLeft}s remaining (time used: ${answerTime}s)`);
+    
+    database.ref('games/' + gameCode + '/answers').push({
+        playerName: playerName,
+        answerIndex: selectedAnswer,
+        questionIndex: currentQuestionIndex,
+        answerTime: answerTime
+    });
 
-            setTimeout(() => {
-                showScreen('answerSubmittedScreen');
-            }, 500);
-        }
+    setTimeout(() => {
+        showScreen('answerSubmittedScreen');
+    }, 500);
+}
 
 function showQuestionResult() {
     if (!currentQuestionData || selectedAnswer === null) {
