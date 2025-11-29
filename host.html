@@ -2496,6 +2496,46 @@ function resumeBackgroundMusicAfterMedia() {
     console.log('🔊 Riprendo musica dopo audio...');
     audio.gameMusic.volume = audio.originalVolume || 0.3;
 }
+        // === FUNZIONI PER RANDOMIZZARE ===
+function shuffleArray(array) {
+    const shuffled = [...array];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+}
+
+function shuffleQuestionsAndAnswers() {
+    // Randomizza l'ordine delle domande
+    const shuffledQuestions = shuffleArray(questions);
+    
+    // Per ogni domanda, randomizza le risposte e aggiorna l'indice corretto
+    shuffledQuestions.forEach(question => {
+        if (question.type !== "order") { // Non randomizzare domande di ordine
+            const originalAnswers = [...question.answers];
+            const originalCorrect = question.correct;
+            const correctAnswer = originalAnswers[originalCorrect];
+            
+            // Randomizza le risposte
+            const shuffledAnswers = shuffleArray(originalAnswers);
+            
+            // Trova la nuova posizione della risposta corretta
+            const newCorrectIndex = shuffledAnswers.indexOf(correctAnswer);
+            
+            // Aggiorna la domanda
+            question.answers = shuffledAnswers;
+            question.correct = newCorrectIndex;
+        }
+    });
+    
+    return shuffledQuestions;
+}
+
+        function initializeGameQuestions() {
+    shuffledQuestions = shuffleQuestionsAndAnswers();
+    console.log(`🎲 Domande randomizzate: ${shuffledQuestions.length}`);
+}
 
         // === VARIABILI DI STATO ===
         let currentQuestion = 0;
@@ -2506,6 +2546,7 @@ function resumeBackgroundMusicAfterMedia() {
         let gameCode = '';
         let answersRevealed = false;
         let playerScores = {};
+        let shuffledQuestions = [];
 
         // === ELEMENTI DOM ===
         const elements = {
@@ -2537,14 +2578,18 @@ function resumeBackgroundMusicAfterMedia() {
             elements.gameCode.textContent = gameCode;
             
             playerScores = {};
+
+            initializeGameQuestions();
             
             console.log('🎮 Host Game Show creato con codice:', gameCode);
+            console.log('🎲 Domande randomizzate correttamente');
             
             database.ref('games/' + gameCode).set({
                 status: 'waiting',
                 host: true,
                 createdAt: Date.now(),
                 version: 'Game-Show-2.0'
+                totalQuestions: shuffledQuestions.length
             });
 
             database.ref('games/' + gameCode + '/players').on('value', (snapshot) => {
@@ -2718,7 +2763,7 @@ function loadQuestion(index) {
     }
 
     currentQuestion = index;
-    const question = questions[index];
+    const question = shuffledQuestions[index];
     
     playerAnswers = [];
     answersRevealed = false;
@@ -2742,6 +2787,7 @@ function loadQuestion(index) {
         const div = document.createElement('div');
         div.className = 'answer-option';
         div.textContent = answer;
+        div.setAttribute('data-answer-index', i);
         elements.answersGrid.appendChild(div);
     });
     
@@ -2790,7 +2836,7 @@ function startTimer(duration = 20) {
 }
 
 function showCorrectAnswer() {
-    const question = questions[currentQuestion];
+    const question = shuffledQuestions[currentQuestion];
     const answerElements = elements.answersGrid.querySelectorAll('.answer-option');
     answerElements[question.correct].classList.add('correct');
     
@@ -2961,7 +3007,7 @@ function toggleLiveLeaderboard() {
         function endGame() {
             playerAnswers.forEach(answer => {
                 if (answer.questionIndex !== undefined) {
-                    const question = questions[answer.questionIndex];
+                    const question = shuffledQuestions[answer.questionIndex];
                     if (question) {
                         const pointsData = calculatePoints(answer, question);
                         if (pointsData.points > 0) {
@@ -3049,6 +3095,7 @@ document.getElementById('leaderboardToggle').addEventListener('click', function(
     </script>
 </body>
 </html>
+
 
 
 
