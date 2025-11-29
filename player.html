@@ -1317,7 +1317,8 @@
                 joinedAt: Date.now()
             });
 
-// Nella funzione joinGame(), modifica questo listener:
+// SOSTITUISCI tutto il listener database.ref('games/' + gameCode).on('value') con questo:
+
 database.ref('games/' + gameCode).on('value', (snapshot) => {
     const game = snapshot.val();
     if (!game) {
@@ -1325,24 +1326,37 @@ database.ref('games/' + gameCode).on('value', (snapshot) => {
         return;
     }
 
-    if (game.status === 'started') {
-        if (game.currentQuestion !== currentQuestionIndex) {
-            currentQuestionIndex = game.currentQuestion || 0;
-            console.log(`🎮 Player: Nuova domanda ${currentQuestionIndex + 1}`);
-            selectedAnswer = null;
-            hasSubmitted = false;
-            showQuestionScreen();
-        }
-    } else if (game.status === 'ended') {
+    console.log(`🔄 Player: Stato gioco - ${game.status}, Domanda: ${game.currentQuestion}, Risposte rivelate: ${game.answersRevealed}`);
+    
+    // Se il gioco è finito, mostra la classifica
+    if (game.status === 'ended') {
         showLeaderboard(game.leaderboard || []);
+        return;
     }
     
-    // MIGLIORATO: Controlla più condizioni per mostrare il risultato
-    if (game.answersRevealed && 
-        game.currentQuestion === currentQuestionIndex && 
-        selectedAnswer !== null) {
-        console.log('🎯 Host ha rivelato le risposte! Mostrando risultato...');
-        showQuestionResult();
+    // Se il gioco è iniziato e c'è una nuova domanda
+    if (game.status === 'started' && game.currentQuestion !== currentQuestionIndex) {
+        currentQuestionIndex = game.currentQuestion || 0;
+        console.log(`🎮 Player: Nuova domanda ${currentQuestionIndex + 1}`);
+        selectedAnswer = null;
+        hasSubmitted = false;
+        showQuestionScreen();
+        return;
+    }
+    
+    // Se le risposte sono state rivelate per la domanda corrente
+    if (game.answersRevealed && game.currentQuestion === currentQuestionIndex && selectedAnswer !== null) {
+        console.log('🎯 Risultati disponibili! Mostrando a tutti i player...');
+        
+        // FORZA la visualizzazione dei risultati per tutti
+        // anche se hanno già visto la schermata "answerSubmitted"
+        if (!document.getElementById('questionResultScreen').classList.contains('hidden')) {
+            console.log('🔄 Già nella schermata risultati, aggiorno contenuto');
+            showQuestionResult(); // Ricarica il risultato
+        } else {
+            console.log('🔄 Passando alla schermata risultati');
+            showQuestionResult();
+        }
     }
 });
 
@@ -1703,7 +1717,7 @@ function startTimer() {
     }, 1000);
 }
 
-       function showQuestionResult() {
+function showQuestionResult() {
     if (!currentQuestionData || selectedAnswer === null) {
         console.log('❌ Dati mancanti per mostrare il risultato');
         return;
@@ -1713,7 +1727,6 @@ function startTimer() {
     
     // Gestione diversa per domande di ordine vs multiple choice
     if (Array.isArray(selectedAnswer)) {
-        // Domanda di ordine - confronta gli array
         const correctOrder = Array.from({length: currentQuestionData.answers.length}, (_, i) => i);
         isCorrect = JSON.stringify(selectedAnswer) === JSON.stringify(correctOrder);
         console.log(`🎯 Risultato ordine: ${isCorrect ? 'CORRETTO' : 'SBAGLIATO'}`, {
@@ -1721,7 +1734,6 @@ function startTimer() {
             correct: correctOrder
         });
     } else {
-        // Domanda multiple choice normale
         isCorrect = selectedAnswer === currentQuestionData.correct;
     }
     
@@ -1747,6 +1759,7 @@ function startTimer() {
             </div>
         `;
         elements.resultCard.className = 'tv-card correct-result';
+        audio.playSFX('correctSound');
         
     } else {
         let correctAnswerText = '';
@@ -1766,12 +1779,52 @@ function startTimer() {
             </div>
         `;
         elements.resultCard.className = 'tv-card wrong-result';
-        
         audio.playSFX('fartSound');
     }
     
     elements.resultContainer.innerHTML = resultHTML;
-    showScreen('questionResultScreen');
+    elements.waitingHostMessage.textContent = 'Waiting for host to start next question...';
+    
+    // FORZA la visualizzazione della schermata risultati
+    document.querySelectorAll('.screen').forEach(screen => {
+        screen.classList.add('hidden');
+    });
+    
+    setTimeout(() => {
+        elements.questionResultScreen.classList.remove('hidden');
+        audio.playSFX('transitionSound');
+        console.log('✅ Schermata risultati attivata per tutti i player');
+    }, 50);
+}
+
+        // === CONTROLLO PER PREVENIRE RITORNO ALLA SCHERMATA DI ATTESA ===
+function shouldStayOnResultScreen() {
+    return currentQuestionData && selectedAnswer !== null && 
+           database && database.ref('games/' + gameCode) && 
+           currentQuestionIndex !== -1;
+}
+
+// === FUNZIONE showScreen MIGLIORATA ===
+function showScreen(screenId) {
+    // Se siamo nella schermata risultati e dovremmo rimanerci, non cambiare
+    const isCurrentlyOnResultScreen = !elements.questionResultScreen.classList.contains('hidden');
+    
+    if (isCurrentlyOnResultScreen && shouldStayOnResultScreen() && screenId !== 'questionResultScreen') {
+        console.log('🔒 Mantenendo schermata risultati attiva - bloccato cambio a:', screenId);
+        return;
+    }
+    
+    document.querySelectorAll('.screen').forEach(screen => {
+        screen.classList.add('hidden');
+    });
+    
+    setTimeout(() => {
+        const targetScreen = document.getElementById(screenId);
+        if (targetScreen) {
+            targetScreen.classList.remove('hidden');
+            audio.playSFX('transitionSound');
+        }
+    }, 50);
 }
 
         function showLeaderboard(leaderboard) {
@@ -1841,6 +1894,7 @@ function startTimer() {
     </script>
 </body>
 </html>
+
 
 
 
