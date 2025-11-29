@@ -1665,7 +1665,7 @@
             resumeBackgroundMusicAfterMedia();
         });
         
-        } else if (mediaUrl.includes('.mp4')) {
+} else if (mediaUrl.includes('.mp4')) {
     const videoElement = document.createElement('video');
     videoElement.controls = true;
     videoElement.src = mediaUrl;
@@ -1684,50 +1684,48 @@
             </div>
         `;
         restoreBackgroundMusic();
-});
-        
-        // ABBASSA MOLTO LA MUSICA per VIDEO (2%)
-        lowerBackgroundMusic();
-        
-        videoElement.addEventListener('loadeddata', () => {
-            console.log('🎬 Video caricato, pronto per la riproduzione');
-        });
-        
-        videoElement.addEventListener('play', () => {
-            console.log('🎬 Video in riproduzione, musica abbassata al 2%');
-        });
-        
-        videoElement.addEventListener('ended', () => {
-            console.log('🎬 Video terminato');
-            // RIPRISTINA LA MUSICA
-            restoreBackgroundMusic();
-        });
-        
-        videoElement.addEventListener('pause', () => {
-            console.log('🎬 Video in pausa');
-            // RIPRISTINA LA MUSICA SE IL VIDEO SI FERMA
-            restoreBackgroundMusic();
-        });
-        
-        videoElement.addEventListener('error', (e) => {
-            console.error('❌ Errore video:', e);
-            // RIPRISTINA LA MUSICA IN CASO DI ERRORE
-            restoreBackgroundMusic();
-        });
-        
-        mediaContainer.appendChild(videoElement);
-        
-        // Prova autoplay
-        videoElement.play().catch((error) => {
-            console.log('⚠️ Autoplay video bloccato:', error);
-            mediaContainer.innerHTML += `
-                <div style="color: var(--accent-gold); margin-top: 10px; font-weight: 600;">
-                    🔇 Clicca play per guardare il video
-                </div>
-            `;
-            // RIPRISTINA LA MUSICA SE AUTOPLAY FALLISCE
-            restoreBackgroundMusic();
-        });
+    });
+    
+    videoElement.addEventListener('loadeddata', function() {
+        console.log('✅ Video caricato correttamente:', mediaUrl);
+    });
+    
+    videoElement.addEventListener('stalled', function() {
+        console.warn('⚠️ Video in stallo:', mediaUrl);
+    });
+    
+    // ABBASSA MOLTO LA MUSICA per VIDEO (2%)
+    lowerBackgroundMusic();
+    
+    videoElement.addEventListener('play', function() {
+        console.log('🎬 Video in riproduzione, musica abbassata al 2%');
+    });
+    
+    videoElement.addEventListener('ended', function() {
+        console.log('🎬 Video terminato');
+        // RIPRISTINA LA MUSICA
+        restoreBackgroundMusic();
+    });
+    
+    videoElement.addEventListener('pause', function() {
+        console.log('🎬 Video in pausa');
+        // RIPRISTINA LA MUSICA SE IL VIDEO SI FERMA
+        restoreBackgroundMusic();
+    });
+    
+    mediaContainer.appendChild(videoElement);
+    
+    // Prova autoplay
+    videoElement.play().catch((error) => {
+        console.log('⚠️ Autoplay video bloccato:', error);
+        mediaContainer.innerHTML += `
+            <div style="color: var(--accent-gold); margin-top: 10px; font-weight: 600;">
+                🔇 Clicca play per guardare il video
+            </div>
+        `;
+        // RIPRISTINA LA MUSICA SE AUTOPLAY FALLISCE
+        restoreBackgroundMusic();
+    });
     } else {
         console.log('📁 Tipo media non supportato:', mediaUrl);
     }
@@ -2391,6 +2389,7 @@ document.getElementById('leaderboardToggle').addEventListener('click', function(
     </script>
 </body>
 </html>
+
 
 
 
