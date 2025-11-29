@@ -1672,6 +1672,38 @@
         videoElement.style.maxWidth = '500px';
         videoElement.className = 'media-element';
         videoElement.volume = 1.0; // VOLUME MASSIMO per il video
+
+        } else if (mediaUrl.includes('.mp4')) {
+    const videoElement = document.createElement('video');
+    videoElement.controls = true;
+    videoElement.src = mediaUrl;
+    videoElement.style.maxWidth = '500px';
+    videoElement.className = 'media-element';
+    videoElement.volume = 1.0;
+    
+    // AGGIUNGI QUESTI CONTROLLI:
+    videoElement.addEventListener('error', function(e) {
+        console.error('❌ Errore video:', e);
+        console.error('Video source:', mediaUrl);
+        mediaContainer.innerHTML = `
+            <div style="color: var(--accent-red); text-align: center; padding: 20px;">
+                ❌ Errore caricamento video<br>
+                <small>Formato non supportato o file corrotto</small>
+            </div>
+        `;
+        restoreBackgroundMusic();
+    });
+    
+    videoElement.addEventListener('loadeddata', function() {
+        console.log('✅ Video caricato correttamente:', mediaUrl);
+    });
+    
+    videoElement.addEventListener('stalled', function() {
+        console.warn('⚠️ Video in stallo:', mediaUrl);
+    });
+    
+    // ... resto del codice video ...
+}
         
         // ABBASSA MOLTO LA MUSICA per VIDEO (2%)
         lowerBackgroundMusic();
@@ -1721,8 +1753,13 @@
 }
 
 function startQuestion(question) {
+    
     const timerDuration = getTimerDuration(question);
     
+    console.log('🔍 DEBUG startQuestion:');
+    console.log(' - Tipo:', question.type);
+    console.log(' - Media path:', question.media);
+    console.log(' - Full URL:', window.location.origin + '/' + question.media);
     console.log(`⏰ Timer: ${timerDuration}s per tipo: ${question.type}, media: ${question.media || 'nessuno'}`);
     
     // Reset stato
@@ -2377,6 +2414,7 @@ document.getElementById('leaderboardToggle').addEventListener('click', function(
     </script>
 </body>
 </html>
+
 
 
 
