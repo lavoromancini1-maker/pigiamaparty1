@@ -462,11 +462,6 @@
             animation: timerPulse 1s ease-in-out infinite;
         }
 
-        .timer.warning {
-            background: linear-gradient(135deg, #FF416C, #FF4B2B);
-            animation: timerDanger 0.5s ease-in-out infinite;
-        }
-
         /* ANSWERS GRID STILE GAME SHOW */
         .answers-grid {
             display: grid;
@@ -728,17 +723,6 @@
         @keyframes timerPulse {
             0%, 100% { transform: scale(1); }
             50% { transform: scale(1.05); }
-        }
-
-        @keyframes timerDanger {
-            0%, 100% { 
-                transform: scale(1);
-                text-shadow: 0 0 30px rgba(255, 65, 108, 0.5);
-            }
-            50% { 
-                transform: scale(1.1);
-                text-shadow: 0 0 50px rgba(255, 65, 108, 0.8);
-            }
         }
 
         @keyframes correctFlash {
@@ -1155,9 +1139,6 @@
     </audio>
     <audio id="transitionSound" preload="auto">
         <source src="audio/transition.wav" type="audio/wav">
-    </audio>
-    <audio id="timerSound" preload="auto">
-        <source src="audio/timer.wav" type="audio/wav">
     </audio>
     <audio id="startSound" preload="auto">
         <source src="audio/start.mp3" type="audio/mpeg">
@@ -2024,11 +2005,6 @@ function resumeBackgroundMusicAfterMedia() {
         timeLeft--;
         elements.timer.textContent = timeLeft;
         
-        if (timeLeft <= 5) {
-            elements.timer.classList.add('warning');
-            if (timeLeft === 3 || timeLeft === 2 || timeLeft === 1) {
-                audio.playSFX('timerSound');
-            }
         }
         
         // CONTROLLO CONTINUO: SE TUTTI HANNO RISPOSTO, FERMA TIMER
@@ -2250,5 +2226,6 @@ function resumeBackgroundMusicAfterMedia() {
     </script>
 </body>
 </html>
+
 
 
