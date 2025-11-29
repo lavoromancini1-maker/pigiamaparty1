@@ -1549,7 +1549,7 @@
         correct: 0,
         points: 25,
         type: "video",
-        media: "media/video/cubacrisis.mp4"
+        media: "video/cubacrisis.mp4"
     },
     {
         id: 2,
@@ -1558,7 +1558,7 @@
         correct: 0,
         points: 20,
         type: "audio",
-        media: "media/audio/hungarian.mp3"
+        media: "audio/hungarian.mp3"
     },
     {
         id: 3,
@@ -1567,7 +1567,7 @@
         correct: 0,
         points: 15,
         type: "image",
-        media: "media/images/tajmahal.jpg"
+        media: "images/tajmahal.jpg"
     },
     {
         id: 4,
@@ -1576,7 +1576,7 @@
         correct: 0,
         points: 15,
         type: "image",
-        media: "media/images/franklin.jpg"
+        media: "images/franklin.jpg"
     },
     {
         id: 5,
@@ -1585,7 +1585,7 @@
         correct: 0,
         points: 20,
         type: "image",
-        media: "media/images/galileo.jpg"
+        media: "images/galileo.jpg"
     },
 
         ];
@@ -1611,7 +1611,7 @@
     const mediaContainer = document.getElementById('mediaContainer');
     mediaContainer.style.display = 'block';
     mediaContainer.innerHTML = '';
-    mediaUrl = 'media/' + mediaUrl;
+    mediaUrl = mediaUrl;
 
     console.log('🎵 Riproduzione media:', mediaUrl);
 
@@ -2378,6 +2378,7 @@ document.getElementById('leaderboardToggle').addEventListener('click', function(
     </script>
 </body>
 </html>
+
 
 
 
