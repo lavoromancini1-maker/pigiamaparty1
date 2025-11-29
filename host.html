@@ -1245,35 +1245,12 @@
     </audio>
 
     <script>
+        
         // === CREA PARTICELLE ANIMATE ===
-        // RIGA ~1300 - SOSTITUISCI CON:
 function createParticles() {
     console.log('🎮 Particelle disabilitate per performance');
-    return; // NON CREA NULLA
+    return;
 }
-            const container = document.getElementById('particlesContainer');
-            const particleCount = 15;
-            
-            for (let i = 0; i < particleCount; i++) {
-                const particle = document.createElement('div');
-                particle.className = 'particle';
-                
-                const size = Math.random() * 4 + 1;
-                particle.style.width = size + 'px';
-                particle.style.height = size + 'px';
-                particle.style.left = Math.random() * 100 + '%';
-                particle.style.top = Math.random() * 100 + '%';
-                
-                const colors = ['var(--accent-gold)', 'var(--accent-blue)', 'var(--accent-purple)', '#FF416C'];
-                particle.style.background = colors[Math.floor(Math.random() * colors.length)];
-                
-                particle.style.animationDelay = Math.random() * 6 + 's';
-                particle.style.animationDuration = (Math.random() * 4 + 4) + 's';
-                
-                container.appendChild(particle);
-            }
-        }
-
         // === NUOVI EFFETTI VISIVI ===
         
         // 1. PARTICELLE DI CELEBRAZIONE
@@ -3149,6 +3126,7 @@ document.getElementById('leaderboardToggle').addEventListener('click', function(
     </script>
 </body>
 </html>
+
 
 
 
