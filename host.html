@@ -2086,21 +2086,50 @@ function loadQuestion(index) {
     elements.mediaContainer.style.display = 'none';
     elements.mediaContainer.innerHTML = '';
     
-    // Mostra IMMAGINI immediatamente
-    if (question.media && (question.media.includes('.jpg') || question.media.includes('.png') || question.media.includes('.jpeg'))) {
-        console.log('🖼️ Caricamento immagine:', question.media);
+    // === AGGIUNGI QUESTO CODICE ===
+    // MOSTRA MEDIA SE PRESENTE (IMMAGINI, AUDIO, VIDEO)
+    if (question.media && question.media !== "") {
+        console.log('🎵 CARICAMENTO MEDIA:', question.media);
         elements.mediaContainer.style.display = 'block';
-        const imgElement = document.createElement('img');
-        imgElement.src = question.media;
-        imgElement.className = 'media-element';
-        imgElement.alt = 'Immagine domanda';
-        imgElement.onload = () => console.log('✅ Immagine caricata con successo');
-        imgElement.onerror = () => {
-            console.error('❌ Errore caricamento immagine:', question.media);
-            elements.mediaContainer.innerHTML = '<div style="color: var(--accent-red); text-align: center;">❌ Immagine non disponibile</div>';
-        };
-        elements.mediaContainer.appendChild(imgElement);
+        
+        if (question.media.includes('.mp3') || question.media.includes('.wav')) {
+            // AUDIO
+            console.log('🔊 Creando player audio');
+            const audioElement = document.createElement('audio');
+            audioElement.controls = true;
+            audioElement.src = question.media; // <-- QUI USA IL PERCORSO DELLA DOMANDA
+            audioElement.style.width = '100%';
+            audioElement.style.maxWidth = '400px';
+            audioElement.onerror = () => console.error('❌ Errore caricamento audio');
+            elements.mediaContainer.appendChild(audioElement);
+            
+        } else if (question.media.includes('.mp4')) {
+            // VIDEO
+            console.log('🎬 Creando player video');
+            const videoElement = document.createElement('video');
+            videoElement.controls = true;
+            videoElement.src = question.media; // <-- QUI USA IL PERCORSO DELLA DOMANDA
+            videoElement.style.maxWidth = '500px';
+            videoElement.className = 'media-element';
+            videoElement.onerror = () => console.error('❌ Errore caricamento video');
+            elements.mediaContainer.appendChild(videoElement);
+            
+        } else if (question.media.includes('.jpg') || question.media.includes('.png') || question.media.includes('.jpeg')) {
+            // IMMAGINE
+            console.log('🖼️ Creando immagine');
+            const imgElement = document.createElement('img');
+            imgElement.src = question.media; // <-- QUI USA IL PERCORSO DELLA DOMANDA
+            imgElement.className = 'media-element';
+            imgElement.alt = 'Immagine domanda';
+            imgElement.onload = () => console.log('✅ Immagine caricata');
+            imgElement.onerror = () => {
+                console.error('❌ Errore caricamento immagine:', question.media);
+                elements.mediaContainer.innerHTML = '<div style="color: var(--accent-red); text-align: center;">❌ Immagine non disponibile</div>';
+            };
+            elements.mediaContainer.appendChild(imgElement);
+        }
     }
+    // === FINE CODICE AGGIUNTO ===
     
     // Pulisci e ricrea le risposte
     elements.answersGrid.innerHTML = '';
@@ -2372,6 +2401,7 @@ function loadQuestion(index) {
     </script>
 </body>
 </html>
+
 
 
 
