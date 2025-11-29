@@ -1543,48 +1543,51 @@
         // === DOMANDE DEL GIOCO ===
         const questions = [
             {
-                id: 1,
-                question: "Qual è la capitale dell'Australia?",
-                answers: ["Sydney", "Melbourne", "Canberra", "Perth"],
-                correct: 2,
-                points: 10,
-                type: "text"
-            },
-            {
-                id: 2, 
-                question: "Ascolta questo brano musicale - di chi è?",
-                answers: ["Beethoven", "Mozart", "Bach", "Vivaldi"],
-                correct: 0,
-                points: 15,
-                type: "audio",
-                media: "audio/sampleaudio.mp3"
-            },
-            {
-                id: 3,
-                question: "Guarda questo video e rispondi",
-                answers: ["Opzione A", "Opzione B", "Opzione C", "Opzione D"],
-                correct: 1,
-                points: 15,
-                type: "video", 
-                media: "video/samplevideo.mp4"
-            },
-            {
-                id: 4,
-                question: "Metti in ordine cronologico questi eventi storici",
-                answers: ["Rivoluzione Francese", "Scoperta dell'America", "Caduta dell'Impero Romano", "Prima Guerra Mondiale"],
-                correct: 2,
-                points: 20,
-                type: "order"
-            },
-            {
-                id: 5,
-                question: "Guarda questa immagine e rispondi",
-                answers: ["Risposta A", "Risposta B", "Risposta C", "Risposta D"],
-                correct: 0,
-                points: 10,
-                type: "image",
-                media: "images/sampleimage.jpg"
-            }
+        id: 1,
+        question: "Questo filmato d'archivio mostra un momento cruciale di quale crisi internazionale?",
+        answers: ["Guerra del vietnam", "Crisi dei missili di Cuba", "Watergate", "Crisi di Suez"],
+        correct: 0,
+        points: 25,
+        type: "video",
+        media: "media/videos/cubacrisis.mp4"
+    },
+    {
+        id: 2,
+        question: "Questa lingua viene parlata in quale regione del mondo?",
+        answers: ["Estonia", "Finlandia", "Ungheria", "Montenegro"],
+        correct: 0,
+        points: 20,
+        type: "audio",
+        media: "media/audio/hungarian.m4a"
+    },
+    {
+        id: 3,
+        question: "Questo monumento visto da un'angolazione insolita si trova in quale paese?",
+        answers: ["Laos", "Pakistan", "Bangladesh", "India"],
+        correct: 0,
+        points: 15,
+        type: "image",
+        media: "media/images/tajmahal.jpg"
+    },
+    {
+        id: 4,
+        question: "🔬 Questo esperimento dimostrò per primo la struttura del DNA",
+        answers: ["Rosalind Franklin - Foto 51", "Watson e Crick - Modello", "Mendel - Piselli", "Darwin - Evoluzione"],
+        correct: 0,
+        points: 15,
+        type: "image",
+        media: "media/images/franklin.jpg"
+    },
+    {
+        id: 5,
+        question: "Questo dispositivo storico è legato a quale importante scoperta scientifica?",
+        answers: ["Anelli di Saturno", "Satelliti di Giove", "Macchie solari", "Fasi di Venere"],
+        correct: 0,
+        points: 20,
+        type: "image",
+        media: "media/images/galileo.jpg"
+    },
+
         ];
 
         // === SISTEMA TIMER DINAMICO ===
@@ -2374,6 +2377,7 @@ document.getElementById('leaderboardToggle').addEventListener('click', function(
     </script>
 </body>
 </html>
+
 
 
 
