@@ -1512,10 +1512,20 @@
 
         // === SISTEMA TIMER DINAMICO ===
         function getTimerDuration(question) {
-            if (question.type === "chronological") return 30;
-            if (question.media && question.media !== "") return 20;
-            return 15;
-        }
+    // Timer per tipo di domanda
+    if (question.type === "order" || 
+        question.question.toLowerCase().includes('ordine') || 
+        question.question.toLowerCase().includes('cronolog') || 
+        question.question.toLowerCase().includes('sequenza')) {
+        return 30; // 30 secondi per domande di ordine
+    }
+    
+    if (question.media && question.media !== "") {
+        return 30; // 30 secondi per domande con media
+    }
+    
+    return 20; // 20 secondi per domande normali
+}
 
        async function playMedia(mediaUrl) {
     return new Promise((resolve) => {
@@ -1642,31 +1652,33 @@
     });
 }
 
-      function startQuestion(question) {
+     function startQuestion(question) {
     const timerDuration = getTimerDuration(question);
     
-    console.log(`⏰ Timer: ${timerDuration}s per tipo: ${question.type}`);
+    console.log(`⏰ Timer: ${timerDuration}s per tipo: ${question.type}, media: ${question.media || 'nessuno'}`);
     
-    // Gestione media - ABBASSA LA MUSICA PRIMA DI INIZIARE
+    // Reset stato
+    elements.mediaContainer.style.display = 'none';
+    elements.mediaContainer.innerHTML = '';
+    
+    // Gestione media
     if (question.media && question.media !== "") {
         if (question.media.includes('.mp3') || question.media.includes('.wav') || question.media.includes('.mp4')) {
-            // Audio/Video - abbassa musica e aspetta fine riproduzione
             console.log('🎵 Media audio/video, abbasso musica');
             
-            // ABBASSA LA MUSICA DI SOTTOFONDO
             lowerBackgroundMusic();
             
             playMedia(question.media).then(() => {
                 console.log('⏰ Media finito, ripristino musica e avvio timer');
-                // RIPRISTINA LA MUSICA NORMALE
                 restoreBackgroundMusic();
+                
+                // SOLO DOPO CHE IL MEDIA È FINITO, PARTE IL TIMER
                 startTimer(timerDuration);
             });
         } else {
-            // Immagini - timer parte immediatamente, musica normale
+            // Immagini - timer parte immediatamente
             console.log('🖼️ Immagine, timer parte subito');
             
-            // Mostra immagine
             const mediaContainer = document.getElementById('mediaContainer');
             mediaContainer.style.display = 'block';
             mediaContainer.innerHTML = '';
@@ -1680,10 +1692,11 @@
             };
             mediaContainer.appendChild(imgElement);
             
+            // PER LE IMMAGINI, TIMER PARTE SUBITO
             startTimer(timerDuration);
         }
     } else {
-        // Nessun media - timer normale, musica normale
+        // Nessun media - timer normale
         console.log('📝 Nessun media, timer normale');
         startTimer(timerDuration);
     }
@@ -1839,10 +1852,11 @@ function resumeBackgroundMusicAfterMedia() {
             }
         }
 
-        function checkAllPlayersAnswered() {
-            const currentQuestionAnswers = playerAnswers.filter(a => a.questionIndex === currentQuestion);
-            return currentQuestionAnswers.length >= connectedPlayers.length && connectedPlayers.length > 0;
-        }
+       function checkAllPlayersAnswered() {
+    const currentQuestionAnswers = playerAnswers.filter(a => a.questionIndex === currentQuestion);
+    console.log(`📊 Risposte: ${currentQuestionAnswers.length}/${connectedPlayers.length} giocatori`);
+    return currentQuestionAnswers.length >= connectedPlayers.length && connectedPlayers.length > 0;
+}
 
         function updateAnswersProgress() {
             const currentAnswers = playerAnswers.filter(a => a.questionIndex === currentQuestion);
@@ -1999,42 +2013,43 @@ function resumeBackgroundMusicAfterMedia() {
         }
 
         function startTimer(duration = 20) {
-            timeLeft = duration;
-            elements.timer.textContent = timeLeft;
-            elements.timer.classList.remove('warning');
-            elements.nextBtn.disabled = true;
-            elements.nextBtn.innerHTML = '<span>⏳</span> WAITING...';
-            
-            clearInterval(timer);
-            timer = setInterval(() => {
-                timeLeft--;
-                elements.timer.textContent = timeLeft;
-                
-                if (timeLeft <= 5) {
-                    elements.timer.classList.add('warning');
-                    if (timeLeft === 3 || timeLeft === 2 || timeLeft === 1) {
-                        audio.playSFX('timerSound');
-                    }
-                }
-                
-                if (checkAllPlayersAnswered() && timeLeft > 0 && !answersRevealed) {
-                    console.log('⏰ Timer fermato - tutti hanno risposto');
-                    clearInterval(timer);
-                    showCorrectAnswer();
-                    elements.nextBtn.disabled = false;
-                    elements.nextBtn.innerHTML = '<span>➡️</span> NEXT QUESTION';
-                    elements.timer.textContent = "🎉 ALL RESPONSES IN!";
-                    return;
-                }
-                
-                if (timeLeft <= 0) {
-                    clearInterval(timer);
-                    showCorrectAnswer();
-                    elements.nextBtn.disabled = false;
-                    elements.nextBtn.innerHTML = '<span>➡️</span> NEXT QUESTION';
-                }
-            }, 1000);
+    timeLeft = duration;
+    elements.timer.textContent = timeLeft;
+    elements.timer.classList.remove('warning');
+    elements.nextBtn.disabled = true;
+    elements.nextBtn.innerHTML = '<span>⏳</span> WAITING...';
+    
+    clearInterval(timer);
+    timer = setInterval(() => {
+        timeLeft--;
+        elements.timer.textContent = timeLeft;
+        
+        if (timeLeft <= 5) {
+            elements.timer.classList.add('warning');
+            if (timeLeft === 3 || timeLeft === 2 || timeLeft === 1) {
+                audio.playSFX('timerSound');
+            }
         }
+        
+        // CONTROLLO CONTINUO: SE TUTTI HANNO RISPOSTO, FERMA TIMER
+        if (checkAllPlayersAnswered() && timeLeft > 0 && !answersRevealed) {
+            console.log('🎯 TUTTI HANNO RISPOSTO! Fermo timer e mostro risposta');
+            clearInterval(timer);
+            showCorrectAnswer();
+            elements.nextBtn.disabled = false;
+            elements.nextBtn.innerHTML = '<span>➡️</span> NEXT QUESTION';
+            elements.timer.textContent = "🎉 ALL RESPONSES IN!";
+            return;
+        }
+        
+        if (timeLeft <= 0) {
+            clearInterval(timer);
+            showCorrectAnswer();
+            elements.nextBtn.disabled = false;
+            elements.nextBtn.innerHTML = '<span>➡️</span> NEXT QUESTION';
+        }
+    }, 1000);
+}
 
         function showCorrectAnswer() {
             const question = questions[currentQuestion];
@@ -2235,4 +2250,5 @@ function resumeBackgroundMusicAfterMedia() {
     </script>
 </body>
 </html>
+
 
