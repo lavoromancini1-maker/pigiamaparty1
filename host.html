@@ -2796,9 +2796,17 @@ function loadQuestion(index) {
     
     updateAnswersProgress();
     
-    database.ref('games/' + gameCode).update({
+        database.ref('games/' + gameCode).update({
         currentQuestion: index,
-        currentQuestionData: question
+        currentQuestionData: {
+            id: question.id,
+            question: question.question,
+            answers: question.answers, // Array randomizzato
+            correct: question.correct, // Indice corretto nell'array randomizzato
+            points: question.points,
+            type: question.type,
+            media: question.media
+        }
     });
     
     // USA IL NUOVO SISTEMA TIMER DINAMICO
@@ -3096,6 +3104,7 @@ document.getElementById('leaderboardToggle').addEventListener('click', function(
     </script>
 </body>
 </html>
+
 
 
 
