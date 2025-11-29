@@ -1417,121 +1417,111 @@ function createParticles() {
         
         // === SISTEMA AUDIO ===
         const audio = {
-            menuMusic: document.getElementById('menuMusic'),
-            gameMusic: document.getElementById('gameMusic'),
-            victoryMusic: document.getElementById('victoryMusic'),
+    menuMusic: document.getElementById('menuMusic'),
+    gameMusic: document.getElementById('gameMusic'),
+    victoryMusic: document.getElementById('victoryMusic'),
+    
+    clickSound: document.getElementById('clickSound'),
+    correctSound: document.getElementById('correctSound'),
+    wrongSound: document.getElementById('wrongSound'),
+    transitionSound: document.getElementById('transitionSound'),
+    startSound: document.getElementById('startSound'),
+    
+    musicEnabled: false,
+    sfxEnabled: false,
+    audioActivated: false,
+    originalVolume: 0.3,
+    
+    async activateAudio() {
+        console.log('🎵 Attivazione audio...');
+        
+        try {
+            this.audioActivated = true;
+            this.musicEnabled = true;
+            this.sfxEnabled = true;
             
-            clickSound: document.getElementById('clickSound'),
-            correctSound: document.getElementById('correctSound'),
-            wrongSound: document.getElementById('wrongSound'),
-            transitionSound: document.getElementById('transitionSound'),
-            timerSound: document.getElementById('timerSound'),
-            startSound: document.getElementById('startSound'),
+            document.getElementById('musicToggle').textContent = '🔊 Music';
+            document.getElementById('sfxToggle').textContent = '🔊 SFX';
             
-            musicEnabled: false,
-            sfxEnabled: false,
-            audioActivated: false,
-            originalVolume: 0.3,
+            const activationOverlay = document.getElementById('audioActivation');
+            activationOverlay.style.opacity = '0';
+            activationOverlay.style.transition = 'opacity 0.5s ease';
             
-            async activateAudio() {
-                console.log('🎵 Attivazione audio...');
-                
-                try {
-                    this.clickSound.volume = 0.01;
-                    await this.clickSound.play();
-                    this.clickSound.pause();
-                    this.clickSound.currentTime = 0;
-                    
-                    this.audioActivated = true;
-                    this.musicEnabled = true;
-                    this.sfxEnabled = true;
-                    
-                    document.getElementById('musicToggle').textContent = '🔊 Music';
-                    document.getElementById('sfxToggle').textContent = '🔊 SFX';
-                    
-                    const activationOverlay = document.getElementById('audioActivation');
-                    activationOverlay.style.opacity = '0';
-                    activationOverlay.style.transition = 'opacity 0.5s ease';
-                    
-                    setTimeout(() => {
-                        activationOverlay.style.display = 'none';
-                    }, 500);
-                    
-                    setTimeout(() => {
-                        this.playMusic('menuMusic');
-                    }, 100);
-                    
-                    console.log('🎵 Audio attivato!');
-                    
-                } catch (error) {
-                    console.error('❌ Errore attivazione audio:', error);
-                    this.audioActivated = true;
-                    this.musicEnabled = true;
-                    this.sfxEnabled = true;
-                }
-            },
+            setTimeout(() => {
+                activationOverlay.style.display = 'none';
+            }, 500);
             
-            async playMusic(type) {
-                if (!this.musicEnabled || !this.audioActivated) return;
-                
-                try {
-                    this.stopAllMusic();
-                    const music = this[type];
-                    music.currentTime = 0;
-                    music.volume = 0.3;
-                    await music.play();
-                    console.log('🎵 Musica avviata:', type);
-                } catch (error) {
-                    console.error('❌ Errore musica:', error);
-                }
-            },
+            console.log('🎵 Audio attivato!');
             
-            stopAllMusic() {
-                [this.menuMusic, this.gameMusic, this.victoryMusic].forEach(music => {
-                    music.pause();
-                    music.currentTime = 0;
-                });
-            },
-            
-            async playSFX(type) {
-                if (!this.sfxEnabled || !this.audioActivated) return;
-                
-                try {
-                    const sfx = this[type];
-                    sfx.currentTime = 0;
-                    sfx.volume = 0.6;
-                    await sfx.play();
-                    console.log('🔊 SFX:', type);
-                } catch (error) {
-                    console.error('❌ Errore SFX:', error);
-                }
-            },
-            
-            toggleMusic() {
-                if (!this.audioActivated) return;
-                this.musicEnabled = !this.musicEnabled;
-                document.getElementById('musicToggle').textContent = 
-                    this.musicEnabled ? '🔊 Music' : '🔇 Music';
-                if (!this.musicEnabled) {
-                    this.stopAllMusic();
-                } else {
-                    if (document.getElementById('lobbyScreen').classList.contains('hidden') === false) {
-                        this.playMusic('menuMusic');
-                    } else if (document.getElementById('gameScreen').classList.contains('hidden') === false) {
-                        this.playMusic('gameMusic');
-                    } else if (document.getElementById('leaderboardScreen').classList.contains('hidden') === false) {
-                        this.playMusic('victoryMusic');
-                    }
-                }
-            },
-            
-            toggleSFX() {
-                if (!this.audioActivated) return;
-                this.sfxEnabled = !this.sfxEnabled;
-                document.getElementById('sfxToggle').textContent = 
-                    this.sfxEnabled ? '🔊 SFX' : '🔇 SFX';
+        } catch (error) {
+            console.error('❌ Errore attivazione audio:', error);
+            this.audioActivated = true;
+            this.musicEnabled = true;
+            this.sfxEnabled = true;
+        }
+    },  // ✅ VIRGOLA
+    
+    async playMusic(type) {
+        if (!this.musicEnabled || !this.audioActivated) return;
+        
+        try {
+            this.stopAllMusic();
+            const music = this[type];
+            music.currentTime = 0;
+            music.volume = 0.3;
+            await music.play();
+            console.log('🎵 Musica avviata:', type);
+        } catch (error) {
+            console.error('❌ Errore musica:', error);
+        }
+    },  // ✅ VIRGOLA
+    
+    stopAllMusic() {
+        [this.menuMusic, this.gameMusic, this.victoryMusic].forEach(music => {
+            music.pause();
+            music.currentTime = 0;
+        });
+    },  // ✅ VIRGOLA AGGIUNTA QUI!
+    
+    async playSFX(type) {
+        if (!this.sfxEnabled || !this.audioActivated) return;
+        
+        try {
+            const sfx = this[type];
+            sfx.currentTime = 0;
+            sfx.volume = 0.6;
+            await sfx.play();
+            console.log('🔊 SFX:', type);
+        } catch (error) {
+            console.error('❌ Errore SFX:', error);
+        }
+    },  // ✅ VIRGOLA
+    
+    toggleMusic() {
+        if (!this.audioActivated) return;
+        this.musicEnabled = !this.musicEnabled;
+        document.getElementById('musicToggle').textContent = 
+            this.musicEnabled ? '🔊 Music' : '🔇 Music';
+        if (!this.musicEnabled) {
+            this.stopAllMusic();
+        } else {
+            if (document.getElementById('lobbyScreen').classList.contains('hidden') === false) {
+                this.playMusic('menuMusic');
+            } else if (document.getElementById('gameScreen').classList.contains('hidden') === false) {
+                this.playMusic('gameMusic');
+            } else if (document.getElementById('leaderboardScreen').classList.contains('hidden') === false) {
+                this.playMusic('victoryMusic');
             }
-        };
+        }
+    },  // ✅ VIRGOLA
+    
+    toggleSFX() {
+        if (!this.audioActivated) return;
+        this.sfxEnabled = !this.sfxEnabled;
+        document.getElementById('sfxToggle').textContent = 
+            this.sfxEnabled ? '🔊 SFX' : '🔇 SFX';
+    }  // ✅ NESSUNA VIRGOLA QUI (ultimo elemento)
+};
 
         // === CONFIGURA FIREBASE ===
         const firebaseConfig = {
@@ -2520,15 +2510,6 @@ function resumeBackgroundMusicAfterMedia() {
 
         // === INIZIALIZZAZIONE ===
         // === OTTIMIZZAZIONE PER TV ===
-function optimizeForTV() {
-    console.log('🎮 Ottimizzazione TV attivata');
-    
-    if (!document.getElementById('gameScreen').classList.contains('hidden')) {
-        document.body.classList.add('tv-optimized');
-    } else {
-        document.body.classList.remove('tv-optimized');
-    }
-}
 
 // Inietta CSS per ottimizzazione TV
 const tvOptimizationCSS = `
@@ -2929,7 +2910,11 @@ function showCorrectAnswer() {
 }
 
 function revealAnswersToPlayers() {
-    console.log('🎯 Rivelando risposte a TUTTI i player...');
+    console.log('🎯 Rivelando risposte ai player...');
+    database.ref('games/' + gameCode).update({
+        answersRevealed: true,
+        currentQuestion: currentQuestion
+    });
     
     // Aggiorna multipli campi per forzare l'aggiornamento
     database.ref('games/' + gameCode).update({
@@ -2943,6 +2928,10 @@ function revealAnswersToPlayers() {
         database.ref('games/' + gameCode + '/answersRevealed').set(true);
     }, 200);
 }
+
+        function optimizeForTV() {
+    console.log('📺 Ottimizzazione TV - Nessuna azione necessaria');
+
 
 function showAnswerManually() {
     if (!answersRevealed) {
@@ -3160,6 +3149,7 @@ document.getElementById('leaderboardToggle').addEventListener('click', function(
     </script>
 </body>
 </html>
+
 
 
 
