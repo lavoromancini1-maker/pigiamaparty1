@@ -356,11 +356,6 @@
             animation: timerPulse 1s ease-in-out infinite;
         }
 
-        .timer.warning {
-            background: linear-gradient(135deg, #FF416C, #FF4B2B);
-            animation: timerDanger 0.5s ease-in-out infinite;
-        }
-
         /* ANSWERS GRID STILE GAME SHOW */
         .answers-container {
             display: grid;
@@ -506,44 +501,6 @@
             display: none !important;
         }
 
-        /* CONTROLLI TEMI */
-        .theme-controls {
-            position: fixed;
-            top: 15px;
-            left: 15px;
-            z-index: 1000;
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-            max-width: 280px;
-        }
-
-        .theme-btn {
-            background: rgba(255, 255, 255, 0.08);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            color: var(--text-primary);
-            padding: 6px 10px;
-            border-radius: 12px;
-            font-size: 0.7rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            flex: 1;
-            min-width: 55px;
-            text-align: center;
-        }
-
-        .theme-btn:hover {
-            background: rgba(255, 255, 255, 0.12);
-            border-color: var(--accent-gold);
-        }
-
-        .theme-btn.active {
-            background: var(--accent-gold);
-            color: #000;
-            border-color: var(--accent-gold);
-        }
-
         /* VERSION INFO */
         .version {
             position: fixed;
@@ -562,15 +519,15 @@
             letter-spacing: 1px;
         }
 
-        /* AUDIO CONTROLS */
-        .audio-controls {
-            position: fixed;
-            top: 15px;
-            right: 15px;
-            z-index: 1000;
-            display: flex;
-            gap: 8px;
-        }
+/* AUDIO CONTROLS */
+.audio-controls {
+    position: fixed;
+    top: 15px;
+    left: 15px; /* CAMBIATO DA right A left */
+    z-index: 1000;
+    display: flex;
+    gap: 8px;
+}
 
         .audio-btn {
             background: rgba(255, 255, 255, 0.1);
@@ -695,17 +652,6 @@
             50% { transform: scale(1.05); }
         }
 
-        @keyframes timerDanger {
-            0%, 100% { 
-                transform: scale(1);
-                text-shadow: 0 0 20px rgba(255, 65, 108, 0.5);
-            }
-            50% { 
-                transform: scale(1.1);
-                text-shadow: 0 0 35px rgba(255, 65, 108, 0.8);
-            }
-        }
-
         @keyframes screenSlide {
             0% { opacity: 0; transform: translateX(30px); filter: blur(10px); }
             100% { opacity: 1; transform: translateX(0); filter: blur(0); }
@@ -812,20 +758,124 @@
                 font-size: 2rem;
             }
 
-            .theme-controls {
-                top: 70px;
-                left: 50%;
-                transform: translateX(-50%);
-                justify-content: center;
-                max-width: 90%;
-            }
+    .audio-controls {
+        top: 15px;
+        left: 15px; /* CAMBIATO */
+        right: auto;
+        transform: none;
+        flex-direction: row; /* CAMBIATO DA column A row */
+    }
 
-            .audio-controls {
-                top: 70px;
-                right: 50%;
-                transform: translateX(50%);
-                flex-direction: column;
-            }
+                    /* === STILE DRAG-AND-DROP PER ORDINE CRONOLOGICO === */
+        .drag-drop-container {
+            margin: 20px 0;
+        }
+
+        .draggable-list {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .draggable-item {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.05));
+            backdrop-filter: blur(15px);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: var(--border-radius);
+            padding: 18px 20px;
+            margin: 12px 0;
+            color: var(--text-primary);
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: grab;
+            transition: all 0.3s ease;
+            position: relative;
+            user-select: none;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .draggable-item::before {
+            content: '≡';
+            font-size: 1.4rem;
+            color: var(--accent-gold);
+            opacity: 0.7;
+        }
+
+        .draggable-item:hover {
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.2), rgba(255, 165, 0, 0.1));
+            border-color: var(--accent-gold);
+            transform: translateX(5px);
+        }
+
+        .draggable-item.dragging {
+            opacity: 0.8;
+            transform: rotate(3deg);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            cursor: grabbing;
+        }
+
+        .draggable-item.dragging::before {
+            opacity: 1;
+        }
+
+        .drag-over {
+            border: 2px dashed var(--accent-gold);
+            background: rgba(255, 215, 0, 0.1);
+        }
+
+        .order-indicator {
+            background: var(--accent-blue);
+            color: #000;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 0.9rem;
+            flex-shrink: 0;
+        }
+
+        .drag-instructions {
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+            font-style: italic;
+        }
+
+        .submit-order-btn {
+            background: linear-gradient(135deg, var(--accent-green), #00B4DB);
+            color: #000;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 5px 20px rgba(0, 255, 136, 0.4);
+            margin-top: 20px;
+            width: 100%;
+            justify-content: center;
+        }
+
+        .submit-order-btn:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(0, 255, 136, 0.6);
+        }
+
+        .submit-order-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
         }
     </style>
 </head>
@@ -835,14 +885,6 @@
         <div class="scanlines"></div>
         <div class="light-beams"></div>
         <div class="particles" id="particlesContainer"></div>
-    </div>
-
-    <!-- CONTROLLI TEMI -->
-    <div class="theme-controls">
-        <button class="theme-btn active" data-theme="default">🎮 Default</button>
-        <button class="theme-btn" data-theme="space">🚀 Space</button>
-        <button class="theme-btn" data-theme="neon">🌈 Neon</button>
-        <button class="theme-btn" data-theme="royal">👑 Royal</button>
     </div>
 
     <!-- CONTROLLO AUDIO PLAYER -->
@@ -1323,55 +1365,294 @@
             showScreen('questionScreen');
         }
 
-        function showQuestion(question) {
-            currentQuestionIndex = question.currentQuestion || currentQuestionIndex;
-            currentQuestionData = question;
-            
-            console.log(`📝 Player: Mostrando domanda ${currentQuestionIndex + 1}`, question);
-            
-            selectedAnswer = null;
-            hasSubmitted = false;
-            
-            elements.questionText.textContent = question.question;
-            elements.questionNumber.textContent = `QUESTION ${currentQuestionIndex + 1}`;
-            
-            elements.answersContainer.innerHTML = '';
-            question.answers.forEach((answer, index) => {
-                const button = document.createElement('button');
-                button.className = 'answer-btn';
-                button.textContent = answer;
-                button.onclick = () => selectAnswer(index, answer);
-                elements.answersContainer.appendChild(button);
-            });
-            
-            showScreen('questionScreen');
-            startTimer();
-        }
+function showQuestion(question) {
+    currentQuestionIndex = question.currentQuestion || currentQuestionIndex;
+    currentQuestionData = question;
+    
+    console.log(`📝 Player: Mostrando domanda ${currentQuestionIndex + 1}`, question);
+    console.log(`🎯 Tipo domanda: ${question.type || 'multiple-choice'}`);
+    
+    selectedAnswer = null;
+    hasSubmitted = false;
+    
+    elements.questionText.textContent = question.question;
+    elements.questionNumber.textContent = `QUESTION ${currentQuestionIndex + 1}`;
+    
+    elements.answersContainer.innerHTML = '';
+    
+    // CONTROLLA SE È UNA DOMANDA DI TIPO "ORDINE"
+    if (question.type === 'order' || question.question.toLowerCase().includes('ordine') || 
+        question.question.toLowerCase().includes('cronolog') || 
+        question.question.toLowerCase().includes('sequenza')) {
+        
+        showOrderQuestion(question);
+    } else {
+        showMultipleChoiceQuestion(question);
+    }
+    
+    showScreen('questionScreen');
+    startTimer();
+}
 
-        function selectAnswer(index, answerText) {
-            if (hasSubmitted) return;
+function showMultipleChoiceQuestion(question) {
+    question.answers.forEach((answer, index) => {
+        const button = document.createElement('button');
+        button.className = 'answer-btn';
+        button.textContent = answer;
+        button.onclick = () => selectAnswer(index, answer);
+        elements.answersContainer.appendChild(button);
+    });
+}
+
+function showOrderQuestion(question) {
+    const dragContainer = document.createElement('div');
+    dragContainer.className = 'drag-drop-container';
+    
+    // Istruzioni
+    const instructions = document.createElement('div');
+    instructions.className = 'drag-instructions';
+    instructions.textContent = 'Trascina le risposte per metterle nell\'ordine corretto (dal primo all\'ultimo)';
+    dragContainer.appendChild(instructions);
+    
+    // Lista draggable
+    const draggableList = document.createElement('ul');
+    draggableList.className = 'draggable-list';
+    draggableList.id = 'draggableList';
+    
+    // Mescola le risposte per iniziare (ma mantieni l'ordine originale per riferimento)
+    const shuffledAnswers = [...question.answers];
+    shuffleArray(shuffledAnswers);
+    
+    shuffledAnswers.forEach((answer, index) => {
+        const li = document.createElement('li');
+        li.className = 'draggable-item';
+        li.draggable = true;
+        li.dataset.answer = answer;
+        li.dataset.originalIndex = question.answers.indexOf(answer);
+        
+        const orderIndicator = document.createElement('div');
+        orderIndicator.className = 'order-indicator';
+        orderIndicator.textContent = index + 1;
+        
+        const answerText = document.createElement('span');
+        answerText.textContent = answer;
+        
+        li.appendChild(orderIndicator);
+        li.appendChild(answerText);
+        draggableList.appendChild(li);
+    });
+    
+    dragContainer.appendChild(draggableList);
+    
+    // Bottone di conferma
+    const submitButton = document.createElement('button');
+    submitButton.className = 'submit-order-btn';
+    submitButton.innerHTML = '🎯 <span>CONFERMA ORDINE</span>';
+    submitButton.onclick = submitOrderAnswer;
+    
+    dragContainer.appendChild(submitButton);
+    elements.answersContainer.appendChild(dragContainer);
+    
+    // Inizializza drag and drop
+    initDragAndDrop();
+}
+
+        function initDragAndDrop() {
+    const draggableList = document.getElementById('draggableList');
+    if (!draggableList) return;
+
+    let draggedItem = null;
+
+    // Eventi per desktop
+    draggableList.querySelectorAll('.draggable-item').forEach(item => {
+        item.addEventListener('dragstart', function(e) {
+            draggedItem = this;
+            setTimeout(() => this.classList.add('dragging'), 0);
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/html', this.innerHTML);
+        });
+
+        item.addEventListener('dragend', function() {
+            this.classList.remove('dragging');
+            draggedItem = null;
+            updateOrderNumbers();
+        });
+
+        item.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+        });
+
+        item.addEventListener('dragenter', function(e) {
+            e.preventDefault();
+            this.classList.add('drag-over');
+        });
+
+        item.addEventListener('dragleave', function() {
+            this.classList.remove('drag-over');
+        });
+
+        item.addEventListener('drop', function(e) {
+            e.preventDefault();
+            this.classList.remove('drag-over');
             
-            audio.playSFX('clickSound');
+            if (draggedItem && this !== draggedItem) {
+                const allItems = Array.from(draggableList.querySelectorAll('.draggable-item'));
+                const thisIndex = allItems.indexOf(this);
+                const draggedIndex = allItems.indexOf(draggedItem);
+                
+                if (draggedIndex < thisIndex) {
+                    this.parentNode.insertBefore(draggedItem, this.nextSibling);
+                } else {
+                    this.parentNode.insertBefore(draggedItem, this);
+                }
+                
+                updateOrderNumbers();
+                audio.playSFX('clickSound');
+            }
+        });
+    });
+
+    // Eventi per touch (mobile)
+    let touchStartY = 0;
+    let touchedItem = null;
+
+    draggableList.querySelectorAll('.draggable-item').forEach(item => {
+        item.addEventListener('touchstart', function(e) {
+            touchedItem = this;
+            touchStartY = e.touches[0].clientY;
+            this.classList.add('dragging');
+            e.preventDefault();
+        });
+
+        item.addEventListener('touchmove', function(e) {
+            if (!touchedItem) return;
             
-            document.querySelectorAll('.answer-btn').forEach(btn => {
-                btn.classList.remove('selected');
-            });
+            const touchY = e.touches[0].clientY;
+            const deltaY = touchY - touchStartY;
             
-            const selectedButton = document.querySelectorAll('.answer-btn')[index];
-            selectedButton.classList.add('selected');
-            selectedButton.classList.add('auto-submitted');
+            // Sposta l'elemento
+            this.style.transform = `translateY(${deltaY}px)`;
             
-            selectedAnswer = index;
-            elements.selectedAnswerText.textContent = answerText;
+            // Trova l'elemento su cui siamo passati
+            const allItems = Array.from(draggableList.querySelectorAll('.draggable-item:not(.dragging)'));
+            const touchElement = document.elementFromPoint(e.touches[0].clientX, e.touches[0].clientY);
+            const targetItem = touchElement ? touchElement.closest('.draggable-item') : null;
             
-            // EFFETTO VISIVO: Particele quando si seleziona risposta
-            const rect = selectedButton.getBoundingClientRect();
-            const centerX = rect.left + rect.width / 2;
-            const centerY = rect.top + rect.height / 2;
-            createCelebrationParticles(centerX, centerY, 10);
+            if (targetItem && targetItem !== touchedItem) {
+                const allItemsWithDragging = Array.from(draggableList.querySelectorAll('.draggable-item'));
+                const thisIndex = allItemsWithDragging.indexOf(targetItem);
+                const touchedIndex = allItemsWithDragging.indexOf(touchedItem);
+                
+                if (touchedIndex < thisIndex) {
+                    targetItem.parentNode.insertBefore(touchedItem, targetItem.nextSibling);
+                } else {
+                    targetItem.parentNode.insertBefore(touchedItem, targetItem);
+                }
+                
+                updateOrderNumbers();
+            }
             
-            submitAnswer();
+            e.preventDefault();
+        });
+
+        item.addEventListener('touchend', function() {
+            if (touchedItem) {
+                touchedItem.classList.remove('dragging');
+                touchedItem.style.transform = '';
+                touchedItem = null;
+                audio.playSFX('clickSound');
+            }
+        });
+    });
+}
+
+function updateOrderNumbers() {
+    const draggableList = document.getElementById('draggableList');
+    if (!draggableList) return;
+    
+    const items = draggableList.querySelectorAll('.draggable-item');
+    items.forEach((item, index) => {
+        const orderIndicator = item.querySelector('.order-indicator');
+        if (orderIndicator) {
+            orderIndicator.textContent = index + 1;
         }
+    });
+}
+
+function submitOrderAnswer() {
+    if (hasSubmitted) return;
+    
+    const draggableList = document.getElementById('draggableList');
+    if (!draggableList) return;
+    
+    const items = draggableList.querySelectorAll('.draggable-item');
+    const submittedOrder = Array.from(items).map(item => parseInt(item.dataset.originalIndex));
+    
+    console.log('📋 Ordine inviato:', submittedOrder);
+    
+    selectedAnswer = submittedOrder;
+    elements.selectedAnswerText.textContent = `Ordine: ${submittedOrder.map(i => i + 1).join(' → ')}`;
+    
+    audio.playSFX('submitSound');
+    hasSubmitted = true;
+    
+    const answerTime = 20 - timeLeft;
+    
+    database.ref('games/' + gameCode + '/answers').push({
+        playerName: playerName,
+        answerIndex: submittedOrder, // Per domande di ordine, inviamo l'array
+        questionIndex: currentQuestionIndex,
+        answerTime: answerTime,
+        isOrderQuestion: true
+    });
+
+    setTimeout(() => {
+        showScreen('answerSubmittedScreen');
+    }, 500);
+}
+        
+// Funzione per mescolare array
+function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+}
+
+function selectAnswer(index, answerText) {
+    if (hasSubmitted) return;
+    
+    // Se è una domanda di ordine, usa il bottone di conferma invece della selezione diretta
+    if (currentQuestionData && (currentQuestionData.type === 'order' || 
+        currentQuestionData.question.toLowerCase().includes('ordine') || 
+        currentQuestionData.question.toLowerCase().includes('cronolog') || 
+        currentQuestionData.question.toLowerCase().includes('sequenza'))) {
+        return; // Le domande di ordine usano submitOrderAnswer
+    }
+    
+    audio.playSFX('clickSound');
+    
+    document.querySelectorAll('.answer-btn').forEach(btn => {
+        btn.classList.remove('selected');
+    });
+    
+    const selectedButton = document.querySelectorAll('.answer-btn')[index];
+    selectedButton.classList.add('selected');
+    selectedButton.classList.add('auto-submitted');
+    
+    selectedAnswer = index;
+    elements.selectedAnswerText.textContent = answerText;
+    
+    // EFFETTO VISIVO: Particele quando si seleziona risposta
+    const rect = selectedButton.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+    createCelebrationParticles(centerX, centerY, 10);
+    
+    submitAnswer();
+}
 
         function submitAnswer() {
             if (selectedAnswer === null || hasSubmitted) return;
@@ -1404,13 +1685,6 @@
                 timeLeft--;
                 elements.timer.textContent = timeLeft;
                 
-                if (timeLeft <= 10) {
-                    elements.timer.classList.add('warning');
-                    if (timeLeft <= 5) {
-                        audio.playSFX('timerSound');
-                    }
-                }
-                
                 if (timeLeft <= 0) {
                     clearInterval(timer);
                     if (selectedAnswer !== null && !hasSubmitted) {
@@ -1422,57 +1696,80 @@
             }, 1000);
         }
 
-        function showQuestionResult() {
-            if (!currentQuestionData || selectedAnswer === null) {
-                console.log('❌ Dati mancanti per mostrare il risultato');
-                return;
-            }
-            
-            const isCorrect = selectedAnswer === currentQuestionData.correct;
-            const answerTime = 20 - (timeLeft > 0 ? timeLeft : 0);
-            const basePoints = currentQuestionData.points || 10;
-            const speedBonus = (answerTime <= 5) ? (6 - answerTime) : 0;
-            const totalPoints = isCorrect ? (basePoints + speedBonus) : 0;
-            
-            console.log(`🎯 Risultato: ${isCorrect ? 'CORRETTO' : 'SBAGLIATO'}, Punti: ${totalPoints}`);
-            
-            clearInterval(timer);
-            
-            let resultHTML = '';
-            
-            if (isCorrect) {
-                resultHTML = `
-                    <div class="result-icon">🎉</div>
-                    <div class="result-title correct-title">CORRECT!</div>
-                    <div class="result-message">Brilliant answer! You nailed it!</div>
-                    <div class="points-earned correct-points">
-                        +${totalPoints} POINTS
-                        ${speedBonus > 0 ? `<div style="font-size: 1rem; margin-top: 5px;">⚡ +${speedBonus} speed bonus!</div>` : ''}
-                    </div>
-                `;
-                elements.resultCard.className = 'tv-card correct-result';
-                
-                audio.playSFX('applauseSound');
-                createConfetti();
-                createCelebrationParticles(window.innerWidth / 2, window.innerHeight / 2, 30);
-                
-            } else {
-                resultHTML = `
-                    <div class="result-icon">💨</div>
-                    <div class="result-title wrong-title">WRONG!</div>
-                    <div class="result-message">Better luck next time! The correct answer was: <strong>${currentQuestionData.answers[currentQuestionData.correct]}</strong></div>
-                    <div class="points-earned wrong-points">
-                        0 POINTS
-                    </div>
-                `;
-                elements.resultCard.className = 'tv-card wrong-result';
-                
-                audio.playSFX('fartSound');
-            }
-            
-            elements.resultContainer.innerHTML = resultHTML;
-            showScreen('questionResultScreen');
+function showQuestionResult() {
+    if (!currentQuestionData || selectedAnswer === null) {
+        console.log('❌ Dati mancanti per mostrare il risultato');
+        return;
+    }
+    
+    let isCorrect = false;
+    
+    // Gestione diversa per domande di ordine vs multiple choice
+    if (Array.isArray(selectedAnswer)) {
+        // Domanda di ordine - confronta gli array
+        const correctOrder = Array.from({length: currentQuestionData.answers.length}, (_, i) => i);
+        isCorrect = JSON.stringify(selectedAnswer) === JSON.stringify(correctOrder);
+        console.log(`🎯 Risultato ordine: ${isCorrect ? 'CORRETTO' : 'SBAGLIATO'}`, {
+            submitted: selectedAnswer,
+            correct: correctOrder
+        });
+    } else {
+        // Domanda multiple choice normale
+        isCorrect = selectedAnswer === currentQuestionData.correct;
+    }
+    
+    const answerTime = 20 - (timeLeft > 0 ? timeLeft : 0);
+    const basePoints = currentQuestionData.points || 10;
+    const speedBonus = (answerTime <= 5) ? (6 - answerTime) : 0;
+    const totalPoints = isCorrect ? (basePoints + speedBonus) : 0;
+    
+    console.log(`🎯 Risultato: ${isCorrect ? 'CORRETTO' : 'SBAGLIATO'}, Punti: ${totalPoints}`);
+    
+    clearInterval(timer);
+    
+    let resultHTML = '';
+    
+    if (isCorrect) {
+        resultHTML = `
+            <div class="result-icon">🎉</div>
+            <div class="result-title correct-title">CORRECT!</div>
+            <div class="result-message">${Array.isArray(selectedAnswer) ? 'Perfect sequence! You got the order right!' : 'Brilliant answer! You nailed it!'}</div>
+            <div class="points-earned correct-points">
+                +${totalPoints} POINTS
+                ${speedBonus > 0 ? `<div style="font-size: 1rem; margin-top: 5px;">⚡ +${speedBonus} speed bonus!</div>` : ''}
+            </div>
+        `;
+        elements.resultCard.className = 'tv-card correct-result';
+        
+        audio.playSFX('applauseSound');
+        createConfetti();
+        createCelebrationParticles(window.innerWidth / 2, window.innerHeight / 2, 30);
+        
+    } else {
+        let correctAnswerText = '';
+        if (Array.isArray(selectedAnswer)) {
+            const correctOrder = Array.from({length: currentQuestionData.answers.length}, (_, i) => i);
+            correctAnswerText = `Correct order: ${correctOrder.map(i => currentQuestionData.answers[i]).join(' → ')}`;
+        } else {
+            correctAnswerText = `The correct answer was: <strong>${currentQuestionData.answers[currentQuestionData.correct]}</strong>`;
         }
+        
+        resultHTML = `
+            <div class="result-icon">💨</div>
+            <div class="result-title wrong-title">WRONG!</div>
+            <div class="result-message">Better luck next time! ${correctAnswerText}</div>
+            <div class="points-earned wrong-points">
+                0 POINTS
+            </div>
+        `;
+        elements.resultCard.className = 'tv-card wrong-result';
+        
+        audio.playSFX('fartSound');
+    }
+    
+    elements.resultContainer.innerHTML = resultHTML;
+    showScreen('questionResultScreen');
+}
 
         function showLeaderboard(leaderboard) {
             if (!leaderboard || leaderboard.length === 0) {
@@ -1524,14 +1821,6 @@
             audio.toggleSFX();
         });
 
-        // CONTROLLI TEMI
-        document.querySelectorAll('.theme-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                audio.playSFX('clickSound');
-                changeTheme(this.dataset.theme);
-            });
-        });
-
         elements.gameCodeInput.addEventListener('keypress', function(e) {
             if (e.key === 'Enter') joinGame();
         });
@@ -1549,3 +1838,4 @@
     </script>
 </body>
 </html>
+
