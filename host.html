@@ -19,7 +19,6 @@
             --accent-blue: #00B4DB;
             --accent-purple: #8A2BE2;
             --accent-red: #FF416C;
-            --accent-green: #00FF00;
             --text-primary: #FFFFFF;
             --text-secondary: #B0B0CC;
             --glass-bg: rgba(255, 255, 255, 0.1);
@@ -402,12 +401,6 @@
             overflow: hidden;
         }
 
-        /* Border color diverso per tipo domanda */
-        .question-card.video { border-color: var(--accent-blue); }
-        .question-card.audio { border-color: var(--accent-purple); }
-        .question-card.image { border-color: var(--accent-green); }
-        .question-card.chronological { border-color: var(--accent-red); }
-
         .question-header {
             display: flex;
             justify-content: space-between;
@@ -431,20 +424,6 @@
             color: var(--text-primary);
             text-align: center;
             text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
-        }
-
-        /* MEDIA CONTAINER */
-        .media-container {
-            text-align: center;
-            margin: 30px 0;
-            position: relative;
-        }
-
-        .media-element {
-            max-width: 100%;
-            max-height: 300px;
-            border-radius: var(--border-radius);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
         }
 
         /* TIMER DRAMMATICO */
@@ -568,19 +547,6 @@
             animation: progressShine 2s infinite;
         }
 
-        /* INDICATORE PROGRESSO DOMANDE */
-        .progress-indicator {
-            margin: 20px 0;
-            text-align: center;
-        }
-
-        .progress-text {
-            font-size: 1.1rem;
-            color: var(--text-secondary);
-            margin-top: 10px;
-            font-weight: 600;
-        }
-
         /* QUICK ACTIONS */
         .quick-actions {
             display: flex;
@@ -681,82 +647,6 @@
             color: #000;
             height: 150px;
             box-shadow: 0 8px 30px rgba(205, 127, 50, 0.4);
-        }
-
-        /* CLASSIFICA PERMANENTE SU HOST */
-        .leaderboard-sidebar {
-            position: fixed;
-            right: 20px;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 280px;
-            background: linear-gradient(135deg, rgba(255, 215, 0, 0.15), rgba(0, 180, 219, 0.1));
-            backdrop-filter: blur(20px);
-            border: 2px solid var(--accent-gold);
-            border-radius: var(--border-radius-large);
-            padding: 20px;
-            box-shadow: var(--neon-glow);
-            z-index: 100;
-            max-height: 80vh;
-            overflow-y: auto;
-        }
-
-        .sidebar-title {
-            font-size: 1.2rem;
-            font-weight: 700;
-            text-align: center;
-            margin-bottom: 15px;
-            color: var(--accent-gold);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .sidebar-content {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .sidebar-player {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px 15px;
-            background: rgba(255, 255, 255, 0.08);
-            border-radius: var(--border-radius);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            transition: all 0.3s ease;
-        }
-
-        .sidebar-player:hover {
-            background: rgba(255, 255, 255, 0.12);
-            transform: translateX(-5px);
-        }
-
-        .sidebar-player.rank-1 {
-            background: linear-gradient(135deg, rgba(255, 215, 0, 0.3), rgba(255, 215, 0, 0.1));
-            border-color: var(--accent-gold);
-        }
-
-        .sidebar-player.rank-2 {
-            background: linear-gradient(135deg, rgba(192, 192, 192, 0.3), rgba(192, 192, 192, 0.1));
-            border-color: #C0C0C0;
-        }
-
-        .sidebar-player.rank-3 {
-            background: linear-gradient(135deg, rgba(205, 127, 50, 0.3), rgba(205, 127, 50, 0.1));
-            border-color: #CD7F32;
-        }
-
-        .sidebar-player-name {
-            font-weight: 600;
-            font-size: 1rem;
-        }
-
-        .sidebar-player-score {
-            font-weight: 700;
-            color: var(--accent-gold);
-            font-size: 1.1rem;
         }
 
         /* CONTROLLI TEMI */
@@ -897,32 +787,6 @@
             }
         }
 
-        /* MESSAGGI TEMPORANEI */
-        .temporary-message {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: linear-gradient(135deg, var(--accent-gold), var(--accent-blue));
-            color: #000;
-            padding: 25px 40px;
-            border-radius: var(--border-radius-large);
-            font-size: 1.5rem;
-            font-weight: 700;
-            z-index: 1000;
-            box-shadow: var(--neon-glow);
-            animation: messagePop 2s ease-in-out forwards;
-            text-align: center;
-        }
-
-        @keyframes messagePop {
-            0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
-            20% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
-            30% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-            80% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-            100% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
-        }
-
         /* RESPONSIVE */
         @media (max-width: 768px) {
             .container {
@@ -971,16 +835,6 @@
                 transform: translateX(-50%);
                 flex-wrap: wrap;
                 justify-content: center;
-            }
-
-            .leaderboard-sidebar {
-                position: relative;
-                width: 100%;
-                margin: 20px 0;
-                right: auto;
-                top: auto;
-                transform: none;
-                max-height: 300px;
             }
         }
 
@@ -1098,17 +952,6 @@
         <div class="particles" id="particlesContainer"></div>
     </div>
 
-    <!-- CLASSIFICA PERMANENTE -->
-    <div class="leaderboard-sidebar" id="leaderboardSidebar">
-        <div class="sidebar-title">🏆 LIVE STANDINGS</div>
-        <div class="sidebar-content" id="sidebarLeaderboard">
-            <div class="sidebar-player">
-                <span class="sidebar-player-name">Classifica in tempo reale</span>
-                <span class="sidebar-player-score">-</span>
-            </div>
-        </div>
-    </div>
-
     <!-- OVERLAY ATTIVAZIONE AUDIO -->
     <div id="audioActivation" class="audio-activation">
         <div class="activation-card">
@@ -1137,21 +980,13 @@
         <button class="audio-btn" id="sfxToggle">🔇 SFX</button>
     </div>
 
-    <div class="version">Game Show Edition v2.1</div>
+    <div class="version">Game Show Edition v2.0</div>
     
     <div class="container">
         <!-- HEADER -->
         <div class="header">
             <h1 class="main-title">🎮 PIGIAMA PARTY</h1>
             <div class="subtitle">THE ULTIMATE GAME SHOW EXPERIENCE</div>
-        </div>
-
-        <!-- INDICATORE PROGRESSO DOMANDE -->
-        <div class="progress-indicator">
-            <div class="progress-bar">
-                <div class="progress-fill" id="questionProgress" style="width: 0%"></div>
-            </div>
-            <div class="progress-text" id="progressText">Domanda 0/0</div>
         </div>
 
         <!-- SCHERMATA LOBBY -->
@@ -1189,18 +1024,13 @@
 
         <!-- SCHERMATA GIOCO -->
         <div id="gameScreen" class="screen hidden">
-            <div class="question-card" id="questionCard">
+            <div class="question-card">
                 <div class="question-header">
                     <div class="question-counter" id="questionCounter">QUESTION 1/10</div>
                 </div>
                 
                 <div class="question-text" id="questionText">
                     The ultimate game show question will appear here...
-                </div>
-
-                <!-- Media Container -->
-                <div class="media-container" id="mediaContainer" style="display: none;">
-                    <!-- Media elements will be inserted here -->
                 </div>
 
                 <div class="timer-container">
@@ -1474,26 +1304,11 @@
             }, 500);
         }
 
-        // 5. MESSAGGIO TEMPORANEO
-        function showTemporaryMessage(message) {
-            const messageElement = document.createElement('div');
-            messageElement.className = 'temporary-message';
-            messageElement.textContent = message;
-            
-            document.body.appendChild(messageElement);
-            
-            setTimeout(() => {
-                if (messageElement.parentNode) {
-                    messageElement.parentNode.removeChild(messageElement);
-                }
-            }, 2000);
-        }
-
         // === INIZIALIZZA PARTICELLE ===
         createParticles();
 
         // === FORZA REFRESH CACHE ===
-        console.log('🎮 HOST Game Show Edition v2.1 - Caricato: ' + new Date().toLocaleString());
+        console.log('🎮 HOST Game Show Edition v2.0 - Caricato: ' + new Date().toLocaleString());
         
         // === SISTEMA AUDIO ===
         const audio = {
@@ -1630,95 +1445,24 @@
         // === DOMANDE DEL GIOCO ===
         const questions = [
             {
-                id: 1,
                 question: "Qual è la capitale dell'Australia?",
                 answers: ["Sydney", "Melbourne", "Canberra", "Perth"],
                 correct: 2,
-                points: 10,
-                type: "text"
+                points: 10
             },
             {
-                id: 2,
                 question: "In quale anno è caduto il muro di Berlino?",
                 answers: ["1987", "1989", "1991", "1985"],
                 correct: 1,
-                points: 15,
-                type: "text"
+                points: 15
             },
             {
-                id: 3,
                 question: "Chi ha scritto 'Il nome della rosa'?",
                 answers: ["Italo Calvino", "Umberto Eco", "Luigi Pirandello", "Alessandro Manzoni"],
                 correct: 1,
-                points: 10,
-                type: "text"
-            },
-            {
-                id: 4,
-                question: "Metti in ordine cronologico questi eventi",
-                answers: ["Rivoluzione Francese", "Scoperta dell'America", "Caduta dell'Impero Romano", "Prima Guerra Mondiale"],
-                correct: 2,
-                points: 20,
-                type: "chronological"
-            },
-            {
-                id: 5,
-                question: "Ascolta questo brano musicale",
-                answers: ["Beethoven", "Mozart", "Bach", "Vivaldi"],
-                correct: 0,
-                points: 15,
-                type: "audio",
-                media: "audio/background.mp3"
+                points: 10
             }
         ];
-
-        // === SISTEMA DI SELEZIONE RANDOM DOMANDE ===
-        let usedQuestions = new Set();
-        let questionCount = 0;
-
-        function getRandomQuestion() {
-            const availableQuestions = questions.filter(q => !usedQuestions.has(q.id));
-            
-            if (availableQuestions.length === 0) {
-                // Reset se abbiamo usato tutte le domande
-                usedQuestions.clear();
-                return shuffleAnswers(questions[Math.floor(Math.random() * questions.length)]);
-            }
-            
-            const randomIndex = Math.floor(Math.random() * availableQuestions.length);
-            const question = availableQuestions[randomIndex];
-            usedQuestions.add(question.id);
-            
-            return shuffleAnswers(question);
-        }
-
-        // Randomizza anche le risposte
-        function shuffleAnswers(question) {
-            const answers = [...question.answers];
-            const correctAnswer = answers[question.correct];
-            
-            // Mescola le risposte
-            for (let i = answers.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [answers[i], answers[j]] = [answers[j], answers[i]];
-            }
-            
-            // Trova la nuova posizione della risposta corretta
-            const newCorrectIndex = answers.indexOf(correctAnswer);
-            
-            return {
-                ...question,
-                answers: answers,
-                correct: newCorrectIndex
-            };
-        }
-
-        // === SISTEMA TIMER DINAMICO ===
-        function getTimerDuration(question) {
-            if (question.type === "chronological") return 30;
-            if (question.media && question.media !== "") return 20;
-            return 15;
-        }
 
         // === VARIABILI DI STATO ===
         let currentQuestion = 0;
@@ -1729,7 +1473,6 @@
         let gameCode = '';
         let answersRevealed = false;
         let playerScores = {};
-        let isMediaPlaying = false;
 
         // === ELEMENTI DOM ===
         const elements = {
@@ -1751,13 +1494,7 @@
             showAnswerBtn: document.getElementById('showAnswerBtn'),
             finalLeaderboard: document.getElementById('finalLeaderboard'),
             podium: document.getElementById('podium'),
-            restartBtn: document.getElementById('restartBtn'),
-            questionCard: document.getElementById('questionCard'),
-            mediaContainer: document.getElementById('mediaContainer'),
-            questionProgress: document.getElementById('questionProgress'),
-            progressText: document.getElementById('progressText'),
-            leaderboardSidebar: document.getElementById('leaderboardSidebar'),
-            sidebarLeaderboard: document.getElementById('sidebarLeaderboard')
+            restartBtn: document.getElementById('restartBtn')
         };
 
         // === INIZIALIZZAZIONE ===
@@ -1773,7 +1510,7 @@
                 status: 'waiting',
                 host: true,
                 createdAt: Date.now(),
-                version: 'Game-Show-2.1'
+                version: 'Game-Show-2.0'
             });
 
             database.ref('games/' + gameCode + '/players').on('value', (snapshot) => {
@@ -1791,7 +1528,6 @@
                 });
                 
                 updatePlayerList();
-                updateLeaderboardSidebar();
             });
 
             database.ref('games/' + gameCode + '/answers').on('value', (snapshot) => {
@@ -1821,43 +1557,6 @@
                 });
                 elements.startBtn.disabled = false;
             }
-        }
-
-        // === AGGIORNAMENTO CLASSIFICA OGNI 10 DOMANDE ===
-        function showIntermediateLeaderboard() {
-            // Mostra classifica aggiornata
-            updateLeaderboardSidebar();
-            
-            // Effetto speciale
-            createCelebrationParticles(window.innerWidth / 2, window.innerHeight / 2, 30);
-            audio.playSFX('transitionSound');
-            
-            // Messaggio temporaneo
-            showTemporaryMessage("📊 Classifica Aggiornata!");
-        }
-
-        // === CLASSIFICA PERMANENTE ===
-        function updateLeaderboardSidebar() {
-            const sortedPlayers = Object.entries(playerScores)
-                .sort(([,a], [,b]) => b.total - a.total)
-                .slice(0, 10); // Mostra solo i primi 10
-            
-            elements.sidebarLeaderboard.innerHTML = '';
-            
-            if (sortedPlayers.length === 0) {
-                elements.sidebarLeaderboard.innerHTML = '<div class="sidebar-player"><span class="sidebar-player-name">Nessun punteggio</span><span class="sidebar-player-score">-</span></div>';
-                return;
-            }
-            
-            sortedPlayers.forEach(([name, data], index) => {
-                const playerElement = document.createElement('div');
-                playerElement.className = `sidebar-player ${index < 3 ? 'rank-' + (index + 1) : ''}`;
-                playerElement.innerHTML = `
-                    <span class="sidebar-player-name">${index + 1}. ${name}</span>
-                    <span class="sidebar-player-score">${data.total}p</span>
-                `;
-                elements.sidebarLeaderboard.appendChild(playerElement);
-            });
         }
 
         function checkAllPlayersAnswered() {
@@ -1972,54 +1671,26 @@
             });
 
             setTimeout(() => {
-                loadNextRandomQuestion();
+                loadQuestion(0);
             }, 500);
         }
 
-        function loadNextRandomQuestion() {
-            if (questionCount >= questions.length) {
+        function loadQuestion(index) {
+            if (index >= questions.length) {
                 endGame();
                 return;
             }
 
-            const question = getRandomQuestion();
-            questionCount++;
-            
-            currentQuestion = questionCount - 1;
+            currentQuestion = index;
+            const question = questions[index];
             
             playerAnswers = [];
             answersRevealed = false;
-            isMediaPlaying = false;
             
-            console.log(`🔄 Caricando domanda ${questionCount} (ID: ${question.id})`);
+            console.log(`🔄 Caricando domanda ${index + 1}`);
             
-            // Aggiorna progresso
-            const progressPercent = (questionCount / questions.length) * 100;
-            elements.questionProgress.style.width = progressPercent + '%';
-            elements.progressText.textContent = `Domanda ${questionCount}/${questions.length}`;
-            
-            elements.questionCounter.textContent = `QUESTION ${questionCount}/${questions.length}`;
+            elements.questionCounter.textContent = `QUESTION ${index + 1}/${questions.length}`;
             elements.questionText.textContent = question.question;
-            
-            // Reset media container
-            elements.mediaContainer.style.display = 'none';
-            elements.mediaContainer.innerHTML = '';
-            
-            // Reset classi domanda
-            elements.questionCard.className = 'question-card';
-            
-            // Aggiungi classe per tipo domanda
-            if (question.type === 'chronological') {
-                elements.questionCard.classList.add('chronological');
-            } else if (question.media) {
-                if (question.media.includes('.mp3') || question.media.includes('.wav')) {
-                    elements.questionCard.classList.add('audio');
-                } else if (question.media.includes('.jpg') || question.media.includes('.png')) {
-                    elements.questionCard.classList.add('image');
-                } else if (question.media.includes('.mp4')) {
-                    elements.questionCard.classList.add('video');
-                }
-            }
             
             elements.answersGrid.innerHTML = '';
             database.ref('games/' + gameCode + '/answers').remove();
@@ -2034,117 +1705,15 @@
             });
             
             database.ref('games/' + gameCode).update({
-                currentQuestion: currentQuestion,
+                currentQuestion: index,
                 currentQuestionData: question
             });
             
-            // Avvia la domanda con gestione media
-            startQuestion(question);
-            
-            // Ogni 10 domande, mostra classifica intermedia
-            if (questionCount % 10 === 0 && questionCount > 0) {
-                showIntermediateLeaderboard();
-            }
+            startTimer();
         }
 
-        function startQuestion(question) {
-            const timerDuration = getTimerDuration(question);
-            
-            // Gestione media
-            if (question.media) {
-                // Abbassa musica di sottofondo
-                audio.gameMusic.volume = 0.1;
-                isMediaPlaying = true;
-                
-                // Riproduci media
-                playMedia(question.media).then(() => {
-                    // Timer parte DOPO la riproduzione
-                    isMediaPlaying = false;
-                    audio.gameMusic.volume = 0.3;
-                    startTimer(timerDuration);
-                }).catch(error => {
-                    console.error('❌ Errore riproduzione media:', error);
-                    isMediaPlaying = false;
-                    audio.gameMusic.volume = 0.3;
-                    startTimer(timerDuration);
-                });
-            } else {
-                // Timer normale
-                startTimer(timerDuration);
-            }
-        }
-
-        async function playMedia(mediaUrl) {
-            return new Promise((resolve, reject) => {
-                elements.mediaContainer.style.display = 'block';
-                
-                if (mediaUrl.includes('.mp3') || mediaUrl.includes('.wav')) {
-                    // Audio
-                    const audioElement = document.createElement('audio');
-                    audioElement.controls = true;
-                    audioElement.src = mediaUrl;
-                    audioElement.style.width = '100%';
-                    audioElement.style.maxWidth = '400px';
-                    
-                    audioElement.addEventListener('ended', () => {
-                        resolve();
-                    });
-                    
-                    audioElement.addEventListener('error', (error) => {
-                        console.error('❌ Errore riproduzione audio:', error);
-                        resolve(); // Continua comunque
-                    });
-                    
-                    elements.mediaContainer.appendChild(audioElement);
-                    
-                    // Auto-play
-                    audioElement.play().catch(error => {
-                        console.error('❌ Auto-play bloccato:', error);
-                        resolve(); // Continua comunque
-                    });
-                    
-                } else if (mediaUrl.includes('.jpg') || mediaUrl.includes('.png')) {
-                    // Immagine
-                    const imgElement = document.createElement('img');
-                    imgElement.src = mediaUrl;
-                    imgElement.className = 'media-element';
-                    imgElement.onload = () => resolve();
-                    imgElement.onerror = () => resolve(); // Continua comunque se errore
-                    elements.mediaContainer.appendChild(imgElement);
-                    
-                } else if (mediaUrl.includes('.mp4')) {
-                    // Video
-                    const videoElement = document.createElement('video');
-                    videoElement.controls = true;
-                    videoElement.src = mediaUrl;
-                    videoElement.className = 'media-element';
-                    videoElement.style.maxWidth = '500px';
-                    
-                    videoElement.addEventListener('ended', () => {
-                        resolve();
-                    });
-                    
-                    videoElement.addEventListener('error', () => {
-                        resolve(); // Continua comunque
-                    });
-                    
-                    elements.mediaContainer.appendChild(videoElement);
-                    
-                    // Auto-play
-                    videoElement.play().catch(error => {
-                        console.error('❌ Auto-play video bloccato:', error);
-                        resolve(); // Continua comunque
-                    });
-                } else {
-                    // Tipo media non supportato
-                    console.warn('⚠️ Tipo media non supportato:', mediaUrl);
-                    resolve();
-                }
-            });
-        }
-
-        function startTimer(duration = 20) {
-            timeLeft = duration;
+        function startTimer() {
+            timeLeft = 20;
             elements.timer.textContent = timeLeft;
             elements.timer.classList.remove('warning');
             elements.nextBtn.disabled = true;
@@ -2182,27 +1751,21 @@
         }
 
         function showCorrectAnswer() {
-            const question = questions.find(q => q.id === currentQuestion + 1) || questions[currentQuestion];
+            const question = questions[currentQuestion];
             const answerElements = elements.answersGrid.querySelectorAll('.answer-option');
-            
-            if (answerElements[question.correct]) {
-                answerElements[question.correct].classList.add('correct');
-            }
+            answerElements[question.correct].classList.add('correct');
             
             audio.playSFX('correctSound');
             
             // EFFETTO VISIVO: Particele di celebrazione
-            if (answerElements[question.correct]) {
-                const correctElement = answerElements[question.correct];
-                const rect = correctElement.getBoundingClientRect();
-                const centerX = rect.left + rect.width / 2;
-                const centerY = rect.top + rect.height / 2;
-                createCelebrationParticles(centerX, centerY, 25);
-            }
+            const correctElement = answerElements[question.correct];
+            const rect = correctElement.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+            createCelebrationParticles(centerX, centerY, 25);
             
             answersRevealed = true;
             updateAnswersList();
-            updateLeaderboardSidebar();
             
             // COMUNICA AI PLAYER DI MOSTRARE I RISULTATI
             revealAnswersToPlayers();
@@ -2233,7 +1796,7 @@
             
             audio.playSFX('transitionSound');
             answersRevealed = false;
-            loadNextRandomQuestion();
+            loadQuestion(currentQuestion + 1);
         }
 
         function showLeaderboard() {
@@ -2380,7 +1943,7 @@
         initGame();
         
         setTimeout(() => {
-            console.log('🔄 HOST Game Show Edition v2.1 attivo');
+            console.log('🔄 HOST Game Show Edition v2.0 attivo');
             document.title = "Pigiama Party - Game Master";
         }, 100);
     </script>
