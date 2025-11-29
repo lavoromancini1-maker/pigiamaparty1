@@ -441,25 +441,32 @@
 }
 
         /* TIMER DRAMMATICO */
-        .timer-container {
-            text-align: center;
-            margin: 40px 0;
-            position: relative;
-        }
+        /* TIMER CONTAINER MIGLIORATO */
+.timer-container {
+    text-align: center;
+    margin: 40px 0;
+    position: relative;
+    min-height: 120px; /* Assicura spazio per il timer */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
 
-        .timer {
-            font-size: 6rem;
-            font-weight: 800;
-            background: linear-gradient(135deg, var(--accent-gold), var(--accent-blue));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            transition: all 0.3s ease;
-            font-family: 'Montserrat', sans-serif;
-            text-shadow: 0 0 30px rgba(255, 215, 0, 0.5);
-            position: relative;
-            animation: timerPulse 1s ease-in-out infinite;
-        }
+.timer {
+    font-size: 6rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--accent-gold), var(--accent-blue));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    transition: all 0.3s ease;
+    font-family: 'Montserrat', sans-serif;
+    text-shadow: 0 0 30px rgba(255, 215, 0, 0.5);
+    position: relative;
+    animation: timerPulse 1s ease-in-out infinite;
+    margin: 20px 0;
+}
 
         .timer.warning {
             background: linear-gradient(135deg, #FF416C, #FF4B2B);
@@ -1513,6 +1520,19 @@ const questions = [
     }
 ];
 
+        // === UTILITY PER VERIFICARE FILE MEDIA ===
+function checkMediaFiles() {
+    questions.forEach((q, index) => {
+        if (q.media) {
+            console.log(`🔍 Domanda ${index + 1}: ${q.media}`);
+            // Qui puoi aggiungere un controllo per verificare se i file esistono
+        }
+    });
+}
+
+// Chiamala dopo aver definito le domande
+setTimeout(checkMediaFiles, 2000);
+
         // === SISTEMA TIMER DINAMICO ===
 function getTimerDuration(question) {
     if (question.type === "chronological") return 30;
@@ -1747,22 +1767,35 @@ async function playMedia(mediaUrl) {
 function startQuestion(question) {
     const timerDuration = getTimerDuration(question);
     
+    console.log(`⏰ Timer duration: ${timerDuration}s per tipo: ${question.type}`);
+    
     // Gestione media
-    if (question.media && (question.media.includes('.mp3') || question.media.includes('.wav') || question.media.includes('.mp4'))) {
-        console.log('🎵 Media detected, abbasso musica');
-        // Abbassa musica di sottofondo
-        audio.gameMusic.volume = 0.1;
+    if (question.media && question.media !== "") {
+        console.log('🎵 Media detected:', question.media);
         
-        // Riproduci media e POI avvia timer
-        playMedia(question.media).then(() => {
-            console.log('⏰ Media finito, avvio timer di', timerDuration, 'secondi');
-            // Ripristina volume musica
-            audio.gameMusic.volume = 0.3;
+        if (question.media.includes('.mp3') || question.media.includes('.wav') || question.media.includes('.mp4')) {
+            // Audio/Video - abbassa musica e aspetta fine riproduzione
+            console.log('🔊 Audio/Video detected, abbasso musica');
+            audio.gameMusic.volume = 0.1;
+            
+            playMedia(question.media).then(() => {
+                console.log('⏰ Media finito, avvio timer di', timerDuration, 'secondi');
+                // Ripristina volume musica
+                audio.gameMusic.volume = 0.3;
+                startTimer(timerDuration);
+            }).catch(error => {
+                console.error('❌ Errore media, continuo comunque:', error);
+                audio.gameMusic.volume = 0.3;
+                startTimer(timerDuration);
+            });
+        } else {
+            // Immagini - timer parte immediatamente
+            console.log('🖼️ Immagine detected, timer parte subito');
             startTimer(timerDuration);
-        });
+        }
     } else {
-        // Nessun media o solo immagini - timer normale
-        console.log('⏰ Nessun media, avvio timer di', timerDuration, 'secondi');
+        // Nessun media - timer normale
+        console.log('📝 Nessun media, avvio timer di', timerDuration, 'secondi');
         startTimer(timerDuration);
     }
 }
@@ -1978,7 +2011,7 @@ function startQuestion(question) {
             }, 500);
         }
 
-        function loadQuestion(index) {
+function loadQuestion(index) {
     if (index >= questions.length) {
         endGame();
         return;
@@ -1999,20 +2032,22 @@ function startQuestion(question) {
     elements.mediaContainer.style.display = 'none';
     elements.mediaContainer.innerHTML = '';
     
-    // Mostra media se presente (immagini)
-    if (question.media && (question.media.includes('.jpg') || question.media.includes('.png'))) {
+    // Mostra IMMAGINI immediatamente (audio/video gestiti dopo)
+    if (question.media && (question.media.includes('.jpg') || question.media.includes('.png') || question.media.includes('.jpeg'))) {
+        console.log('🖼️ Caricamento immagine immediato');
         elements.mediaContainer.style.display = 'block';
         const imgElement = document.createElement('img');
         imgElement.src = question.media;
         imgElement.className = 'media-element';
+        imgElement.onerror = () => {
+            console.error('❌ Errore caricamento immagine');
+            elements.mediaContainer.innerHTML = '<div style="color: var(--accent-red); text-align: center;">❌ Immagine non disponibile</div>';
+        };
         elements.mediaContainer.appendChild(imgElement);
     }
     
+    // Pulisci e ricrea le risposte
     elements.answersGrid.innerHTML = '';
-    database.ref('games/' + gameCode + '/answers').remove();
-    
-    updateAnswersProgress();
-    
     question.answers.forEach((answer, i) => {
         const div = document.createElement('div');
         div.className = 'answer-option';
@@ -2020,52 +2055,58 @@ function startQuestion(question) {
         elements.answersGrid.appendChild(div);
     });
     
+    // Reset Firebase answers
+    database.ref('games/' + gameCode + '/answers').remove();
+    
+    updateAnswersProgress();
+    
+    // Aggiorna Firebase con la domanda corrente
     database.ref('games/' + gameCode).update({
         currentQuestion: index,
         currentQuestionData: question
     });
     
-    // USA IL NUOVO SISTEMA TIMER DINAMICO
+    // AVVIA IL SISTEMA TIMER DINAMICO
     startQuestion(question);
 }
 
-        function startTimer() {
-            timeLeft = 20;
-            elements.timer.textContent = timeLeft;
-            elements.timer.classList.remove('warning');
-            elements.nextBtn.disabled = true;
-            elements.nextBtn.innerHTML = '<span>⏳</span> WAITING...';
-            
-            clearInterval(timer);
-            timer = setInterval(() => {
-                timeLeft--;
-                elements.timer.textContent = timeLeft;
-                
-                if (timeLeft <= 5) {
-                    elements.timer.classList.add('warning');
-                    if (timeLeft === 3 || timeLeft === 2 || timeLeft === 1) {
-                        audio.playSFX('timerSound');
-                    }
-                }
-                
-                if (checkAllPlayersAnswered() && timeLeft > 0 && !answersRevealed) {
-                    console.log('⏰ Timer fermato - tutti hanno risposto');
-                    clearInterval(timer);
-                    showCorrectAnswer();
-                    elements.nextBtn.disabled = false;
-                    elements.nextBtn.innerHTML = '<span>➡️</span> NEXT QUESTION';
-                    elements.timer.textContent = "🎉 ALL RESPONSES IN!";
-                    return;
-                }
-                
-                if (timeLeft <= 0) {
-                    clearInterval(timer);
-                    showCorrectAnswer();
-                    elements.nextBtn.disabled = false;
-                    elements.nextBtn.innerHTML = '<span>➡️</span> NEXT QUESTION';
-                }
-            }, 1000);
+        function startTimer(duration = 20) {
+    timeLeft = duration;
+    elements.timer.textContent = timeLeft;
+    elements.timer.classList.remove('warning');
+    elements.nextBtn.disabled = true;
+    elements.nextBtn.innerHTML = '<span>⏳</span> WAITING...';
+    
+    clearInterval(timer);
+    timer = setInterval(() => {
+        timeLeft--;
+        elements.timer.textContent = timeLeft;
+        
+        if (timeLeft <= 5) {
+            elements.timer.classList.add('warning');
+            if (timeLeft === 3 || timeLeft === 2 || timeLeft === 1) {
+                audio.playSFX('timerSound');
+            }
         }
+        
+        if (checkAllPlayersAnswered() && timeLeft > 0 && !answersRevealed) {
+            console.log('⏰ Timer fermato - tutti hanno risposto');
+            clearInterval(timer);
+            showCorrectAnswer();
+            elements.nextBtn.disabled = false;
+            elements.nextBtn.innerHTML = '<span>➡️</span> NEXT QUESTION';
+            elements.timer.textContent = "🎉 ALL RESPONSES IN!";
+            return;
+        }
+        
+        if (timeLeft <= 0) {
+            clearInterval(timer);
+            showCorrectAnswer();
+            elements.nextBtn.disabled = false;
+            elements.nextBtn.innerHTML = '<span>➡️</span> NEXT QUESTION';
+        }
+    }, 1000);
+}
 
         function showCorrectAnswer() {
             const question = questions[currentQuestion];
@@ -2266,4 +2307,5 @@ function startQuestion(question) {
     </script>
 </body>
 </html>
+
 
