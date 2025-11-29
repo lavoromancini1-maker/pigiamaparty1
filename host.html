@@ -2672,71 +2672,63 @@ function shuffleQuestionsAndAnswers() {
             return { points, speedBonus };
         }
 
-        function updateAnswersList() {
-            elements.answersList.innerHTML = '';
+function updateAnswersList() {
+    elements.answersList.innerHTML = '';
+    
+    if (playerAnswers.length === 0) {
+        elements.answersList.innerHTML = '<li class="player-item"><span class="player-icon">⏳</span><span class="player-name">Waiting for responses...</span></li>';
+    } else {
+        const currentAnswers = playerAnswers.filter(a => a.questionIndex === currentQuestion);
+        
+        if (!answersRevealed) {
+            currentAnswers.forEach(answer => {
+                const li = document.createElement('li');
+                li.className = 'player-item';
+                li.innerHTML = `<span class="player-icon">🎯</span><span class="player-name">${answer.playerName}: Response submitted</span>`;
+                elements.answersList.appendChild(li);
+            });
+        } else {
+            const question = shuffledQuestions[currentQuestion];
             
-            if (playerAnswers.length === 0) {
-                elements.answersList.innerHTML = '<li class="player-item"><span class="player-icon">⏳</span><span class="player-name">Waiting for responses...</span></li>';
-            } else {
-                const currentAnswers = playerAnswers.filter(a => a.questionIndex === currentQuestion);
+            currentAnswers.forEach(answer => {
+                const pointsData = calculatePoints(answer, question);
                 
-                if (!answersRevealed) {
-                    currentAnswers.forEach(answer => {
-                        const li = document.createElement('li');
-                        li.className = 'player-item';
-                        li.innerHTML = `<span class="player-icon">🎯</span><span class="player-name">${answer.playerName}: Response submitted</span>`;
-                        elements.answersList.appendChild(li);
-                    });
+                const li = document.createElement('li');
+                li.className = 'player-item';
+                
+                const isCorrect = answer.answerIndex === question.correct;
+                const icon = isCorrect ? '🏆' : '❌';
+                
+                let pointsText = '';
+                if (isCorrect) {
+                    pointsText = ` (+${pointsData.points}${pointsData.speedBonus > 0 ? ` ⚡+${pointsData.speedBonus}` : ''})`;
                     
-                    if (currentAnswers.length > 0) {
-                        const summary = document.createElement('li');
-                        summary.className = 'player-item';
-                        summary.style.background = 'rgba(255, 215, 0, 0.2)';
-                        summary.innerHTML = `<span class="player-icon">📊</span><span class="player-name">${currentAnswers.length}/${connectedPlayers.length} contestants responded</span>`;
-                        elements.answersList.appendChild(summary);
+                    if (!playerScores[answer.playerName]) {
+                        playerScores[answer.playerName] = { total: 0, correctAnswers: 0, speedBonuses: 0 };
                     }
-                } else {
-                    const question = questions[currentQuestion];
-                    currentAnswers.forEach(answer => {
-                        const pointsData = calculatePoints(answer, question);
-                        
-                        const li = document.createElement('li');
-                        li.className = 'player-item';
-                        
-                        const isCorrect = answer.answerIndex === question.correct;
-                        const icon = isCorrect ? '🏆' : '❌';
-                        
-                        let pointsText = '';
-                        if (isCorrect) {
-                            pointsText = ` (+${pointsData.points}${pointsData.speedBonus > 0 ? ` ⚡+${pointsData.speedBonus}` : ''})`;
-                            
-                            if (!playerScores[answer.playerName]) {
-                                playerScores[answer.playerName] = { total: 0, correctAnswers: 0, speedBonuses: 0 };
-                            }
-                            playerScores[answer.playerName].total += pointsData.points;
-                            playerScores[answer.playerName].correctAnswers += 1;
-                            if (pointsData.speedBonus > 0) {
-                                playerScores[answer.playerName].speedBonuses += pointsData.speedBonus;
-                            }
-                        }
-                        
-                        li.innerHTML = `<span class="player-icon">${icon}</span><span class="player-name">${answer.playerName}: Option ${answer.answerIndex + 1}${pointsText}</span>`;
-                        elements.answersList.appendChild(li);
-                    });
+                    playerScores[answer.playerName].total += pointsData.points;
+                    playerScores[answer.playerName].correctAnswers += 1;
+                    if (pointsData.speedBonus > 0) {
+                        playerScores[answer.playerName].speedBonuses += pointsData.speedBonus;
+                    }
                 }
                 
-                updateAnswersProgress();
-                
-                if (checkAllPlayersAnswered() && timeLeft > 0 && !answersRevealed) {
-                    clearInterval(timer);
-                    showCorrectAnswer();
-                    elements.nextBtn.disabled = false;
-                    elements.nextBtn.innerHTML = '<span>➡️</span> NEXT QUESTION';
-                    elements.timer.textContent = "🎉 ALL RESPONSES IN!";
-                }
-            }
-            updateLiveLeaderboard();
+                li.innerHTML = `<span class="player-icon">${icon}</span><span class="player-name">${answer.playerName}: ${question.answers[answer.answerIndex]}${pointsText}</span>`;
+                elements.answersList.appendChild(li);
+            });
         }
+        
+        updateAnswersProgress();
+        
+        if (checkAllPlayersAnswered() && timeLeft > 0 && !answersRevealed) {
+            clearInterval(timer);
+            showCorrectAnswer();
+            elements.nextBtn.disabled = false;
+            elements.nextBtn.innerHTML = '<span>➡️</span> NEXT QUESTION';
+        }
+    }
+    updateLiveLeaderboard();
+}
 
         function startGame() {
             audio.playSFX('startSound');
@@ -3104,6 +3096,7 @@ document.getElementById('leaderboardToggle').addEventListener('click', function(
     </script>
 </body>
 </html>
+
 
 
 
