@@ -1950,53 +1950,56 @@ function resumeBackgroundMusicAfterMedia() {
             }, 500);
         }
 
-        function loadQuestion(index) {
-            if (index >= questions.length) {
-                endGame();
-                return;
-            }
+function loadQuestion(index) {
+    if (index >= questions.length) {
+        endGame();
+        return;
+    }
 
-            currentQuestion = index;
-            const question = questions[index];
-            
-            playerAnswers = [];
-            answersRevealed = false;
-            
-            console.log(`🔄 Caricando domanda ${index + 1}: ${question.question}`);
-            console.log(`📊 Tipo: ${question.type}, Media: ${question.media || 'nessuno'}`);
-            
-            elements.questionCounter.textContent = `QUESTION ${index + 1}/${questions.length}`;
-            elements.questionText.textContent = question.question;
-            
-            // Reset media container
-            elements.mediaContainer.style.display = 'none';
-            elements.mediaContainer.innerHTML = '';
-            
-            elements.answersGrid.innerHTML = '';
-            database.ref('games/' + gameCode + '/answers').remove();
-            
-            updateAnswersProgress();
-            
-            question.answers.forEach((answer, i) => {
-                const div = document.createElement('div');
-                div.className = 'answer-option';
-                div.textContent = answer;
-                elements.answersGrid.appendChild(div);
-            });
-            
-            database.ref('games/' + gameCode).update({
-                currentQuestion: index,
-                currentQuestionData: question
-            });
-            
-            // USA IL NUOVO SISTEMA TIMER DINAMICO
-            startQuestion(question);
-        }
+    currentQuestion = index;
+    const question = questions[index];
+    
+    playerAnswers = [];
+    answersRevealed = false;
+    
+    console.log(`🔄 Caricando domanda ${index + 1}: ${question.question}`);
+    console.log(`📊 Tipo: ${question.type}, Media: ${question.media || 'nessuno'}`);
+    
+    elements.questionCounter.textContent = `QUESTION ${index + 1}/${questions.length}`;
+    elements.questionText.textContent = question.question;
+    
+    // RESET TIMER ALL'INIZIO DI OGNI DOMANDA
+    elements.timer.textContent = getTimerDuration(question);
+    
+    // Reset media container
+    elements.mediaContainer.style.display = 'none';
+    elements.mediaContainer.innerHTML = '';
+    
+    // Reset answers grid
+    elements.answersGrid.innerHTML = '';
+    question.answers.forEach((answer, i) => {
+        const div = document.createElement('div');
+        div.className = 'answer-option';
+        div.textContent = answer;
+        elements.answersGrid.appendChild(div);
+    });
+    
+    database.ref('games/' + gameCode + '/answers').remove();
+    
+    updateAnswersProgress();
+    
+    database.ref('games/' + gameCode).update({
+        currentQuestion: index,
+        currentQuestionData: question
+    });
+    
+    // USA IL NUOVO SISTEMA TIMER DINAMICO
+    startQuestion(question);
+}
 
-        function startTimer(duration = 20) {
+function startTimer(duration = 20) {
     timeLeft = duration;
     elements.timer.textContent = timeLeft;
-    elements.timer.classList.remove('warning');
     elements.nextBtn.disabled = true;
     elements.nextBtn.innerHTML = '<span>⏳</span> WAITING...';
     
@@ -2005,8 +2008,6 @@ function resumeBackgroundMusicAfterMedia() {
         timeLeft--;
         elements.timer.textContent = timeLeft;
         
-        }
-        
         // CONTROLLO CONTINUO: SE TUTTI HANNO RISPOSTO, FERMA TIMER
         if (checkAllPlayersAnswered() && timeLeft > 0 && !answersRevealed) {
             console.log('🎯 TUTTI HANNO RISPOSTO! Fermo timer e mostro risposta');
@@ -2014,7 +2015,7 @@ function resumeBackgroundMusicAfterMedia() {
             showCorrectAnswer();
             elements.nextBtn.disabled = false;
             elements.nextBtn.innerHTML = '<span>➡️</span> NEXT QUESTION';
-            elements.timer.textContent = "🎉 ALL RESPONSES IN!";
+            // RIMOSSO: elements.timer.textContent = "🎉 ALL RESPONSES IN!";
             return;
         }
         
@@ -2027,29 +2028,32 @@ function resumeBackgroundMusicAfterMedia() {
     }, 1000);
 }
 
-        function showCorrectAnswer() {
-            const question = questions[currentQuestion];
-            const answerElements = elements.answersGrid.querySelectorAll('.answer-option');
-            answerElements[question.correct].classList.add('correct');
-            
-            audio.playSFX('correctSound');
-            
-            // EFFETTO VISIVO: Particele di celebrazione
-            const correctElement = answerElements[question.correct];
-            const rect = correctElement.getBoundingClientRect();
-            const centerX = rect.left + rect.width / 2;
-            const centerY = rect.top + rect.height / 2;
-            createCelebrationParticles(centerX, centerY, 25);
-            
-            answersRevealed = true;
-            updateAnswersList();
-            
-            // COMUNICA AI PLAYER DI MOSTRARE I RISULTATI
-            revealAnswersToPlayers();
-            
-            elements.nextBtn.disabled = false;
-            elements.nextBtn.innerHTML = '<span>➡️</span> NEXT QUESTION';
-        }
+function showCorrectAnswer() {
+    const question = questions[currentQuestion];
+    const answerElements = elements.answersGrid.querySelectorAll('.answer-option');
+    answerElements[question.correct].classList.add('correct');
+    
+    audio.playSFX('correctSound');
+    
+    // EFFETTO VISIVO: Particele di celebrazione
+    const correctElement = answerElements[question.correct];
+    const rect = correctElement.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+    createCelebrationParticles(centerX, centerY, 25);
+    
+    answersRevealed = true;
+    updateAnswersList();
+    
+    // COMUNICA AI PLAYER DI MOSTRARE I RISULTATI
+    revealAnswersToPlayers();
+    
+    elements.nextBtn.disabled = false;
+    elements.nextBtn.innerHTML = '<span>➡️</span> NEXT QUESTION';
+    
+    // ASSICURIAMOCI CHE IL TIMER MOSTRI SEMPRE IL NUMERO CORRETTO
+    elements.timer.textContent = "0";
+}
 
         function revealAnswersToPlayers() {
             console.log('🎯 Rivelando risposte a tutti i player...');
@@ -2060,13 +2064,13 @@ function resumeBackgroundMusicAfterMedia() {
             });
         }
 
-        function showAnswerManually() {
-            if (!answersRevealed) {
-                clearInterval(timer);
-                showCorrectAnswer();
-                elements.timer.textContent = "⏹️ STOPPED";
-            }
-        }
+function showAnswerManually() {
+    if (!answersRevealed) {
+        clearInterval(timer);
+        showCorrectAnswer();
+        elements.timer.textContent = "0"; // MOSTRA SEMPRE NUMERO
+    }
+}
 
         function nextQuestion() {
             database.ref('games/' + gameCode + '/answersRevealed').remove();
@@ -2175,14 +2179,14 @@ function resumeBackgroundMusicAfterMedia() {
             nextQuestion();
         });
 
-        elements.skipTimerBtn.addEventListener('click', function() {
-            audio.playSFX('clickSound');
-            clearInterval(timer);
-            showCorrectAnswer();
-            elements.nextBtn.disabled = false;
-            elements.nextBtn.innerHTML = '<span>➡️</span> NEXT QUESTION';
-            elements.timer.textContent = "⏩ TIMER SKIPPED";
-        });
+elements.skipTimerBtn.addEventListener('click', function() {
+    audio.playSFX('clickSound');
+    clearInterval(timer);
+    showCorrectAnswer();
+    elements.nextBtn.disabled = false;
+    elements.nextBtn.innerHTML = '<span>➡️</span> NEXT QUESTION';
+    elements.timer.textContent = "0"; // MOSTRA SEMPRE NUMERO
+});
 
         elements.showAnswerBtn.addEventListener('click', function() {
             audio.playSFX('clickSound');
@@ -2226,6 +2230,7 @@ function resumeBackgroundMusicAfterMedia() {
     </script>
 </body>
 </html>
+
 
 
 
