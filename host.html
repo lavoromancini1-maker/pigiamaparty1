@@ -1611,6 +1611,7 @@
     const mediaContainer = document.getElementById('mediaContainer');
     mediaContainer.style.display = 'block';
     mediaContainer.innerHTML = '';
+    mediaUrl = 'media/' + mediaUrl;
 
     console.log('🎵 Riproduzione media:', mediaUrl);
 
@@ -1752,7 +1753,7 @@ function startQuestion(question) {
             mediaContainer.innerHTML = '';
             
             const imgElement = document.createElement('img');
-            imgElement.src = question.media;
+            imgElement.src = 'media/' + question.media;
             imgElement.className = 'media-element';
             imgElement.onerror = () => {
                 console.error('❌ Errore caricamento immagine');
@@ -2377,6 +2378,7 @@ document.getElementById('leaderboardToggle').addEventListener('click', function(
     </script>
 </body>
 </html>
+
 
 
 
