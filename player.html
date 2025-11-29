@@ -1282,6 +1282,23 @@
         };
 
         // === FUNZIONI PRINCIPALI ===
+        // === SISTEMA TIMER DINAMICO (UGUALE ALL'HOST) ===
+function getTimerDuration(question) {
+    // Timer per tipo di domanda
+    if (question.type === "order" || 
+        question.question.toLowerCase().includes('ordine') || 
+        question.question.toLowerCase().includes('cronolog') || 
+        question.question.toLowerCase().includes('sequenza')) {
+        return 30; // 30 secondi per domande di ordine
+    }
+    
+    if (question.media && question.media !== "") {
+        return 30; // 30 secondi per domande con media
+    }
+    
+    return 20; // 20 secondi per domande normali
+}
+        
         function showScreen(screenId) {
             document.querySelectorAll('.screen').forEach(screen => {
                 screen.classList.add('hidden');
@@ -1614,7 +1631,8 @@ function submitOrderAnswer() {
     audio.playSFX('submitSound');
     hasSubmitted = true;
     
-    const answerTime = 20 - timeLeft;
+    const initialTime = currentQuestionData ? getTimerDuration(currentQuestionData) : 20;
+    const answerTime = initialTime - timeLeft;
     
     database.ref('games/' + gameCode + '/answers').push({
         playerName: playerName,
@@ -1671,47 +1689,58 @@ function selectAnswer(index, answerText) {
     submitAnswer();
 }
 
-        function submitAnswer() {
-            if (selectedAnswer === null || hasSubmitted) return;
-            
-            audio.playSFX('submitSound');
-            hasSubmitted = true;
-            
-            const answerTime = 20 - timeLeft;
-            console.log(`⏱️ Answer time: ${answerTime}s (bonus: ${answerTime <= 5 ? 'YES' : 'NO'})`);
-            
-            database.ref('games/' + gameCode + '/answers').push({
-                playerName: playerName,
-                answerIndex: selectedAnswer,
-                questionIndex: currentQuestionIndex,
-                answerTime: answerTime
-            });
+function submitAnswer() {
+    if (selectedAnswer === null || hasSubmitted) return;
+    
+    audio.playSFX('submitSound');
+    hasSubmitted = true;
+    
+    // Calcola il tempo di risposta BASATO SUL TIMER DINAMICO
+    const initialTime = currentQuestionData ? getTimerDuration(currentQuestionData) : 20;
+    const answerTime = initialTime - timeLeft;
+    
+    console.log(`⏱️ Answer time: ${answerTime}s (bonus: ${answerTime <= 5 ? 'YES' : 'NO'})`);
+    
+    database.ref('games/' + gameCode + '/answers').push({
+        playerName: playerName,
+        answerIndex: selectedAnswer,
+        questionIndex: currentQuestionIndex,
+        answerTime: answerTime
+    });
 
-            setTimeout(() => {
-                showScreen('answerSubmittedScreen');
-            }, 500);
-        }
+    setTimeout(() => {
+        showScreen('answerSubmittedScreen');
+    }, 500);
+}
 
-        function startTimer() {
-            timeLeft = 20;
-            elements.timer.textContent = timeLeft;
-            elements.timer.classList.remove('warning');
-            
+function startTimer() {
+    if (!currentQuestionData) {
+        console.error('❌ Dati domanda non disponibili per il timer');
+        timeLeft = 20; // Fallback
+    } else {
+        timeLeft = getTimerDuration(currentQuestionData);
+    }
+    
+    console.log(`⏰ Player Timer: ${timeLeft}s per domanda tipo: ${currentQuestionData?.type || 'unknown'}`);
+    
+    elements.timer.textContent = timeLeft;
+    elements.timer.classList.remove('warning');
+    
+    clearInterval(timer);
+    timer = setInterval(() => {
+        timeLeft--;
+        elements.timer.textContent = timeLeft;
+        
+        if (timeLeft <= 0) {
             clearInterval(timer);
-            timer = setInterval(() => {
-                timeLeft--;
-                elements.timer.textContent = timeLeft;
-                
-                if (timeLeft <= 0) {
-                    clearInterval(timer);
-                    if (selectedAnswer !== null && !hasSubmitted) {
-                        submitAnswer();
-                    } else if (!hasSubmitted) {
-                        showScreen('answerSubmittedScreen');
-                    }
-                }
-            }, 1000);
+            if (selectedAnswer !== null && !hasSubmitted) {
+                submitAnswer();
+            } else if (!hasSubmitted) {
+                showScreen('answerSubmittedScreen');
+            }
         }
+    }, 1000);
+}
 
 function showQuestionResult() {
     if (!currentQuestionData || selectedAnswer === null) {
@@ -1733,7 +1762,8 @@ function showQuestionResult() {
         isCorrect = selectedAnswer === currentQuestionData.correct;
     }
     
-    const answerTime = 20 - (timeLeft > 0 ? timeLeft : 0);
+    const initialTime = currentQuestionData ? getTimerDuration(currentQuestionData) : 20;
+    const answerTime = initialTime - (timeLeft > 0 ? timeLeft : 0);
     const basePoints = currentQuestionData.points || 10;
     const speedBonus = (answerTime <= 5) ? (6 - answerTime) : 0;
     const totalPoints = isCorrect ? (basePoints + speedBonus) : 0;
@@ -1890,5 +1920,6 @@ function showScreen(screenId) {
     </script>
 </body>
 </html>
+
 
 
