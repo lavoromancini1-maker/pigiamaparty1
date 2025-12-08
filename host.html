@@ -2883,14 +2883,6 @@ function startTimer(duration = 20) {
     }, 1000);
 }
 
-
-## 1️⃣ Mostrare SOLO la risposta corretta, grande
-
-Cerca la funzione **`showCorrectAnswer()`** (quella dove ora inserisci domanda + “CORRECT ANSWER”). È questa: :contentReference[oaicite:1]{index=1}  
-
-Sostituiscila **tutta** con questa:
-
-```js
 function showCorrectAnswer() {
     const question = shuffledQuestions[currentQuestion];
     const answerElements = elements.answersGrid.querySelectorAll('.answer-option');
@@ -3169,6 +3161,7 @@ document.getElementById('leaderboardToggle').addEventListener('click', function(
     </script>
 </body>
 </html>
+
 
 
 
