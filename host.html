@@ -2884,21 +2884,6 @@ function startTimer(duration = 20) {
 }
 
 
-let currentQuestion = 0;
-let timeLeft = 20;
-let timer;
-let autoNextTimeout = null; // 👈 NUOVO
-let connectedPlayers = [];
-let playerAnswers = [];
-let gameCode = '';
-let answersRevealed = false;
-let playerScores = {};
-let shuffledQuestions = [];
-let totalQuestions = [];
-``` :contentReference[oaicite:0]{index=0}  
-
----
-
 ## 1️⃣ Mostrare SOLO la risposta corretta, grande
 
 Cerca la funzione **`showCorrectAnswer()`** (quella dove ora inserisci domanda + “CORRECT ANSWER”). È questa: :contentReference[oaicite:1]{index=1}  
@@ -3184,6 +3169,7 @@ document.getElementById('leaderboardToggle').addEventListener('click', function(
     </script>
 </body>
 </html>
+
 
 
 
