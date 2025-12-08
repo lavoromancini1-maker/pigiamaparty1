@@ -2573,6 +2573,7 @@ function shuffleQuestionsAndAnswersForSelected(selectedQuestions) {
         let currentQuestion = 0;
         let timeLeft = 20;
         let timer;
+        let autoNextTimeout = null;
         let connectedPlayers = [];
         let playerAnswers = [];
         let gameCode = '';
@@ -2852,21 +2853,35 @@ function startTimer(duration = 20) {
     elements.nextBtn.innerHTML = '<span>⏳</span> WAITING...';
     
     clearInterval(timer);
+    if (autoNextTimeout) {
+        clearTimeout(autoNextTimeout);
+        autoNextTimeout = null;
+    }
+
     timer = setInterval(() => {
         timeLeft--;
         elements.timer.textContent = timeLeft;
         
         // CONTROLLO CONTINUO: SE TUTTI HANNO RISPOSTO, FERMA TIMER
         if (checkAllPlayersAnswered() && timeLeft > 0 && !answersRevealed) {
-            console.log('🎯 TUTTI HANNO RISPOSTO! Fermo timer e mostro risposta');
+            console.log('🎯 TUTTI HANNO RISPOSTO! Fermo timer, mostro la risposta e programmo la prossima domanda');
             clearInterval(timer);
+            
             showCorrectAnswer();
             elements.nextBtn.disabled = false;
             elements.nextBtn.innerHTML = '<span>➡️</span> NEXT QUESTION';
-            // RIMOSSO: elements.timer.textContent = "🎉 ALL RESPONSES IN!";
+
+            // ⏱️ DOPO 5 SECONDI PASSA AUTOMATICAMENTE ALLA PROSSIMA DOMANDA
+            autoNextTimeout = setTimeout(() => {
+                // Se nel frattempo è già partita un’altra domanda, non fare nulla
+                if (!answersRevealed) return;
+                nextQuestion();
+            }, 5000);
+
             return;
         }
         
+        // ⏰ Timer scaduto: mostra comunque la risposta (ma qui NON auto-skip)
         if (timeLeft <= 0) {
             clearInterval(timer);
             showCorrectAnswer();
@@ -2883,7 +2898,18 @@ function showCorrectAnswer() {
     
     audio.playSFX('correctSound');
     
-    // EFFETTO VISIVO: Particele di celebrazione
+    // 🔍 MOSTRA ANCHE LA RISPOSTA CORRETTA NEL RIQUADRO DELLA DOMANDA
+    elements.questionText.innerHTML = `
+        ${question.question}
+        <div style="margin-top: 20px; font-size: 1.4rem;">
+            <span style="color: var(--accent-gold); font-weight: 700;">✅ CORRECT ANSWER:</span>
+            <span style="color: var(--accent-green); font-weight: 700; margin-left: 8px;">
+                ${question.answers[question.correct]}
+            </span>
+        </div>
+    `;
+    
+    // EFFETTO VISIVO: Particelle di celebrazione
     const correctElement = answerElements[question.correct];
     const rect = correctElement.getBoundingClientRect();
     const centerX = rect.left + rect.width / 2;
@@ -2904,6 +2930,7 @@ function showCorrectAnswer() {
 
     updateLiveLeaderboard();
 }
+
 
 function revealAnswersToPlayers() {
     console.log('🎯 Rivelando risposte a TUTTI i player...');
@@ -3136,6 +3163,7 @@ document.getElementById('leaderboardToggle').addEventListener('click', function(
     </script>
 </body>
 </html>
+
 
 
 
