@@ -2797,7 +2797,7 @@ function updateAnswersList() {
         }
 
 function loadQuestion(index) {
-    if (index >= questions.length) {
+    if (index >= shuffledQuestions.length) {
         endGame();
         return;
     }
@@ -2811,7 +2811,7 @@ function loadQuestion(index) {
     console.log(`🔄 Caricando domanda ${index + 1}: ${question.question}`);
     console.log(`📊 Tipo: ${question.type}, Media: ${question.media || 'nessuno'}`);
     
-    elements.questionCounter.textContent = `QUESTION ${index + 1}/${questions.length}`;
+    elements.questionCounter.textContent = `QUESTION ${index + 1}/${shuffledQuestions.length}`;
     elements.questionText.textContent = question.question;
     
     // RESET TIMER ALL'INIZIO DI OGNI DOMANDA
@@ -3161,6 +3161,7 @@ document.getElementById('leaderboardToggle').addEventListener('click', function(
     </script>
 </body>
 </html>
+
 
 
 
