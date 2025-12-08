@@ -2820,18 +2820,26 @@ function loadQuestion(index) {
     
     updateAnswersProgress();
     
-        database.ref('games/' + gameCode).update({
-        currentQuestion: index,
-        currentQuestionData: {
-            id: question.id,
-            question: question.question,
-            answers: question.answers, // Array randomizzato
-            correct: question.correct, // Indice corretto nell'array randomizzato
-            points: question.points,
-            type: question.type,
-            media: question.media
-        }
-    });
+// Costruisco l'oggetto senza media
+const currentQuestionData = {
+    id: question.id,
+    question: question.question,
+    answers: question.answers, // Array randomizzato
+    correct: question.correct, // Indice corretto nell'array randomizzato
+    points: question.points,
+    type: question.type
+};
+
+// Aggiungo media SOLO se esiste davvero
+if (typeof question.media !== 'undefined') {
+    currentQuestionData.media = question.media;
+}
+
+database.ref('games/' + gameCode).update({
+    currentQuestion: index,
+    currentQuestionData: currentQuestionData
+});
+
     
     // USA IL NUOVO SISTEMA TIMER DINAMICO
     startQuestion(question);
@@ -3128,6 +3136,7 @@ document.getElementById('leaderboardToggle').addEventListener('click', function(
     </script>
 </body>
 </html>
+
 
 
 
