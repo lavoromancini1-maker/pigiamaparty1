@@ -2754,14 +2754,28 @@ function updateAnswersList() {
         updateAnswersProgress();
         
         if (checkAllPlayersAnswered() && timeLeft > 0 && !answersRevealed) {
+            console.log('🎯 TUTTI HANNO RISPOSTO! Mostro risposta e programmo auto-next');
             clearInterval(timer);
             showCorrectAnswer();
             elements.nextBtn.disabled = false;
             elements.nextBtn.innerHTML = '<span>➡️</span> NEXT QUESTION';
+
+            // 🔁 Se c'era già un timeout programmato, lo annullo
+            if (autoNextTimeout) {
+                clearTimeout(autoNextTimeout);
+            }
+
+            // ⏱️ DOPO 5 SECONDI PASSA AUTOMATICAMENTE ALLA PROSSIMA DOMANDA
+            autoNextTimeout = setTimeout(() => {
+                // Se per qualche motivo nel frattempo non siamo più su questa domanda, non fare nulla
+                if (!answersRevealed) return;
+                nextQuestion();
+            }, 5000);
         }
     }
     updateLiveLeaderboard();
 }
+
 
         function startGame() {
             audio.playSFX('startSound');
@@ -2851,37 +2865,15 @@ function startTimer(duration = 20) {
     elements.timer.textContent = timeLeft;
     elements.nextBtn.disabled = true;
     elements.nextBtn.innerHTML = '<span>⏳</span> WAITING...';
-    
-    clearInterval(timer);
-    if (autoNextTimeout) {
-        clearTimeout(autoNextTimeout);
-        autoNextTimeout = null;
-    }
 
+    // Stop vecchio timer
+    clearInterval(timer);
+
+    // Il timer ora pensa solo al tempo
     timer = setInterval(() => {
         timeLeft--;
         elements.timer.textContent = timeLeft;
-        
-        // CONTROLLO CONTINUO: SE TUTTI HANNO RISPOSTO, FERMA TIMER
-        if (checkAllPlayersAnswered() && timeLeft > 0 && !answersRevealed) {
-            console.log('🎯 TUTTI HANNO RISPOSTO! Fermo timer, mostro la risposta e programmo la prossima domanda');
-            clearInterval(timer);
-            
-            showCorrectAnswer();
-            elements.nextBtn.disabled = false;
-            elements.nextBtn.innerHTML = '<span>➡️</span> NEXT QUESTION';
 
-            // ⏱️ DOPO 5 SECONDI PASSA AUTOMATICAMENTE ALLA PROSSIMA DOMANDA
-            autoNextTimeout = setTimeout(() => {
-                // Se nel frattempo è già partita un’altra domanda, non fare nulla
-                if (!answersRevealed) return;
-                nextQuestion();
-            }, 5000);
-
-            return;
-        }
-        
-        // ⏰ Timer scaduto: mostra comunque la risposta (ma qui NON auto-skip)
         if (timeLeft <= 0) {
             clearInterval(timer);
             showCorrectAnswer();
@@ -2891,45 +2883,74 @@ function startTimer(duration = 20) {
     }, 1000);
 }
 
+
+let currentQuestion = 0;
+let timeLeft = 20;
+let timer;
+let autoNextTimeout = null; // 👈 NUOVO
+let connectedPlayers = [];
+let playerAnswers = [];
+let gameCode = '';
+let answersRevealed = false;
+let playerScores = {};
+let shuffledQuestions = [];
+let totalQuestions = [];
+``` :contentReference[oaicite:0]{index=0}  
+
+---
+
+## 1️⃣ Mostrare SOLO la risposta corretta, grande
+
+Cerca la funzione **`showCorrectAnswer()`** (quella dove ora inserisci domanda + “CORRECT ANSWER”). È questa: :contentReference[oaicite:1]{index=1}  
+
+Sostituiscila **tutta** con questa:
+
+```js
 function showCorrectAnswer() {
     const question = shuffledQuestions[currentQuestion];
     const answerElements = elements.answersGrid.querySelectorAll('.answer-option');
-    answerElements[question.correct].classList.add('correct');
-    
+
+    // Evidenzia comunque la risposta corretta nella griglia
+    if (answerElements[question.correct]) {
+        answerElements[question.correct].classList.add('correct');
+
+        // Effetto particelle sulla risposta corretta
+        const rect = answerElements[question.correct].getBoundingClientRect();
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
+        createCelebrationParticles(centerX, centerY, 25);
+    }
+
     audio.playSFX('correctSound');
-    
-    // 🔍 MOSTRA ANCHE LA RISPOSTA CORRETTA NEL RIQUADRO DELLA DOMANDA
+
+    // 🟡 QUI: SOLO RISPOSTA CORRETTA, MOLTO GRANDE
     elements.questionText.innerHTML = `
-        ${question.question}
-        <div style="margin-top: 20px; font-size: 1.4rem;">
-            <span style="color: var(--accent-gold); font-weight: 700;">✅ CORRECT ANSWER:</span>
-            <span style="color: var(--accent-green); font-weight: 700; margin-left: 8px;">
-                ${question.answers[question.correct]}
-            </span>
+        <div style="
+            font-size: 3.2rem;
+            font-weight: 800;
+            text-align: center;
+            line-height: 1.3;
+            text-transform: uppercase;
+        ">
+            ✅ ${question.answers[question.correct]}
         </div>
     `;
-    
-    // EFFETTO VISIVO: Particelle di celebrazione
-    const correctElement = answerElements[question.correct];
-    const rect = correctElement.getBoundingClientRect();
-    const centerX = rect.left + rect.width / 2;
-    const centerY = rect.top + rect.height / 2;
-    createCelebrationParticles(centerX, centerY, 25);
-    
+
     answersRevealed = true;
     updateAnswersList();
-    
-    // COMUNICA AI PLAYER DI MOSTRARE I RISULTATI
+
+    // Comunica ai player di mostrare i risultati
     revealAnswersToPlayers();
-    
+
     elements.nextBtn.disabled = false;
     elements.nextBtn.innerHTML = '<span>➡️</span> NEXT QUESTION';
-    
-    // ASSICURIAMOCI CHE IL TIMER MOSTRI SEMPRE IL NUMERO CORRETTO
+
+    // Timer a 0 quando la risposta è mostrata
     elements.timer.textContent = "0";
 
     updateLiveLeaderboard();
 }
+
 
 
 function revealAnswersToPlayers() {
@@ -3163,6 +3184,7 @@ document.getElementById('leaderboardToggle').addEventListener('click', function(
     </script>
 </body>
 </html>
+
 
 
 
