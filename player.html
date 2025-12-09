@@ -1629,60 +1629,6 @@ function showOrderQuestion(question) {
     });
 }
 
-
-    // Eventi per touch (mobile)
-    let touchStartY = 0;
-    let touchedItem = null;
-
-    draggableList.querySelectorAll('.draggable-item').forEach(item => {
-        item.addEventListener('touchstart', function(e) {
-            touchedItem = this;
-            touchStartY = e.touches[0].clientY;
-            this.classList.add('dragging');
-            e.preventDefault();
-        });
-
-        item.addEventListener('touchmove', function(e) {
-            if (!touchedItem) return;
-            
-            const touchY = e.touches[0].clientY;
-            const deltaY = touchY - touchStartY;
-            
-            // Sposta l'elemento
-            this.style.transform = `translateY(${deltaY}px)`;
-            
-            // Trova l'elemento su cui siamo passati
-            const allItems = Array.from(draggableList.querySelectorAll('.draggable-item:not(.dragging)'));
-            const touchElement = document.elementFromPoint(e.touches[0].clientX, e.touches[0].clientY);
-            const targetItem = touchElement ? touchElement.closest('.draggable-item') : null;
-            
-            if (targetItem && targetItem !== touchedItem) {
-                const allItemsWithDragging = Array.from(draggableList.querySelectorAll('.draggable-item'));
-                const thisIndex = allItemsWithDragging.indexOf(targetItem);
-                const touchedIndex = allItemsWithDragging.indexOf(touchedItem);
-                
-                if (touchedIndex < thisIndex) {
-                    targetItem.parentNode.insertBefore(touchedItem, targetItem.nextSibling);
-                } else {
-                    targetItem.parentNode.insertBefore(touchedItem, targetItem);
-                }
-                
-                updateOrderNumbers();
-            }
-            
-            e.preventDefault();
-        });
-
-        item.addEventListener('touchend', function() {
-            if (touchedItem) {
-                touchedItem.classList.remove('dragging');
-                touchedItem.style.transform = '';
-                touchedItem = null;
-                audio.playSFX('clickSound');
-            }
-        });
-    });
-
 function updateOrderNumbers() {
     const draggableList = document.getElementById('draggableList');
     if (!draggableList) return;
@@ -2002,6 +1948,7 @@ function showScreen(screenId) {
     </script>
 </body>
 </html>
+
 
 
 
