@@ -1491,61 +1491,144 @@ function showOrderQuestion(question) {
     initDragAndDrop();
 }
 
-        function initDragAndDrop() {
+  function initDragAndDrop() {
     const draggableList = document.getElementById('draggableList');
     if (!draggableList) return;
 
+    // ========= DESKTOP: drag & drop nativo =========
     let draggedItem = null;
 
-    // Eventi per desktop
     draggableList.querySelectorAll('.draggable-item').forEach(item => {
-        item.addEventListener('dragstart', function(e) {
+        // Inizio drag (mouse)
+        item.addEventListener('dragstart', function (e) {
             draggedItem = this;
             setTimeout(() => this.classList.add('dragging'), 0);
             e.dataTransfer.effectAllowed = 'move';
-            e.dataTransfer.setData('text/html', this.innerHTML);
+            e.dataTransfer.setData('text/plain', 'drag'); // serve solo per abilitare il drag
         });
 
-        item.addEventListener('dragend', function() {
+        // Fine drag (mouse)
+        item.addEventListener('dragend', function () {
             this.classList.remove('dragging');
             draggedItem = null;
             updateOrderNumbers();
         });
 
-        item.addEventListener('dragover', function(e) {
+        // Permette il drop
+        item.addEventListener('dragover', function (e) {
             e.preventDefault();
             e.dataTransfer.dropEffect = 'move';
         });
 
-        item.addEventListener('dragenter', function(e) {
+        item.addEventListener('dragenter', function (e) {
             e.preventDefault();
             this.classList.add('drag-over');
         });
 
-        item.addEventListener('dragleave', function() {
+        item.addEventListener('dragleave', function () {
             this.classList.remove('drag-over');
         });
 
-        item.addEventListener('drop', function(e) {
+        // Drop (mouse)
+        item.addEventListener('drop', function (e) {
             e.preventDefault();
             this.classList.remove('drag-over');
-            
+
             if (draggedItem && this !== draggedItem) {
                 const allItems = Array.from(draggableList.querySelectorAll('.draggable-item'));
                 const thisIndex = allItems.indexOf(this);
                 const draggedIndex = allItems.indexOf(draggedItem);
-                
+
                 if (draggedIndex < thisIndex) {
                     this.parentNode.insertBefore(draggedItem, this.nextSibling);
                 } else {
                     this.parentNode.insertBefore(draggedItem, this);
                 }
-                
+
                 updateOrderNumbers();
                 audio.playSFX('clickSound');
             }
         });
     });
+
+    // ========= MOBILE: touch semplificato =========
+    let touchStartY = 0;
+    let activeItem = null;
+
+    draggableList.querySelectorAll('.draggable-item').forEach(item => {
+        // INIZIO TOUCH
+        item.addEventListener('touchstart', function (e) {
+            if (e.touches.length !== 1) return;
+
+            activeItem = this;
+            touchStartY = e.touches[0].clientY;
+
+            this.classList.add('dragging');
+            this.style.transition = 'none'; // niente animazioni mentre si trascina
+
+            // evitiamo scroll accidentale
+            e.preventDefault();
+        }, { passive: false });
+
+        // MOVIMENTO TOUCH (solo effetto visivo)
+        item.addEventListener('touchmove', function (e) {
+            if (!activeItem || activeItem !== this) return;
+
+            const currentY = e.touches[0].clientY;
+            const deltaY = currentY - touchStartY;
+
+            // sposta visivamente l’elemento sotto il dito
+            this.style.transform = `translateY(${deltaY}px)`;
+
+            // evitiamo scroll della pagina
+            e.preventDefault();
+        }, { passive: false });
+
+        // FINE TOUCH: calcolo nuova posizione e riordino UNA VOLTA
+        item.addEventListener('touchend', function (e) {
+            if (!activeItem || activeItem !== this) return;
+
+            const endY = e.changedTouches[0].clientY;
+
+            // ripristina stile
+            this.classList.remove('dragging');
+            this.style.transform = '';
+            this.style.transition = '';
+
+            const items = Array.from(draggableList.querySelectorAll('.draggable-item'));
+
+            // Trova la posizione target in base alla posizione finale del dito
+            let targetIndex = items.length - 1;
+            for (let i = 0; i < items.length; i++) {
+                const rect = items[i].getBoundingClientRect();
+                const midY = rect.top + rect.height / 2;
+
+                if (endY < midY) {
+                    targetIndex = i;
+                    break;
+                }
+            }
+
+            const fromIndex = items.indexOf(this);
+
+            if (fromIndex !== -1 && fromIndex !== targetIndex) {
+                if (fromIndex < targetIndex) {
+                    // Se viene spostato più in basso
+                    draggableList.insertBefore(this, items[targetIndex].nextSibling);
+                } else {
+                    // Se viene spostato più in alto
+                    draggableList.insertBefore(this, items[targetIndex]);
+                }
+
+                updateOrderNumbers();
+                audio.playSFX('clickSound');
+            }
+
+            activeItem = null;
+        });
+    });
+}
+
 
     // Eventi per touch (mobile)
     let touchStartY = 0;
@@ -1920,6 +2003,7 @@ function showScreen(screenId) {
     </script>
 </body>
 </html>
+
 
 
 
